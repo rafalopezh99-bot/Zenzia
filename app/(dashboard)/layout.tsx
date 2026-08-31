@@ -25,9 +25,9 @@ export default async function DashboardLayout({ children }: { children: React.Re
     .eq("status", "nueva");
 
   return (
-    <div className="flex min-h-screen bg-paper text-ink">
+    <div className="flex min-h-screen flex-col bg-paper text-ink sm:flex-row">
       <Sidebar modules={modules} notificationCount={notificationCount ?? 0} />
-      <main className="flex-1 p-8">{children}</main>
+      <main className="flex-1 overflow-x-hidden p-4 sm:p-8">{children}</main>
     </div>
   );
 }

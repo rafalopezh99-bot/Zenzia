@@ -31,7 +31,7 @@ export default async function DashboardPage() {
         title={fullName ? `¡Bienvenido a tu CRM, ${fullName}!` : "Panel de control"}
       />
 
-      <div className="mb-8 grid max-w-2xl grid-cols-3 gap-4">
+      <div className="mb-8 grid grid-cols-1 gap-4 sm:max-w-2xl sm:grid-cols-3">
         <Card>
           <div className="text-2xl font-semibold text-ink">{contactCount ?? 0}</div>
           <div className="text-sm text-slate">Contactos activos</div>

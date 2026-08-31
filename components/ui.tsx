@@ -121,7 +121,7 @@ export function Badge({
 // Clases reutilizables para tablas (se aplican directamente, no como
 // componente, porque <table>/<tr>/<td> necesitan quedarse como elementos
 // nativos para que el HTML sea válido).
-export const tableWrap = "overflow-hidden rounded-2xl border border-line";
+export const tableWrap = "overflow-x-auto rounded-2xl border border-line";
 export const tableEl = "w-full text-left text-sm";
 export const theadEl = "bg-paper-deep text-xs uppercase tracking-wide text-slate";
 export const thEl = "px-4 py-3 font-medium";
