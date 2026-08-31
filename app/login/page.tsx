@@ -1,15 +1,29 @@
+"use client";
+
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { signIn } from "@/lib/actions/auth";
 
-export const dynamic = "force-dynamic";
+export default function LoginPage() {
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+  const router = useRouter();
 
-export default function LoginPage({
-  searchParams,
-}: {
-  searchParams: { error?: string };
-}) {
+  async function handleSubmit(formData: FormData) {
+    setLoading(true);
+    const result = await signIn(formData);
+    if (result.error) {
+      setError(result.error);
+      setLoading(false);
+      return;
+    }
+    router.push("/dashboard");
+    router.refresh();
+  }
+
   return (
     <div className="flex min-h-screen items-center justify-center bg-neutral-900">
-      <form action={signIn} className="w-80 space-y-3 rounded-lg bg-neutral-950 p-6">
+      <form action={handleSubmit} className="w-80 space-y-3 rounded-lg bg-neutral-950 p-6">
         <h1 className="text-lg font-semibold text-neutral-100">Zenzia</h1>
         <input
           name="email"
@@ -25,9 +39,12 @@ export default function LoginPage({
           placeholder="Contrasena"
           required
         />
-        {searchParams?.error && <p className="text-sm text-red-400">{searchParams.error}</p>}
-        <button className="w-full rounded bg-neutral-100 p-2 font-medium text-neutral-900">
-          Entrar
+        {error && <p className="text-sm text-red-400">{error}</p>}
+        <button
+          disabled={loading}
+          className="w-full rounded bg-neutral-100 p-2 font-medium text-neutral-900 disabled:opacity-60"
+        >
+          {loading ? "Entrando..." : "Entrar"}
         </button>
       </form>
     </div>
