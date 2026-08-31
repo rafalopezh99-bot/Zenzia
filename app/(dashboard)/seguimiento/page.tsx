@@ -37,15 +37,15 @@ export default async function SeguimientoPage() {
       <Card>
         <ul className="space-y-2 text-sm">
           {(entries ?? []).map((e: any) => (
-            <li key={e.id} className="border-b border-white/5 pb-2 last:border-0 last:pb-0">
-              <span className="text-neutral-500">{new Date(e.created_at).toLocaleString("es-ES")}</span>{" — "}
-              <span className="font-medium text-neutral-200">{e.contacts?.full_name}</span>:{" "}
-              <span className="text-neutral-300">
+            <li key={e.id} className="border-b border-line pb-2 last:border-0 last:pb-0">
+              <span className="text-slate/70">{new Date(e.created_at).toLocaleString("es-ES")}</span>{" — "}
+              <span className="font-medium text-ink">{e.contacts?.full_name}</span>:{" "}
+              <span className="text-slate">
                 {e.custom_fields?.label} = {e.custom_fields?.value}
               </span>
             </li>
           ))}
-          {(entries ?? []).length === 0 && <li className="text-neutral-500">Sin entradas todavía.</li>}
+          {(entries ?? []).length === 0 && <li className="text-slate/70">Sin entradas todavía.</li>}
         </ul>
       </Card>
     </div>

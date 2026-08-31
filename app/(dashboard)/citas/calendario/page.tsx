@@ -10,10 +10,10 @@ const MONTH_NAMES = [
 ];
 
 const CHIP_TONE_CLASS: Record<string, string> = {
-  green: "bg-emerald-400/10 text-emerald-300",
-  amber: "bg-amber-400/10 text-amber-200",
-  red: "bg-red-400/10 text-red-300 line-through",
-  neutral: "bg-white/5 text-neutral-300",
+  green: "bg-emerald-50 text-emerald-700",
+  amber: "bg-amber-50 text-amber-700",
+  red: "bg-red-50 text-red-700 line-through",
+  neutral: "bg-paper-deep text-slate",
 };
 
 function parseMonthParam(month?: string) {
@@ -66,7 +66,7 @@ export default async function CalendarioPage({ searchParams }: { searchParams: {
   const prevMonthDate = new Date(year, monthIndex - 1, 1);
   const nextMonthDate = new Date(year, monthIndex + 1, 1);
   const navLinkClass =
-    "rounded-full border border-white/15 px-3 py-1.5 text-sm text-neutral-300 transition hover:border-emerald-400/50 hover:text-emerald-300";
+    "rounded-full border border-line px-3 py-1.5 text-sm text-slate transition hover:border-brand hover:text-brand";
 
   return (
     <div>
@@ -76,7 +76,7 @@ export default async function CalendarioPage({ searchParams }: { searchParams: {
           <div className="flex gap-2">
             <Link
               href="/citas"
-              className="inline-block rounded-full border border-white/15 px-5 py-2.5 text-sm font-medium text-neutral-200 transition hover:border-emerald-400/50 hover:text-emerald-300"
+              className="inline-block rounded-full border border-line px-5 py-2.5 text-sm font-medium text-ink transition hover:border-brand hover:text-brand"
             >
               Ver semana
             </Link>
@@ -95,7 +95,7 @@ export default async function CalendarioPage({ searchParams }: { searchParams: {
           >
             ← Anterior
           </Link>
-          <div className="text-sm font-semibold text-neutral-100">
+          <div className="text-sm font-semibold text-ink">
             {MONTH_NAMES[monthIndex]} {year}
           </div>
           <Link
@@ -108,7 +108,7 @@ export default async function CalendarioPage({ searchParams }: { searchParams: {
 
         <div className="grid grid-cols-7 gap-1.5">
           {WEEKDAYS.map((w) => (
-            <div key={w} className="px-1 py-1 text-center text-[11px] font-medium uppercase tracking-wide text-neutral-500">
+            <div key={w} className="px-1 py-1 text-center text-[11px] font-medium uppercase tracking-wide text-slate/70">
               {w}
             </div>
           ))}
@@ -120,10 +120,10 @@ export default async function CalendarioPage({ searchParams }: { searchParams: {
               <div
                 key={idx}
                 className={`min-h-[92px] rounded-lg border p-1.5 ${
-                  isToday ? "border-emerald-400/50 bg-emerald-400/5" : "border-white/5 bg-white/[0.02]"
+                  isToday ? "border-brand bg-brand/5" : "border-line bg-paper-deep"
                 }`}
               >
-                <div className={`mb-1 text-right text-[11px] ${isToday ? "font-semibold text-emerald-300" : "text-neutral-500"}`}>
+                <div className={`mb-1 text-right text-[11px] ${isToday ? "font-semibold text-brand" : "text-slate/70"}`}>
                   {day}
                 </div>
                 <div className="space-y-1">
@@ -139,7 +139,7 @@ export default async function CalendarioPage({ searchParams }: { searchParams: {
                     </div>
                   ))}
                   {dayAppointments.length > 3 && (
-                    <div className="text-[10px] text-neutral-500">+{dayAppointments.length - 3} más</div>
+                    <div className="text-[10px] text-slate/70">+{dayAppointments.length - 3} más</div>
                   )}
                 </div>
               </div>

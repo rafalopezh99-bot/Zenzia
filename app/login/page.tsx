@@ -25,20 +25,15 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-[#05070d] px-4">
+    <div className="flex min-h-screen items-center justify-center bg-paper px-4">
       <form
         onSubmit={handleSubmit}
-        className="w-80 space-y-4 rounded-2xl border border-white/10 bg-[#0d1420]/70 p-6 shadow-[0_0_60px_-20px_rgba(52,211,153,0.3)] backdrop-blur"
+        className="w-80 space-y-4 rounded-2xl border border-line bg-white p-6 shadow-sm"
       >
-        <div className="flex items-center gap-2">
-          <span className="h-2 w-2 rounded-full bg-gradient-to-br from-emerald-400 to-violet-400" />
-          <h1 className="bg-gradient-to-r from-emerald-300 to-violet-400 bg-clip-text text-lg font-bold text-transparent">
-            Zenzia
-          </h1>
-        </div>
+        <h1 className="text-lg font-black uppercase tracking-tight text-ink">Zenzia</h1>
         <Input name="email" type="email" placeholder="Email" required className="w-full" />
         <Input name="password" type="password" placeholder="Contraseña" required className="w-full" />
-        {error && <p className="text-sm text-red-400">{error}</p>}
+        {error && <p className="text-sm text-red-600">{error}</p>}
         <PrimaryButton disabled={loading} className="w-full">
           {loading ? "Entrando..." : "Entrar"}
         </PrimaryButton>

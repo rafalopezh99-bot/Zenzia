@@ -6,10 +6,10 @@ import { APPOINTMENT_STATUS_TONE } from "@/lib/appointmentStatus";
 const WEEKDAY_NAMES = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes"];
 
 const CHIP_TONE_CLASS: Record<string, string> = {
-  green: "bg-emerald-400/10 text-emerald-300",
-  amber: "bg-amber-400/10 text-amber-200",
-  red: "bg-red-400/10 text-red-300 line-through",
-  neutral: "bg-white/5 text-neutral-300",
+  green: "bg-emerald-50 text-emerald-700",
+  amber: "bg-amber-50 text-amber-700",
+  red: "bg-red-50 text-red-700 line-through",
+  neutral: "bg-paper-deep text-slate",
 };
 
 function getMonday(d: Date) {
@@ -78,7 +78,7 @@ export default async function CitasPage({ searchParams }: { searchParams: { week
   nextWeek.setDate(nextWeek.getDate() + 7);
 
   const navLinkClass =
-    "rounded-full border border-white/15 px-3 py-1.5 text-sm text-neutral-300 transition hover:border-emerald-400/50 hover:text-emerald-300";
+    "rounded-full border border-line px-3 py-1.5 text-sm text-slate transition hover:border-brand hover:text-brand";
 
   const rangeLabel = `${days[0].toLocaleDateString("es-ES", { day: "numeric", month: "short" })} – ${days[4].toLocaleDateString(
     "es-ES",
@@ -96,7 +96,7 @@ export default async function CitasPage({ searchParams }: { searchParams: { week
             </Link>
             <Link
               href="/citas/lista"
-              className="inline-block rounded-full border border-white/15 px-5 py-2.5 text-sm font-medium text-neutral-200 transition hover:border-emerald-400/50 hover:text-emerald-300"
+              className="inline-block rounded-full border border-line px-5 py-2.5 text-sm font-medium text-ink transition hover:border-brand hover:text-brand"
             >
               Ver lista
             </Link>
@@ -113,8 +113,8 @@ export default async function CitasPage({ searchParams }: { searchParams: { week
             ← Semana anterior
           </Link>
           <div className="flex items-center gap-3">
-            <div className="text-sm font-semibold text-neutral-100">{rangeLabel}</div>
-            <Link href="/citas" className="text-xs text-emerald-300 hover:underline">
+            <div className="text-sm font-semibold text-ink">{rangeLabel}</div>
+            <Link href="/citas" className="text-xs text-brand hover:underline">
               Hoy
             </Link>
           </div>
@@ -132,12 +132,12 @@ export default async function CitasPage({ searchParams }: { searchParams: { week
               return (
                 <div
                   key={d.toISOString()}
-                  className={`border-b border-white/10 px-2 py-2 text-center ${isToday ? "text-emerald-300" : "text-neutral-300"}`}
+                  className={`border-b border-line px-2 py-2 text-center ${isToday ? "text-brand" : "text-slate"}`}
                 >
-                  <div className="text-[11px] uppercase tracking-wide text-neutral-500">
+                  <div className="text-[11px] uppercase tracking-wide text-slate/70">
                     {WEEKDAY_NAMES[(d.getDay() + 6) % 7]}
                   </div>
-                  <div className={`text-lg font-semibold ${isToday ? "text-emerald-300" : "text-neutral-100"}`}>
+                  <div className={`text-lg font-semibold ${isToday ? "text-brand" : "text-ink"}`}>
                     {d.getDate()}
                   </div>
                 </div>
@@ -147,11 +147,11 @@ export default async function CitasPage({ searchParams }: { searchParams: { week
             {/* Filas por hora */}
             {HOURS.map((hour) => (
               <div key={hour} className="contents">
-                <div className="border-t border-white/5 px-1 py-1 text-right text-[10px] text-neutral-600">
+                <div className="border-t border-line px-1 py-1 text-right text-[10px] text-slate/50">
                   {String(hour).padStart(2, "0")}:00
                 </div>
                 {days.map((_, dayIdx) => (
-                  <div key={dayIdx} className="min-h-[44px] border-t border-l border-white/5 p-1">
+                  <div key={dayIdx} className="min-h-[44px] border-t border-l border-line p-1">
                     <div className="space-y-1">
                       {grid[hour][dayIdx].map((a: any) => (
                         <div

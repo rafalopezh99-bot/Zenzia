@@ -38,7 +38,7 @@ export default async function ContactosPage() {
               return (
                 <tr key={c.id} className={trEl}>
                   <td className={tdEl}>
-                    <Link href={`/contactos/${c.id}`} className="text-neutral-100 hover:text-emerald-300">
+                    <Link href={`/contactos/${c.id}`} className="text-ink hover:text-brand">
                       {c.full_name}
                     </Link>
                   </td>
@@ -52,12 +52,12 @@ export default async function ContactosPage() {
                         href={demoUrl}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-emerald-300 hover:underline"
+                        className="text-brand hover:underline"
                       >
                         Ver demo →
                       </a>
                     ) : (
-                      <span className="text-neutral-600">—</span>
+                      <span className="text-slate/50">—</span>
                     )}
                   </td>
                 </tr>

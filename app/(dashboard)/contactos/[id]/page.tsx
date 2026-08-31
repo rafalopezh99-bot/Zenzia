@@ -25,7 +25,7 @@ export default async function ContactoDetailPage({ params }: { params: { id: str
   return (
     <div className="max-w-2xl">
       <PageHeader title={contact.full_name} />
-      <p className="-mt-6 mb-6 text-sm text-neutral-400">
+      <p className="-mt-6 mb-6 text-sm text-slate">
         {contact.phone} {contact.phone && contact.email && "·"} {contact.email}
         {demoUrl && (
           <>
@@ -34,7 +34,7 @@ export default async function ContactoDetailPage({ params }: { params: { id: str
               href={demoUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-emerald-300 hover:underline"
+              className="text-brand hover:underline"
             >
               Ver demo →
             </a>
@@ -43,7 +43,7 @@ export default async function ContactoDetailPage({ params }: { params: { id: str
       </p>
 
       <Card className="mb-6">
-        <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-neutral-400">Etapa del cliente</h2>
+        <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-slate">Etapa del cliente</h2>
         <form action={updateStageForContact} className="flex flex-wrap items-center gap-2">
           <Select name="stage" defaultValue={currentStage}>
             {PIPELINE_STAGES.map((s) => (
@@ -57,7 +57,7 @@ export default async function ContactoDetailPage({ params }: { params: { id: str
       </Card>
 
       <Card className="mb-6">
-        <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-neutral-400">Enlace de la demo</h2>
+        <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-slate">Enlace de la demo</h2>
         <form action={updateLinkForContact} className="flex flex-wrap items-center gap-2">
           <Input
             name="demo_url"
@@ -71,7 +71,7 @@ export default async function ContactoDetailPage({ params }: { params: { id: str
       </Card>
 
       <Card>
-        <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-neutral-400">
+        <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-slate">
           Notas / resumen de conversaciones
         </h2>
         <form action={addActivityForContact} className="mb-4 flex gap-2">
@@ -81,12 +81,12 @@ export default async function ContactoDetailPage({ params }: { params: { id: str
 
         <ul className="space-y-2 text-sm">
           {(activities ?? []).map((a) => (
-            <li key={a.id} className="border-b border-white/5 pb-2 last:border-0 last:pb-0">
-              <span className="text-neutral-500">{new Date(a.created_at).toLocaleString("es-ES")}</span> —{" "}
-              <span className="text-neutral-200">{a.content}</span>
+            <li key={a.id} className="border-b border-line pb-2 last:border-0 last:pb-0">
+              <span className="text-slate/70">{new Date(a.created_at).toLocaleString("es-ES")}</span> —{" "}
+              <span className="text-ink">{a.content}</span>
             </li>
           ))}
-          {(activities ?? []).length === 0 && <li className="text-neutral-500">Sin notas todavía.</li>}
+          {(activities ?? []).length === 0 && <li className="text-slate/70">Sin notas todavía.</li>}
         </ul>
       </Card>
     </div>

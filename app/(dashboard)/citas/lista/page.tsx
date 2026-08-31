@@ -18,13 +18,13 @@ export default async function CitasListaPage() {
           <div className="flex gap-2">
             <Link
               href="/citas"
-              className="inline-block rounded-full border border-white/15 px-5 py-2.5 text-sm font-medium text-neutral-200 transition hover:border-emerald-400/50 hover:text-emerald-300"
+              className="inline-block rounded-full border border-line px-5 py-2.5 text-sm font-medium text-ink transition hover:border-brand hover:text-brand"
             >
               Ver semana
             </Link>
             <Link
               href="/citas/calendario"
-              className="inline-block rounded-full border border-white/15 px-5 py-2.5 text-sm font-medium text-neutral-200 transition hover:border-emerald-400/50 hover:text-emerald-300"
+              className="inline-block rounded-full border border-line px-5 py-2.5 text-sm font-medium text-ink transition hover:border-brand hover:text-brand"
             >
               Ver mes
             </Link>

@@ -18,7 +18,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
   const modules = await getEnabledModules(profile.companyId);
 
   return (
-    <div className="flex min-h-screen bg-[#05070d] text-neutral-100">
+    <div className="flex min-h-screen bg-paper text-ink">
       <Sidebar modules={modules} />
       <main className="flex-1 p-8">{children}</main>
     </div>

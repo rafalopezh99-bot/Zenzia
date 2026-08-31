@@ -28,24 +28,24 @@ export default async function DashboardPage() {
 
       <div className="mb-8 grid max-w-md grid-cols-2 gap-4">
         <Card>
-          <div className="text-2xl font-semibold text-neutral-100">{contactCount ?? 0}</div>
-          <div className="text-sm text-neutral-400">Contactos activos</div>
+          <div className="text-2xl font-semibold text-ink">{contactCount ?? 0}</div>
+          <div className="text-sm text-slate">Contactos activos</div>
         </Card>
         <Card>
-          <div className="text-2xl font-semibold text-neutral-100">{upcoming?.length ?? 0}</div>
-          <div className="text-sm text-neutral-400">Próximas citas</div>
+          <div className="text-2xl font-semibold text-ink">{upcoming?.length ?? 0}</div>
+          <div className="text-sm text-slate">Próximas citas</div>
         </Card>
       </div>
 
       <Card>
-        <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-neutral-400">Próximas citas</h2>
-        <ul className="space-y-2 text-sm text-neutral-300">
+        <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-slate">Próximas citas</h2>
+        <ul className="space-y-2 text-sm text-slate">
           {(upcoming ?? []).map((a: any) => (
-            <li key={a.id} className="border-b border-white/5 pb-2 last:border-0 last:pb-0">
+            <li key={a.id} className="border-b border-line pb-2 last:border-0 last:pb-0">
               {new Date(a.starts_at).toLocaleString("es-ES")} — {a.contacts?.full_name}
             </li>
           ))}
-          {(upcoming ?? []).length === 0 && <li className="text-neutral-500">Sin citas próximas.</li>}
+          {(upcoming ?? []).length === 0 && <li className="text-slate/70">Sin citas próximas.</li>}
         </ul>
       </Card>
     </div>

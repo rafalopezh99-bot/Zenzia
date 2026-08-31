@@ -21,12 +21,12 @@ export default async function FacturacionPage() {
 
       <div className="mb-6 grid max-w-md grid-cols-2 gap-4">
         <Card>
-          <div className="text-2xl font-semibold text-neutral-100">{total.toFixed(2)} €</div>
-          <div className="text-sm text-neutral-400">Total facturado</div>
+          <div className="text-2xl font-semibold text-ink">{total.toFixed(2)} €</div>
+          <div className="text-sm text-slate">Total facturado</div>
         </Card>
         <Card>
-          <div className="text-2xl font-semibold text-amber-300">{pendiente.toFixed(2)} €</div>
-          <div className="text-sm text-neutral-400">Pendiente de cobro</div>
+          <div className="text-2xl font-semibold text-amber-600">{pendiente.toFixed(2)} €</div>
+          <div className="text-sm text-slate">Pendiente de cobro</div>
         </Card>
       </div>
 

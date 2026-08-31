@@ -17,28 +17,21 @@ export default async function OnboardingPage() {
   if (profile.onboarded) redirect("/dashboard");
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-[#05070d] px-4 py-10">
+    <div className="flex min-h-screen items-center justify-center bg-paper px-4 py-10">
       <Card className="w-full max-w-md">
-        <div className="mb-1 flex items-center gap-2">
-          <span className="h-2 w-2 rounded-full bg-gradient-to-br from-emerald-400 to-violet-400" />
-          <h1 className="bg-gradient-to-r from-emerald-300 to-violet-400 bg-clip-text text-lg font-bold text-transparent">
-            Configura tu CRM
-          </h1>
-        </div>
-        <p className="mb-5 text-sm text-neutral-400">
-          Unas preguntas rápidas y dejamos Zenzia listo a tu medida.
-        </p>
+        <h1 className="mb-1 text-lg font-black uppercase tracking-tight text-ink">Configura tu CRM</h1>
+        <p className="mb-5 text-sm text-slate">Unas preguntas rápidas y dejamos Zenzia listo a tu medida.</p>
 
         <form action={completeOnboarding} className="space-y-4">
           <div>
-            <label className="mb-1 block text-xs font-medium text-neutral-400" htmlFor="full_name">
+            <label className="mb-1 block text-xs font-medium text-slate" htmlFor="full_name">
               ¿Cómo te llamas?
             </label>
             <Input id="full_name" name="full_name" placeholder="Tu nombre" required className="w-full" />
           </div>
 
           <div>
-            <label className="mb-1 block text-xs font-medium text-neutral-400" htmlFor="company_name">
+            <label className="mb-1 block text-xs font-medium text-slate" htmlFor="company_name">
               Nombre del negocio
             </label>
             <Input
@@ -51,7 +44,7 @@ export default async function OnboardingPage() {
           </div>
 
           <div>
-            <label className="mb-1 block text-xs font-medium text-neutral-400" htmlFor="business_type">
+            <label className="mb-1 block text-xs font-medium text-slate" htmlFor="business_type">
               ¿Cómo operas?
             </label>
             <Select id="business_type" name="business_type" required defaultValue="" className="w-full">
@@ -64,7 +57,7 @@ export default async function OnboardingPage() {
           </div>
 
           <div>
-            <label className="mb-1 block text-xs font-medium text-neutral-400" htmlFor="vertical">
+            <label className="mb-1 block text-xs font-medium text-slate" htmlFor="vertical">
               ¿A qué se dedica tu negocio?
             </label>
             <Select id="vertical" name="vertical" required defaultValue="" className="w-full">
@@ -81,7 +74,7 @@ export default async function OnboardingPage() {
                 </optgroup>
               ))}
             </Select>
-            <p className="mt-1 text-xs text-neutral-500">
+            <p className="mt-1 text-xs text-slate/70">
               Activamos automáticamente lo común para ese tipo de negocio — luego puedes ajustar los módulos.
             </p>
           </div>

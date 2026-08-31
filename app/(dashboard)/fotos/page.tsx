@@ -43,7 +43,7 @@ export default async function FotosPage() {
             type="file"
             accept="image/*"
             required
-            className="rounded-lg border border-white/10 bg-[#0a0f19] px-3 py-2 text-sm text-neutral-300 file:mr-3 file:rounded-full file:border-0 file:bg-white/10 file:px-3 file:py-1.5 file:text-xs file:text-neutral-200"
+            className="rounded-lg border border-line bg-white px-3 py-2 text-sm text-slate file:mr-3 file:rounded-full file:border-0 file:bg-paper-deep file:px-3 file:py-1.5 file:text-xs file:text-ink"
           />
           <PrimaryButton>Subir foto</PrimaryButton>
         </form>
@@ -51,13 +51,13 @@ export default async function FotosPage() {
 
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4">
         {withUrls.map((p) => (
-          <div key={p.id} className="overflow-hidden rounded-2xl border border-white/10 bg-[#0d1420]/70">
+          <div key={p.id} className="overflow-hidden rounded-2xl border border-line bg-white">
             {p.url && (
               // eslint-disable-next-line @next/next/no-img-element
               <img src={p.url} alt={KIND_LABEL[p.kind]} className="h-40 w-full object-cover" />
             )}
-            <div className="p-2 text-xs text-neutral-400">
-              <div className="text-neutral-100">{p.contacts?.full_name}</div>
+            <div className="p-2 text-xs text-slate">
+              <div className="text-ink">{p.contacts?.full_name}</div>
               <div>{KIND_LABEL[p.kind]}</div>
             </div>
           </div>
