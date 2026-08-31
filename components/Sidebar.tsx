@@ -4,7 +4,13 @@ import type { ModuleDef } from "@/lib/modules";
 // El sidebar no sabe nada de "fisio" ni "taller": solo pinta los módulos
 // que llegan activados. Añadir o quitar una ventana para un cliente es
 // activar/desactivar una fila en company_modules, no tocar este componente.
-export default function Sidebar({ modules }: { modules: ModuleDef[] }) {
+export default function Sidebar({
+  modules,
+  notificationCount = 0,
+}: {
+  modules: ModuleDef[];
+  notificationCount?: number;
+}) {
   const linkClass = "block rounded-xl px-3 py-2 text-slate transition hover:bg-paper-deep hover:text-ink";
 
   return (
@@ -17,6 +23,14 @@ export default function Sidebar({ modules }: { modules: ModuleDef[] }) {
       </Link>
       <Link href="/contactos" className={linkClass}>
         Contactos
+      </Link>
+      <Link href="/notificaciones" className={`${linkClass} flex items-center justify-between`}>
+        <span>Notificaciones</span>
+        {notificationCount > 0 && (
+          <span className="rounded-full bg-brand px-2 py-0.5 text-xs font-semibold text-white">
+            {notificationCount}
+          </span>
+        )}
       </Link>
       {modules.map((m) => (
         <Link key={m.key} href={m.href} className={linkClass}>

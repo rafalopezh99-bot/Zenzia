@@ -11,6 +11,11 @@ export default async function DashboardPage() {
     .select("*", { count: "exact", head: true })
     .eq("status", "active");
 
+  const { count: newNotifications } = await supabase
+    .from("notifications")
+    .select("*", { count: "exact", head: true })
+    .eq("status", "nueva");
+
   const { data: upcoming } = await supabase
     .from("appointments")
     .select("id, starts_at, contacts(full_name)")
@@ -26,7 +31,7 @@ export default async function DashboardPage() {
         title={fullName ? `¡Bienvenido a tu CRM, ${fullName}!` : "Panel de control"}
       />
 
-      <div className="mb-8 grid max-w-md grid-cols-2 gap-4">
+      <div className="mb-8 grid max-w-2xl grid-cols-3 gap-4">
         <Card>
           <div className="text-2xl font-semibold text-ink">{contactCount ?? 0}</div>
           <div className="text-sm text-slate">Contactos activos</div>
@@ -34,6 +39,10 @@ export default async function DashboardPage() {
         <Card>
           <div className="text-2xl font-semibold text-ink">{upcoming?.length ?? 0}</div>
           <div className="text-sm text-slate">Próximas citas</div>
+        </Card>
+        <Card>
+          <div className="text-2xl font-semibold text-ink">{newNotifications ?? 0}</div>
+          <div className="text-sm text-slate">Notificaciones nuevas</div>
         </Card>
       </div>
 

@@ -3,10 +3,10 @@ import { insertLead, type LeadOrigin } from "@/lib/leads";
 
 // Endpoint público para que OTROS sitios (hoy: rldigitalstudios.com)
 // puedan mandar un lead a Zenzia sin tener sesión. Reutiliza la misma
-// inserción en `contacts` (etapa "nuevo_lead") que el formulario propio de
-// la landing de Zenzia — ver lib/leads.ts. Solo acepta insertar, nunca
-// leer ni modificar nada; la política RLS que lo permite está en
-// supabase/migrations/2026-08-31-landing-contact-form.sql.
+// inserción en `notifications` que el formulario propio de la landing de
+// Zenzia — ver lib/leads.ts. Solo acepta insertar, nunca leer ni
+// modificar nada; la política RLS que lo permite está en
+// supabase/migrations/2026-08-31-notifications.sql.
 //
 // IMPORTANTE al desplegar: cambia la URL a la que apunta el formulario de
 // rldigitalstudios.com (hoy http://localhost:3000/api/leads para pruebas

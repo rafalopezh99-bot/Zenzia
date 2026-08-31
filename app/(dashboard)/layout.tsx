@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import Sidebar from "@/components/Sidebar";
 import { getEnabledModules } from "@/lib/modules";
 import { getCurrentCompanyProfile } from "@/lib/company";
+import { createClient } from "@/lib/supabase/server";
 
 // Todo lo que cuelga de este layout depende de la sesión y de los módulos
 // activados por empresa — nunca se prerenderiza estático.
@@ -17,9 +18,15 @@ export default async function DashboardLayout({ children }: { children: React.Re
 
   const modules = await getEnabledModules(profile.companyId);
 
+  const supabase = createClient();
+  const { count: notificationCount } = await supabase
+    .from("notifications")
+    .select("*", { count: "exact", head: true })
+    .eq("status", "nueva");
+
   return (
     <div className="flex min-h-screen bg-paper text-ink">
-      <Sidebar modules={modules} />
+      <Sidebar modules={modules} notificationCount={notificationCount ?? 0} />
       <main className="flex-1 p-8">{children}</main>
     </div>
   );
