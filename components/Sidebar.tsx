@@ -24,6 +24,9 @@ export default function Sidebar({
       <Link href="/contactos" className={linkClass}>
         Contactos
       </Link>
+      <Link href="/clientes" className={linkClass}>
+        Clientes
+      </Link>
       <Link href="/notificaciones" className={`${linkClass} flex items-center justify-between`}>
         <span>Notificaciones</span>
         {notificationCount > 0 && (
