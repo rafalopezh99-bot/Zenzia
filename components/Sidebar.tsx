@@ -15,7 +15,9 @@ export default function Sidebar({
 
   return (
     <nav className="w-56 shrink-0 border-r border-line bg-white p-4 text-sm">
-      <div className="mb-6 px-1">
+      <div className="mb-6 flex items-center gap-2 px-1">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src="/zenzia-icon.png" alt="" width={24} height={24} className="h-6 w-6" />
         <span className="text-base font-black uppercase tracking-tight text-ink">Zenzia</span>
       </div>
       <Link href="/dashboard" className={linkClass}>

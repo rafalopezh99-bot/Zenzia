@@ -30,7 +30,11 @@ export default function LoginPage() {
         onSubmit={handleSubmit}
         className="w-80 space-y-4 rounded-2xl border border-line bg-white p-6 shadow-sm"
       >
-        <h1 className="text-lg font-black uppercase tracking-tight text-ink">Zenzia</h1>
+        <div className="flex flex-col items-center gap-2 pb-1 text-center">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/zenzia-icon.png" alt="" width={44} height={44} className="h-11 w-11" />
+          <h1 className="text-lg font-black uppercase tracking-tight text-ink">Zenzia</h1>
+        </div>
         <Input name="email" type="email" placeholder="Email" required className="w-full" />
         <Input name="password" type="password" placeholder="Contraseña" required className="w-full" />
         {error && <p className="text-sm text-red-600">{error}</p>}

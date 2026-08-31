@@ -24,7 +24,9 @@ export function Mono({
 export function MarketingHeader({ minimal = false }: { minimal?: boolean }) {
   return (
     <header className="mx-auto flex max-w-6xl items-center justify-between px-6 py-6">
-      <Link href="/" className="flex items-baseline gap-2">
+      <Link href="/" className="flex items-center gap-2">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src="/zenzia-icon.png" alt="" width={30} height={30} className="h-[30px] w-[30px]" />
         <span className="text-xl font-black tracking-tight" style={{ color: INK }}>
           Zenzia
         </span>
