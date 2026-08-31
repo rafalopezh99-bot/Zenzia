@@ -30,10 +30,11 @@ export default function LoginPage() {
         onSubmit={handleSubmit}
         className="w-80 space-y-4 rounded-2xl border border-line bg-white p-6 shadow-sm"
       >
-        <div className="flex flex-col items-center gap-2 pb-1 text-center">
+        <div className="flex items-center justify-center gap-1 pb-1">
+          {/* El icono hace de "Z" inicial — el texto sigue en "enzia" para no repetirla. */}
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/zenzia-icon.png" alt="" width={44} height={44} className="h-11 w-11" />
-          <h1 className="text-lg font-black uppercase tracking-tight text-ink">Zenzia</h1>
+          <img src="/zenzia-icon.png" alt="Zenzia" width={64} height={64} className="h-16 w-16" />
+          <h1 className="text-2xl font-black uppercase tracking-tight text-ink">enzia</h1>
         </div>
         <Input name="email" type="email" placeholder="Email" required className="w-full" />
         <Input name="password" type="password" placeholder="Contraseña" required className="w-full" />

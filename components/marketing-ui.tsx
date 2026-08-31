@@ -21,55 +21,78 @@ export function Mono({
   );
 }
 
+// El icono hace de "Z" inicial de la palabra: el texto que va al lado
+// empieza en "enzia" (no "Zenzia") para no repetir la letra. Por eso el
+// icono se pinta grande y pegado al texto, casi como una letra capital.
+function ZenziaWordmark({ size, textClassName }: { size: number; textClassName: string }) {
+  return (
+    <span className="flex items-center gap-1">
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src="/zenzia-icon.png"
+        alt="Zenzia"
+        width={size}
+        height={size}
+        style={{ height: size, width: size }}
+      />
+      <span className={`${textClassName} uppercase`} style={{ color: INK }}>
+        enzia
+      </span>
+    </span>
+  );
+}
+
 export function MarketingHeader({ minimal = false }: { minimal?: boolean }) {
   return (
-    <header className="mx-auto flex max-w-6xl items-center justify-between px-6 py-6">
-      <Link href="/" className="flex items-center gap-2">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src="/zenzia-icon.png" alt="" width={30} height={30} className="h-[30px] w-[30px]" />
-        <span className="text-xl font-black tracking-tight" style={{ color: INK }}>
-          Zenzia
-        </span>
+    <header
+      className={`mx-auto grid max-w-6xl items-center gap-4 px-6 py-6 ${
+        minimal ? "grid-cols-[1fr_auto]" : "grid-cols-[1fr_auto_1fr]"
+      }`}
+    >
+      <Link href="/" className="justify-self-start">
+        <ZenziaWordmark size={52} textClassName="text-xl font-black tracking-tight" />
       </Link>
       {minimal ? (
         <Link
           href="/"
-          className="text-sm uppercase tracking-wide transition hover:opacity-70"
+          className="justify-self-end text-sm uppercase tracking-wide transition hover:opacity-70"
           style={{ fontFamily: FONT_MONO, color: SLATE }}
         >
           ‹ Volver a Zenzia
         </Link>
       ) : (
-        <nav className="flex items-center gap-6">
-          <a
-            href="#funcionalidades"
-            className="hidden text-sm uppercase tracking-wide transition hover:opacity-70 sm:inline"
-            style={{ fontFamily: FONT_MONO, color: SLATE }}
-          >
-            Funcionalidades
-          </a>
-          <a
-            href="#sectores"
-            className="hidden text-sm uppercase tracking-wide transition hover:opacity-70 sm:inline"
-            style={{ fontFamily: FONT_MONO, color: SLATE }}
-          >
-            Sectores
-          </a>
-          <a
-            href="#contacto"
-            className="hidden text-sm uppercase tracking-wide transition hover:opacity-70 sm:inline"
-            style={{ fontFamily: FONT_MONO, color: SLATE }}
-          >
-            Contacto
-          </a>
+        <>
+          <nav className="hidden items-center gap-6 sm:flex">
+            <a
+              href="#funcionalidades"
+              className="text-sm uppercase tracking-wide transition hover:opacity-70"
+              style={{ fontFamily: FONT_MONO, color: SLATE }}
+            >
+              Funcionalidades
+            </a>
+            <a
+              href="#sectores"
+              className="text-sm uppercase tracking-wide transition hover:opacity-70"
+              style={{ fontFamily: FONT_MONO, color: SLATE }}
+            >
+              Sectores
+            </a>
+            <a
+              href="#contacto"
+              className="text-sm uppercase tracking-wide transition hover:opacity-70"
+              style={{ fontFamily: FONT_MONO, color: SLATE }}
+            >
+              Contacto
+            </a>
+          </nav>
           <Link
             href="/login"
-            className="rounded-full px-5 py-2 text-sm font-medium text-white transition hover:brightness-110"
+            className="justify-self-end rounded-full px-5 py-2 text-sm font-medium text-white transition hover:brightness-110"
             style={{ backgroundColor: INK, fontFamily: FONT_MONO }}
           >
             acceder()
           </Link>
-        </nav>
+        </>
       )}
     </header>
   );
