@@ -1,6 +1,8 @@
 import { createClient } from "@/lib/supabase/server";
-import { addActivity } from "@/lib/actions/contacts";
+import { addActivity, updateContactStage, updateContactLink } from "@/lib/actions/contacts";
 import { notFound } from "next/navigation";
+import { Card, PageHeader, Input, Select, PrimaryButton, GhostButton } from "@/components/ui";
+import { PIPELINE_STAGES, STAGE_LABEL, getStage } from "@/lib/pipeline";
 
 export default async function ContactoDetailPage({ params }: { params: { id: string } }) {
   const supabase = createClient();
@@ -15,33 +17,78 @@ export default async function ContactoDetailPage({ params }: { params: { id: str
     .order("created_at", { ascending: false });
 
   const addActivityForContact = addActivity.bind(null, params.id);
+  const updateStageForContact = updateContactStage.bind(null, params.id);
+  const updateLinkForContact = updateContactLink.bind(null, params.id);
+  const currentStage = getStage(contact.custom_fields);
+  const demoUrl: string = contact.custom_fields?.demo_url ?? "";
 
   return (
     <div className="max-w-2xl">
-      <h1 className="mb-1 text-xl font-semibold">{contact.full_name}</h1>
-      <p className="mb-6 text-sm text-neutral-400">
+      <PageHeader title={contact.full_name} />
+      <p className="-mt-6 mb-6 text-sm text-neutral-400">
         {contact.phone} {contact.phone && contact.email && "·"} {contact.email}
+        {demoUrl && (
+          <>
+            {" · "}
+            <a
+              href={demoUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-emerald-300 hover:underline"
+            >
+              Ver demo →
+            </a>
+          </>
+        )}
       </p>
 
-      <h2 className="mb-2 font-medium">Historial</h2>
-      <form action={addActivityForContact} className="mb-4 flex gap-2">
-        <input
-          name="content"
-          placeholder="Añadir nota..."
-          className="flex-1 rounded bg-neutral-800 p-2 text-sm"
-        />
-        <button className="rounded bg-neutral-100 px-3 text-sm font-medium text-neutral-900">Añadir</button>
-      </form>
+      <Card className="mb-6">
+        <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-neutral-400">Etapa del cliente</h2>
+        <form action={updateStageForContact} className="flex flex-wrap items-center gap-2">
+          <Select name="stage" defaultValue={currentStage}>
+            {PIPELINE_STAGES.map((s) => (
+              <option key={s} value={s}>
+                {STAGE_LABEL[s]}
+              </option>
+            ))}
+          </Select>
+          <GhostButton>Actualizar etapa</GhostButton>
+        </form>
+      </Card>
 
-      <ul className="space-y-2 text-sm">
-        {(activities ?? []).map((a) => (
-          <li key={a.id} className="border-b border-neutral-800 pb-2">
-            <span className="text-neutral-500">{new Date(a.created_at).toLocaleString("es-ES")}</span> —{" "}
-            {a.content}
-          </li>
-        ))}
-        {(activities ?? []).length === 0 && <li className="text-neutral-500">Sin notas todavía.</li>}
-      </ul>
+      <Card className="mb-6">
+        <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-neutral-400">Enlace de la demo</h2>
+        <form action={updateLinkForContact} className="flex flex-wrap items-center gap-2">
+          <Input
+            name="demo_url"
+            type="url"
+            placeholder="https://cliente-demo.netlify.app"
+            defaultValue={demoUrl}
+            className="flex-1"
+          />
+          <GhostButton>Guardar enlace</GhostButton>
+        </form>
+      </Card>
+
+      <Card>
+        <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-neutral-400">
+          Notas / resumen de conversaciones
+        </h2>
+        <form action={addActivityForContact} className="mb-4 flex gap-2">
+          <Input name="content" placeholder="Ej: hablado por WhatsApp, interesado en el plan de 250€..." className="flex-1" />
+          <PrimaryButton>Añadir</PrimaryButton>
+        </form>
+
+        <ul className="space-y-2 text-sm">
+          {(activities ?? []).map((a) => (
+            <li key={a.id} className="border-b border-white/5 pb-2 last:border-0 last:pb-0">
+              <span className="text-neutral-500">{new Date(a.created_at).toLocaleString("es-ES")}</span> —{" "}
+              <span className="text-neutral-200">{a.content}</span>
+            </li>
+          ))}
+          {(activities ?? []).length === 0 && <li className="text-neutral-500">Sin notas todavía.</li>}
+        </ul>
+      </Card>
     </div>
   );
 }

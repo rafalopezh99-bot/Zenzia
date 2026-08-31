@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { createVehicle } from "@/lib/actions/assets";
+import { Card, PageHeader, Input, Select, PrimaryButton, tableWrap, tableEl, theadEl, thEl, tdEl, trEl } from "@/components/ui";
 
 export default async function VehiculosPage() {
   const supabase = createClient();
@@ -12,40 +13,44 @@ export default async function VehiculosPage() {
 
   return (
     <div>
-      <h1 className="mb-4 text-xl font-semibold">Vehículos</h1>
+      <PageHeader title="Vehículos" />
 
-      <form action={createVehicle} className="mb-6 flex flex-wrap items-end gap-2 text-sm">
-        <select name="contact_id" required className="rounded bg-neutral-800 p-2">
-          <option value="">Cliente</option>
-          {(contacts ?? []).map((c) => (
-            <option key={c.id} value={c.id}>
-              {c.full_name}
-            </option>
-          ))}
-        </select>
-        <input name="plate" placeholder="Matrícula" required className="rounded bg-neutral-800 p-2" />
-        <input name="model" placeholder="Marca y modelo" className="rounded bg-neutral-800 p-2" />
-        <button className="rounded bg-neutral-100 px-3 py-2 font-medium text-neutral-900">Añadir vehículo</button>
-      </form>
+      <Card className="mb-6">
+        <form action={createVehicle} className="flex flex-wrap items-end gap-2 text-sm">
+          <Select name="contact_id" required>
+            <option value="">Cliente</option>
+            {(contacts ?? []).map((c) => (
+              <option key={c.id} value={c.id}>
+                {c.full_name}
+              </option>
+            ))}
+          </Select>
+          <Input name="plate" placeholder="Matrícula" required />
+          <Input name="model" placeholder="Marca y modelo" />
+          <PrimaryButton>Añadir vehículo</PrimaryButton>
+        </form>
+      </Card>
 
-      <table className="w-full text-left text-sm">
-        <thead className="text-neutral-400">
-          <tr>
-            <th className="py-2">Cliente</th>
-            <th className="py-2">Matrícula</th>
-            <th className="py-2">Modelo</th>
-          </tr>
-        </thead>
-        <tbody>
-          {(vehicles ?? []).map((v: any) => (
-            <tr key={v.id} className="border-t border-neutral-800">
-              <td className="py-2">{v.contacts?.full_name}</td>
-              <td className="py-2">{v.custom_fields?.plate}</td>
-              <td className="py-2">{v.custom_fields?.model}</td>
+      <div className={tableWrap}>
+        <table className={tableEl}>
+          <thead className={theadEl}>
+            <tr>
+              <th className={thEl}>Cliente</th>
+              <th className={thEl}>Matrícula</th>
+              <th className={thEl}>Modelo</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {(vehicles ?? []).map((v: any) => (
+              <tr key={v.id} className={trEl}>
+                <td className={tdEl}>{v.contacts?.full_name}</td>
+                <td className={tdEl}>{v.custom_fields?.plate}</td>
+                <td className={tdEl}>{v.custom_fields?.model}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }

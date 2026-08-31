@@ -10,7 +10,19 @@ create extension if not exists "pgcrypto";
 create table companies (
   id uuid primary key default gen_random_uuid(),
   name text not null,
-  vertical text not null check (vertical in ('fisio','nutricion','taller','dental','estetica')),
+  vertical text not null check (vertical in (
+    'fisio','osteopatia','nutricion','psicologia','podologia','entrenador_personal','dental','veterinaria',
+    'estetica','peluqueria','barberia','manicura','tatuajes','spa',
+    'taller',
+    'reformas','parquet','pintura','electricista','fontaneria','cerrajeria','jardineria','limpieza',
+    'agencia','asesoria','fotografia','academia'
+  )),
+  -- Autónomo o empresa — se pregunta en el asistente de configuración inicial.
+  business_type text check (business_type in ('autonomo','empresa')),
+  -- Si ya pasó por el asistente de configuración inicial (nombre, tipo de
+  -- negocio, módulos por defecto). Mientras sea false, el panel redirige a
+  -- /onboarding en lugar de mostrar el dashboard.
+  onboarded boolean not null default false,
   created_at timestamptz not null default now()
 );
 
@@ -20,6 +32,9 @@ create table company_users (
   company_id uuid not null references companies(id) on delete cascade,
   user_id uuid not null references auth.users(id) on delete cascade,
   role text not null default 'admin' check (role in ('owner','admin','staff')),
+  -- Nombre de la persona que gestiona la cuenta, recogido en el asistente
+  -- de configuración inicial. Se usa para el saludo del dashboard.
+  full_name text,
   created_at timestamptz not null default now(),
   unique (company_id, user_id)
 );
@@ -158,8 +173,21 @@ $$;
 create policy "member sees own company" on companies
   for select using (id in (select auth_company_ids()));
 
+-- Necesaria para que el asistente de configuración inicial (onboarding)
+-- pueda guardar el nombre real, el tipo de negocio y marcar la empresa
+-- como configurada.
+create policy "member updates own company" on companies
+  for update using (id in (select auth_company_ids()))
+  with check (id in (select auth_company_ids()));
+
 create policy "member sees own company_users" on company_users
   for select using (company_id in (select auth_company_ids()));
+
+-- Cada usuario solo puede editar su propia fila (p. ej. su nombre desde el
+-- onboarding), nunca la de un compañero de la misma empresa.
+create policy "member updates own profile" on company_users
+  for update using (user_id = auth.uid() and company_id in (select auth_company_ids()))
+  with check (user_id = auth.uid() and company_id in (select auth_company_ids()));
 
 create policy "member sees own company_modules" on company_modules
   for select using (company_id in (select auth_company_ids()));

@@ -1,7 +1,10 @@
 import { createClient } from "@/lib/supabase/server";
+import { Card, PageHeader } from "@/components/ui";
+import { getCurrentCompanyProfile } from "@/lib/company";
 
 export default async function DashboardPage() {
   const supabase = createClient();
+  const { fullName } = await getCurrentCompanyProfile();
 
   const { count: contactCount } = await supabase
     .from("contacts")
@@ -18,28 +21,33 @@ export default async function DashboardPage() {
 
   return (
     <div>
-      <h1 className="mb-6 text-xl font-semibold">Dashboard</h1>
+      <PageHeader
+        eyebrow="Dashboard"
+        title={fullName ? `¡Bienvenido a tu CRM, ${fullName}!` : "Panel de control"}
+      />
 
       <div className="mb-8 grid max-w-md grid-cols-2 gap-4">
-        <div className="rounded border border-neutral-800 p-4">
-          <div className="text-2xl font-semibold">{contactCount ?? 0}</div>
+        <Card>
+          <div className="text-2xl font-semibold text-neutral-100">{contactCount ?? 0}</div>
           <div className="text-sm text-neutral-400">Contactos activos</div>
-        </div>
-        <div className="rounded border border-neutral-800 p-4">
-          <div className="text-2xl font-semibold">{upcoming?.length ?? 0}</div>
+        </Card>
+        <Card>
+          <div className="text-2xl font-semibold text-neutral-100">{upcoming?.length ?? 0}</div>
           <div className="text-sm text-neutral-400">Próximas citas</div>
-        </div>
+        </Card>
       </div>
 
-      <h2 className="mb-2 font-medium">Próximas citas</h2>
-      <ul className="space-y-1 text-sm text-neutral-300">
-        {(upcoming ?? []).map((a: any) => (
-          <li key={a.id}>
-            {new Date(a.starts_at).toLocaleString("es-ES")} — {a.contacts?.full_name}
-          </li>
-        ))}
-        {(upcoming ?? []).length === 0 && <li className="text-neutral-500">Sin citas próximas.</li>}
-      </ul>
+      <Card>
+        <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-neutral-400">Próximas citas</h2>
+        <ul className="space-y-2 text-sm text-neutral-300">
+          {(upcoming ?? []).map((a: any) => (
+            <li key={a.id} className="border-b border-white/5 pb-2 last:border-0 last:pb-0">
+              {new Date(a.starts_at).toLocaleString("es-ES")} — {a.contacts?.full_name}
+            </li>
+          ))}
+          {(upcoming ?? []).length === 0 && <li className="text-neutral-500">Sin citas próximas.</li>}
+        </ul>
+      </Card>
     </div>
   );
 }

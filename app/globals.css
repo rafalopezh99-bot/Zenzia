@@ -1,3 +1,171 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Fondo por defecto: el "paper" claro de la landing pública (zenzia.es).
+   El panel (login, onboarding, dashboard) pinta su propio fondo oscuro en
+   el div raíz de cada pantalla, así que este valor solo se ve un instante
+   antes de hidratar o en zonas de overscroll — nunca en el panel. */
+html,
+body {
+  background-color: #f7f8f6;
+  color: #0f1113;
+}
+
+/* ---------- Dashboard mockup (landing hero) ---------- */
+/* Mockup animado (solo CSS) del panel de Zenzia, usado en components/DashboardMockup.tsx. */
+.dm-window {
+  border: 1px solid;
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 30px 60px -30px rgba(15, 17, 19, 0.25);
+}
+.dm-titlebar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 12px 16px;
+  border-bottom: 1px solid;
+}
+.dm-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  display: inline-block;
+}
+.dm-titlebar-label {
+  margin-left: 8px;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.dm-body {
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+.dm-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+.dm-stat {
+  border: 1px solid;
+  border-radius: 12px;
+  padding: 12px 14px;
+}
+.dm-stat-label {
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.dm-stat-value {
+  margin-top: 6px;
+  font-size: 20px;
+  font-weight: 800;
+}
+.dm-stat-delta {
+  margin-top: 2px;
+  font-size: 11px;
+  font-weight: 600;
+}
+.dm-chart {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  height: 120px;
+  padding-top: 8px;
+}
+.dm-bar {
+  flex: 1;
+  border-radius: 6px 6px 2px 2px;
+  transform-origin: bottom;
+  animation-name: dm-bar-grow, dm-bar-breathe;
+  animation-duration: 0.6s, 3.2s;
+  animation-timing-function: ease-out, ease-in-out;
+  animation-iteration-count: 1, infinite;
+  animation-fill-mode: both, none;
+}
+@keyframes dm-bar-grow {
+  from {
+    transform: scaleY(0);
+    opacity: 0;
+  }
+  to {
+    transform: scaleY(1);
+    opacity: 1;
+  }
+}
+@keyframes dm-bar-breathe {
+  0%,
+  100% {
+    transform: scaleY(1);
+  }
+  50% {
+    transform: scaleY(0.94);
+  }
+}
+.dm-toast {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border: 1px solid;
+  border-radius: 12px;
+  padding: 10px 14px;
+  width: fit-content;
+  animation: dm-toast-loop 6s ease-in-out infinite;
+}
+.dm-toast-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  animation: dm-toast-pulse 1.6s ease-in-out infinite;
+}
+.dm-toast-title {
+  font-size: 13px;
+  font-weight: 700;
+}
+.dm-toast-sub {
+  margin-top: 2px;
+  font-size: 11px;
+}
+@keyframes dm-toast-loop {
+  0%,
+  8% {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  14%,
+  82% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  92%,
+  100% {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+}
+@keyframes dm-toast-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(191, 227, 211, 0.6);
+  }
+  50% {
+    box-shadow: 0 0 0 6px rgba(191, 227, 211, 0);
+  }
+}
+@media (max-width: 640px) {
+  .dm-stat-value {
+    font-size: 16px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .dm-bar,
+  .dm-toast,
+  .dm-toast-dot {
+    animation: none !important;
+  }
+}

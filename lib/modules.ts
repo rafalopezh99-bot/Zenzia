@@ -42,6 +42,38 @@ export const VERTICAL_PACKS: Record<string, ModuleKey[]> = {
   taller: ["agenda", "ficha_vehiculo", "presupuestos"],
   dental: ["agenda", "historial_clinico", "fotos", "consentimientos", "presupuestos"],
   estetica: ["agenda", "historial_clinico", "fotos", "bonos", "consentimientos"],
+  // Uso interno de RL Digital Studios como agencia: gestión de leads/clientes
+  // propios, no un vertical que se vaya a vender a terceros. El historial
+  // por contacto ya está siempre disponible en la ficha del contacto, así
+  // que no hace falta el módulo "historial_clinico" (vista global).
+  agencia: ["agenda", "presupuestos", "facturacion"],
+  // Ampliación de verticales (inspirado en la matriz de Kollabox): negocios
+  // basados en citas que encajan directamente en el mismo modelo.
+  peluqueria: ["agenda", "historial_clinico", "fotos", "bonos"],
+  tatuajes: ["agenda", "fotos", "consentimientos", "presupuestos"],
+  manicura: ["agenda", "historial_clinico", "fotos", "bonos"],
+  reformas: ["agenda", "presupuestos", "fotos", "facturacion"],
+
+  // Catálogo ampliado para el asistente de configuración inicial (ver
+  // lib/verticals.ts) — mismo criterio: cada pack trae lo común y general
+  // para ese tipo de negocio, ajustable después desde el panel.
+  osteopatia: ["agenda", "historial_clinico", "seguimiento", "bonos"],
+  psicologia: ["agenda", "historial_clinico", "consentimientos"],
+  podologia: ["agenda", "historial_clinico", "bonos"],
+  entrenador_personal: ["agenda", "seguimiento", "bonos"],
+  veterinaria: ["agenda", "historial_clinico", "presupuestos"],
+  spa: ["agenda", "bonos", "fotos", "consentimientos"],
+  barberia: ["agenda", "fotos", "bonos"],
+  parquet: ["agenda", "presupuestos", "fotos", "facturacion"],
+  pintura: ["agenda", "presupuestos", "fotos", "facturacion"],
+  electricista: ["agenda", "presupuestos", "facturacion"],
+  fontaneria: ["agenda", "presupuestos", "facturacion"],
+  cerrajeria: ["agenda", "presupuestos", "facturacion"],
+  jardineria: ["agenda", "presupuestos", "facturacion"],
+  limpieza: ["agenda", "presupuestos", "facturacion"],
+  asesoria: ["agenda", "presupuestos", "facturacion"],
+  fotografia: ["agenda", "presupuestos", "fotos", "facturacion"],
+  academia: ["agenda", "seguimiento"],
 };
 
 import { createClient } from "@/lib/supabase/server";

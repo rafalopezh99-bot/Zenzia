@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { createAppointment } from "@/lib/actions/appointments";
+import { Card, PageHeader, Input, Select, Textarea, PrimaryButton } from "@/components/ui";
 
 export default async function NuevaCitaPage() {
   const supabase = createClient();
@@ -7,28 +8,23 @@ export default async function NuevaCitaPage() {
 
   return (
     <div>
-      <h1 className="mb-4 text-xl font-semibold">Nueva cita</h1>
-      <form action={createAppointment} className="max-w-sm space-y-3">
-        <select name="contact_id" required className="w-full rounded bg-neutral-800 p-2 text-sm">
-          <option value="">Selecciona contacto</option>
-          {(contacts ?? []).map((c) => (
-            <option key={c.id} value={c.id}>
-              {c.full_name}
-            </option>
-          ))}
-        </select>
-        <input name="starts_at" type="datetime-local" required className="w-full rounded bg-neutral-800 p-2 text-sm" />
-        <input
-          name="duration_minutes"
-          type="number"
-          defaultValue={30}
-          className="w-full rounded bg-neutral-800 p-2 text-sm"
-        />
-        <textarea name="notes" placeholder="Notas" className="w-full rounded bg-neutral-800 p-2 text-sm" />
-        <button className="rounded bg-neutral-100 px-4 py-2 text-sm font-medium text-neutral-900">
-          Guardar
-        </button>
-      </form>
+      <PageHeader title="Nueva cita" />
+      <Card className="max-w-sm">
+        <form action={createAppointment} className="space-y-3">
+          <Select name="contact_id" required className="w-full">
+            <option value="">Selecciona contacto</option>
+            {(contacts ?? []).map((c) => (
+              <option key={c.id} value={c.id}>
+                {c.full_name}
+              </option>
+            ))}
+          </Select>
+          <Input name="starts_at" type="datetime-local" required className="w-full" />
+          <Input name="duration_minutes" type="number" defaultValue={30} className="w-full" />
+          <Textarea name="notes" placeholder="Notas" className="w-full" />
+          <PrimaryButton>Guardar</PrimaryButton>
+        </form>
+      </Card>
     </div>
   );
 }

@@ -3,14 +3,17 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { signIn } from "@/lib/actions/auth";
+import { Input, PrimaryButton } from "@/components/ui";
 
 export default function LoginPage() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
-  async function handleSubmit(formData: FormData) {
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
     setLoading(true);
+    const formData = new FormData(e.currentTarget);
     const result = await signIn(formData);
     if (result.error) {
       setError(result.error);
@@ -22,30 +25,23 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-neutral-900">
-      <form action={handleSubmit} className="w-80 space-y-3 rounded-lg bg-neutral-950 p-6">
-        <h1 className="text-lg font-semibold text-neutral-100">Zenzia</h1>
-        <input
-          name="email"
-          className="w-full rounded bg-neutral-800 p-2 text-neutral-100"
-          type="email"
-          placeholder="Email"
-          required
-        />
-        <input
-          name="password"
-          className="w-full rounded bg-neutral-800 p-2 text-neutral-100"
-          type="password"
-          placeholder="Contrasena"
-          required
-        />
+    <div className="flex min-h-screen items-center justify-center bg-[#05070d] px-4">
+      <form
+        onSubmit={handleSubmit}
+        className="w-80 space-y-4 rounded-2xl border border-white/10 bg-[#0d1420]/70 p-6 shadow-[0_0_60px_-20px_rgba(52,211,153,0.3)] backdrop-blur"
+      >
+        <div className="flex items-center gap-2">
+          <span className="h-2 w-2 rounded-full bg-gradient-to-br from-emerald-400 to-violet-400" />
+          <h1 className="bg-gradient-to-r from-emerald-300 to-violet-400 bg-clip-text text-lg font-bold text-transparent">
+            Zenzia
+          </h1>
+        </div>
+        <Input name="email" type="email" placeholder="Email" required className="w-full" />
+        <Input name="password" type="password" placeholder="Contraseña" required className="w-full" />
         {error && <p className="text-sm text-red-400">{error}</p>}
-        <button
-          disabled={loading}
-          className="w-full rounded bg-neutral-100 p-2 font-medium text-neutral-900 disabled:opacity-60"
-        >
+        <PrimaryButton disabled={loading} className="w-full">
           {loading ? "Entrando..." : "Entrar"}
-        </button>
+        </PrimaryButton>
       </form>
     </div>
   );
