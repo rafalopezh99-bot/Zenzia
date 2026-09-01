@@ -28,7 +28,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
 
   return (
     <div className="flex min-h-screen flex-col bg-paper text-ink sm:flex-row">
-      <Sidebar modules={modules} notificationCount={notificationCount ?? 0} />
+      <Sidebar modules={modules} notificationCount={notificationCount ?? 0} companyName={profile.companyName} />
       <main className="flex-1 overflow-x-hidden p-4 sm:p-8">{children}</main>
     </div>
   );

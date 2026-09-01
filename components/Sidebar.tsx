@@ -15,9 +15,11 @@ import type { ModuleDef } from "@/lib/modules";
 export default function Sidebar({
   modules,
   notificationCount = 0,
+  companyName,
 }: {
   modules: ModuleDef[];
   notificationCount?: number;
+  companyName?: string;
 }) {
   const [open, setOpen] = useState(false);
   const linkClass = "block rounded-xl px-3 py-2 text-slate transition hover:bg-paper-deep hover:text-ink";
@@ -59,17 +61,31 @@ export default function Sidebar({
           open ? "translate-x-0" : "-translate-x-full"
         }`}
       >
-        <div className="mb-6 hidden items-center gap-1 px-1 sm:flex">
-          {/* El icono hace de "Z" inicial — el texto sigue en "enzia" para no repetirla. */}
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/zenzia-icon.png" alt="Zenzia" width={40} height={40} className="h-10 w-10" />
-          <span className="text-base font-black uppercase tracking-tight text-ink">enzia</span>
-        </div>
-        <div className="mb-4 flex items-center justify-between px-1 sm:hidden">
+        <div className="mb-6 hidden px-1 sm:block">
           <div className="flex items-center gap-1">
+            {/* El icono hace de "Z" inicial — el texto sigue en "enzia" para no repetirla. */}
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/zenzia-icon.png" alt="Zenzia" width={32} height={32} className="h-8 w-8" />
-            <span className="text-sm font-black uppercase tracking-tight text-ink">enzia</span>
+            <img src="/zenzia-icon.png" alt="Zenzia" width={40} height={40} className="h-10 w-10" />
+            <span className="text-base font-black uppercase tracking-tight text-ink">enzia</span>
+          </div>
+          {companyName && (
+            <div className="mt-1 truncate text-xs text-slate/70" title={companyName}>
+              {companyName}
+            </div>
+          )}
+        </div>
+        <div className="mb-4 flex items-start justify-between px-1 sm:hidden">
+          <div>
+            <div className="flex items-center gap-1">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/zenzia-icon.png" alt="Zenzia" width={32} height={32} className="h-8 w-8" />
+              <span className="text-sm font-black uppercase tracking-tight text-ink">enzia</span>
+            </div>
+            {companyName && (
+              <div className="mt-1 truncate text-xs text-slate/70" title={companyName}>
+                {companyName}
+              </div>
+            )}
           </div>
           <button
             type="button"
