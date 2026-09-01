@@ -35,7 +35,7 @@ export default function Sidebar({
       <div className="flex items-center justify-between border-b border-line bg-white px-4 py-3 sm:hidden">
         <Link href="/dashboard" className="flex items-center" onClick={close}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/zenzia-icon.png" alt="Zenzia" width={24} height={24} className="h-6 w-6 -mr-1" />
+          <img src="/zenzia-icon.png" alt="Zenzia" width={24} height={24} className="h-6 w-6 mr-1" />
           <span className="text-base font-black uppercase tracking-tight text-ink">enzia</span>
         </Link>
         <button
@@ -69,7 +69,7 @@ export default function Sidebar({
           <div className="flex items-center">
             {/* El icono hace de "Z" inicial — el texto sigue en "enzia" para no repetirla. */}
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/zenzia-icon.png" alt="Zenzia" width={34} height={34} className="h-[34px] w-[34px] -mr-1.5" />
+            <img src="/zenzia-icon.png" alt="Zenzia" width={34} height={34} className="h-[34px] w-[34px] mr-1" />
             <span className="text-lg font-black uppercase tracking-tight text-ink">enzia</span>
           </div>
           {companyName && (
@@ -82,7 +82,7 @@ export default function Sidebar({
           <div>
             <div className="flex items-center">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/zenzia-icon.png" alt="Zenzia" width={28} height={28} className="h-7 w-7 -mr-1" />
+              <img src="/zenzia-icon.png" alt="Zenzia" width={28} height={28} className="h-7 w-7 mr-1" />
               <span className="text-base font-black uppercase tracking-tight text-ink">enzia</span>
             </div>
             {companyName && (

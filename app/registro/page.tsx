@@ -15,7 +15,7 @@ export default function RegistroPage() {
       <Card className="w-full max-w-lg">
         <div className="mb-1 flex items-center justify-center">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/zenzia-icon.png" alt="Zenzia" width={56} height={56} className="h-14 w-14 -mr-2" />
+          <img src="/zenzia-icon.png" alt="Zenzia" width={56} height={56} className="h-14 w-14 mr-1.5" />
           <h1 className="text-3xl font-black uppercase tracking-tight text-ink">enzia</h1>
         </div>
         <p className="mb-6 text-center text-sm text-slate">

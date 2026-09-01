@@ -33,7 +33,7 @@ function ZenziaWordmark({ size, textClassName }: { size: number; textClassName: 
         alt="Zenzia"
         width={size}
         height={size}
-        style={{ height: size, width: size, marginRight: size * -0.14 }}
+        style={{ height: size, width: size, marginRight: size * 0.04 }}
       />
       <span className={`${textClassName} uppercase`} style={{ color: INK }}>
         enzia
