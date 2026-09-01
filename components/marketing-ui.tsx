@@ -26,14 +26,14 @@ export function Mono({
 // icono se pinta grande y pegado al texto, casi como una letra capital.
 function ZenziaWordmark({ size, textClassName }: { size: number; textClassName: string }) {
   return (
-    <span className="flex items-center gap-1">
+    <span className="flex items-center">
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
         src="/zenzia-icon.png"
         alt="Zenzia"
         width={size}
         height={size}
-        style={{ height: size, width: size }}
+        style={{ height: size, width: size, marginRight: size * -0.14 }}
       />
       <span className={`${textClassName} uppercase`} style={{ color: INK }}>
         enzia
@@ -50,7 +50,7 @@ export function MarketingHeader({ minimal = false }: { minimal?: boolean }) {
       }`}
     >
       <Link href="/" className="justify-self-start">
-        <ZenziaWordmark size={52} textClassName="text-xl font-black tracking-tight" />
+        <ZenziaWordmark size={68} textClassName="text-2xl font-black tracking-tight" />
       </Link>
       {minimal ? (
         <Link

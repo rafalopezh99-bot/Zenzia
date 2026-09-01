@@ -16,10 +16,14 @@ export default function Sidebar({
   modules,
   notificationCount = 0,
   companyName,
+  isAdmin = false,
+  signupRequestCount = 0,
 }: {
   modules: ModuleDef[];
   notificationCount?: number;
   companyName?: string;
+  isAdmin?: boolean;
+  signupRequestCount?: number;
 }) {
   const [open, setOpen] = useState(false);
   const linkClass = "block rounded-xl px-3 py-2 text-slate transition hover:bg-paper-deep hover:text-ink";
@@ -29,10 +33,10 @@ export default function Sidebar({
     <>
       {/* Barra superior: solo en móvil */}
       <div className="flex items-center justify-between border-b border-line bg-white px-4 py-3 sm:hidden">
-        <Link href="/dashboard" className="flex items-center gap-1" onClick={close}>
+        <Link href="/dashboard" className="flex items-center" onClick={close}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/zenzia-icon.png" alt="Zenzia" width={28} height={28} className="h-7 w-7" />
-          <span className="text-sm font-black uppercase tracking-tight text-ink">enzia</span>
+          <img src="/zenzia-icon.png" alt="Zenzia" width={36} height={36} className="h-9 w-9 -mr-1.5" />
+          <span className="text-base font-black uppercase tracking-tight text-ink">enzia</span>
         </Link>
         <button
           type="button"
@@ -62,11 +66,11 @@ export default function Sidebar({
         }`}
       >
         <div className="mb-6 hidden px-1 sm:block">
-          <div className="flex items-center gap-1">
+          <div className="flex items-center">
             {/* El icono hace de "Z" inicial — el texto sigue en "enzia" para no repetirla. */}
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/zenzia-icon.png" alt="Zenzia" width={40} height={40} className="h-10 w-10" />
-            <span className="text-base font-black uppercase tracking-tight text-ink">enzia</span>
+            <img src="/zenzia-icon.png" alt="Zenzia" width={52} height={52} className="h-[52px] w-[52px] -mr-2" />
+            <span className="text-lg font-black uppercase tracking-tight text-ink">enzia</span>
           </div>
           {companyName && (
             <div className="mt-1 truncate text-xs text-slate/70" title={companyName}>
@@ -76,10 +80,10 @@ export default function Sidebar({
         </div>
         <div className="mb-4 flex items-start justify-between px-1 sm:hidden">
           <div>
-            <div className="flex items-center gap-1">
+            <div className="flex items-center">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/zenzia-icon.png" alt="Zenzia" width={32} height={32} className="h-8 w-8" />
-              <span className="text-sm font-black uppercase tracking-tight text-ink">enzia</span>
+              <img src="/zenzia-icon.png" alt="Zenzia" width={42} height={42} className="h-[42px] w-[42px] -mr-1.5" />
+              <span className="text-base font-black uppercase tracking-tight text-ink">enzia</span>
             </div>
             {companyName && (
               <div className="mt-1 truncate text-xs text-slate/70" title={companyName}>
@@ -120,6 +124,16 @@ export default function Sidebar({
             {m.label}
           </Link>
         ))}
+        {isAdmin && (
+          <Link href="/solicitudes" className={`${linkClass} flex items-center justify-between`} onClick={close}>
+            <span>Solicitudes</span>
+            {signupRequestCount > 0 && (
+              <span className="rounded-full bg-brand px-2 py-0.5 text-xs font-semibold text-white">
+                {signupRequestCount}
+              </span>
+            )}
+          </Link>
+        )}
       </nav>
     </>
   );

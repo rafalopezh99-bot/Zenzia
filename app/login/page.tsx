@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { signIn } from "@/lib/actions/auth";
 import { Input, PrimaryButton } from "@/components/ui";
 
@@ -30,11 +31,11 @@ export default function LoginPage() {
         onSubmit={handleSubmit}
         className="w-80 space-y-4 rounded-2xl border border-line bg-white p-6 shadow-sm"
       >
-        <div className="flex items-center justify-center gap-1 pb-1">
+        <div className="flex items-center justify-center pb-1">
           {/* El icono hace de "Z" inicial — el texto sigue en "enzia" para no repetirla. */}
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/zenzia-icon.png" alt="Zenzia" width={64} height={64} className="h-16 w-16" />
-          <h1 className="text-2xl font-black uppercase tracking-tight text-ink">enzia</h1>
+          <img src="/zenzia-icon.png" alt="Zenzia" width={84} height={84} className="h-[84px] w-[84px] -mr-3" />
+          <h1 className="text-3xl font-black uppercase tracking-tight text-ink">enzia</h1>
         </div>
         <Input name="email" type="email" placeholder="Email" required className="w-full" />
         <Input name="password" type="password" placeholder="Contraseña" required className="w-full" />
@@ -42,6 +43,12 @@ export default function LoginPage() {
         <PrimaryButton disabled={loading} className="w-full">
           {loading ? "Entrando..." : "Entrar"}
         </PrimaryButton>
+        <p className="text-center text-xs text-slate">
+          ¿No tienes cuenta todavía?{" "}
+          <Link href="/registro" className="text-brand hover:underline">
+            Solicita acceso
+          </Link>
+        </p>
       </form>
     </div>
   );

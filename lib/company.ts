@@ -2,6 +2,12 @@ import { cache } from "react";
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 
+// La empresa de Rafa (RL Digital Studios), dueño de Zenzia. Es la única que
+// puede ver /solicitudes (las peticiones de gente que quiere registrarse) —
+// mismo id que ya usan las políticas de Supabase para el formulario público
+// de contacto y el de notificaciones.
+export const ZENZIA_ADMIN_COMPANY_ID = "5a279e59-d107-4341-80a2-f33bb5f71b24";
+
 // Toda pantalla del panel cuelga de la empresa (tenant) del usuario logueado,
 // así que esto se acaba pidiendo varias veces en la misma carga de página
 // (el layout, la propia página, a veces un componente...). `cache()` de
