@@ -16,13 +16,15 @@ export default async function DashboardLayout({ children }: { children: React.Re
   // decididos, así que no tiene sentido enseñar el panel todavía.
   if (!profile.onboarded) redirect("/onboarding");
 
-  const modules = await getEnabledModules(profile.companyId);
-
+  // Estas dos consultas no dependen una de otra (solo del companyId, que ya
+  // tenemos), así que se lanzan a la vez en vez de esperar a que termine la
+  // primera para pedir la segunda — la página tarda lo que tarda la más
+  // lenta de las dos, no la suma de ambas.
   const supabase = createClient();
-  const { count: notificationCount } = await supabase
-    .from("notifications")
-    .select("*", { count: "exact", head: true })
-    .eq("status", "nueva");
+  const [modules, { count: notificationCount }] = await Promise.all([
+    getEnabledModules(profile.companyId),
+    supabase.from("notifications").select("*", { count: "exact", head: true }).eq("status", "nueva"),
+  ]);
 
   return (
     <div className="flex min-h-screen flex-col bg-paper text-ink sm:flex-row">

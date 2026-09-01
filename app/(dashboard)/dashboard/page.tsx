@@ -4,25 +4,26 @@ import { getCurrentCompanyProfile } from "@/lib/company";
 
 export default async function DashboardPage() {
   const supabase = createClient();
+  // getCurrentCompanyProfile() está cacheada por petición (ver lib/company.ts):
+  // el layout ya la llamó justo antes, así que esto no repite el viaje a
+  // Supabase, solo reutiliza el resultado.
   const { fullName } = await getCurrentCompanyProfile();
 
-  const { count: contactCount } = await supabase
-    .from("contacts")
-    .select("*", { count: "exact", head: true })
-    .eq("status", "active");
-
-  const { count: newNotifications } = await supabase
-    .from("notifications")
-    .select("*", { count: "exact", head: true })
-    .eq("status", "nueva");
-
-  const { data: upcoming } = await supabase
-    .from("appointments")
-    .select("id, starts_at, contacts(full_name)")
-    .eq("status", "scheduled")
-    .gte("starts_at", new Date().toISOString())
-    .order("starts_at", { ascending: true })
-    .limit(5);
+  // Las tres consultas de aquí abajo son independientes entre sí, así que
+  // se lanzan las tres a la vez en vez de una detrás de otra — antes el
+  // dashboard tardaba la suma de las tres, ahora tarda lo que tarda la más
+  // lenta.
+  const [{ count: contactCount }, { count: newNotifications }, { data: upcoming }] = await Promise.all([
+    supabase.from("contacts").select("*", { count: "exact", head: true }).eq("status", "active"),
+    supabase.from("notifications").select("*", { count: "exact", head: true }).eq("status", "nueva"),
+    supabase
+      .from("appointments")
+      .select("id, starts_at, contacts(full_name)")
+      .eq("status", "scheduled")
+      .gte("starts_at", new Date().toISOString())
+      .order("starts_at", { ascending: true })
+      .limit(5),
+  ]);
 
   return (
     <div>

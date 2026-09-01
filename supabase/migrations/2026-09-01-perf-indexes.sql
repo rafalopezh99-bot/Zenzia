@@ -1,0 +1,14 @@
+-- Migración: índice que faltaba en company_users.user_id.
+-- Ejecutar una sola vez en Supabase → SQL Editor.
+--
+-- auth_company_ids() (la función que decide "a qué empresas pertenece este
+-- usuario") consulta company_users filtrando por user_id, y esa función se
+-- ejecuta en la política de seguridad (RLS) de CASI TODAS las tablas:
+-- contacts, appointments, activities, notifications, prospects, tasks,
+-- packages, quotes, photos, consents, invoices... es decir, en casi
+-- cualquier consulta que hace el panel. company_users solo tenía un índice
+-- que empieza por company_id (el de la restricción "unique"), no por
+-- user_id, así que esa búsqueda tan repetida no podía usar ningún índice.
+-- Con pocos usuarios no se nota, pero es la consulta más repetida de toda
+-- la aplicación — vale la pena tenerla bien indexada desde ya.
+create index if not exists company_users_user_id_idx on company_users (user_id);
