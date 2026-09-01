@@ -50,7 +50,7 @@ export function MarketingHeader({ minimal = false }: { minimal?: boolean }) {
       }`}
     >
       <Link href="/" className="justify-self-start">
-        <ZenziaWordmark size={68} textClassName="text-2xl font-black tracking-tight" />
+        <ZenziaWordmark size={46} textClassName="text-2xl font-black tracking-tight" />
       </Link>
       {minimal ? (
         <Link
