@@ -7,7 +7,7 @@ export default async function ContactosPage() {
   const supabase = createClient();
   const { data: contacts } = await supabase
     .from("contacts")
-    .select("id, full_name, phone, status, custom_fields")
+    .select("id, full_name, status, custom_fields")
     .order("created_at", { ascending: false });
 
   return (
@@ -26,7 +26,7 @@ export default async function ContactosPage() {
           <thead className={theadEl}>
             <tr>
               <th className={thEl}>Nombre</th>
-              <th className={thEl}>Teléfono</th>
+              <th className={thEl}>Tipo de negocio</th>
               <th className={thEl}>Etapa</th>
               <th className={thEl}>Demo</th>
             </tr>
@@ -42,7 +42,9 @@ export default async function ContactosPage() {
                       {c.full_name}
                     </Link>
                   </td>
-                  <td className={tdEl}>{c.phone}</td>
+                  <td className={tdEl}>
+                    {c.custom_fields?.business_type || <span className="text-slate/50">—</span>}
+                  </td>
                   <td className={tdEl}>
                     <Badge tone={STAGE_TONE[stage]}>{STAGE_LABEL[stage]}</Badge>
                   </td>

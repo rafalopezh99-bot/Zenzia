@@ -13,6 +13,11 @@ export async function createContact(formData: FormData) {
   if (!full_name) throw new Error("El nombre es obligatorio");
 
   const demo_url = String(formData.get("demo_url") ?? "").trim();
+  const business_type = String(formData.get("business_type") ?? "").trim();
+
+  const custom_fields: Record<string, string> = {};
+  if (demo_url) custom_fields.demo_url = demo_url;
+  if (business_type) custom_fields.business_type = business_type;
 
   const { error } = await supabase.from("contacts").insert({
     company_id: companyId,
@@ -20,7 +25,7 @@ export async function createContact(formData: FormData) {
     phone: String(formData.get("phone") ?? "") || null,
     email: String(formData.get("email") ?? "") || null,
     status: "active",
-    custom_fields: demo_url ? { demo_url } : {},
+    custom_fields,
   });
   if (error) throw new Error(error.message);
 
@@ -68,6 +73,27 @@ export async function updateContactLink(contactId: string, formData: FormData) {
   if (error) throw new Error(error.message);
 
   revalidatePath(`/contactos/${contactId}`);
+}
+
+// Tipo de negocio del contacto (ej. "centro de estética"), igual que el
+// enlace de la demo: se guarda en custom_fields, sin migración de esquema.
+export async function updateContactBusinessType(contactId: string, formData: FormData) {
+  const business_type = String(formData.get("business_type") ?? "").trim();
+  const supabase = createClient();
+
+  const { data: contact } = await supabase
+    .from("contacts")
+    .select("custom_fields")
+    .eq("id", contactId)
+    .single();
+
+  const custom_fields = { ...(contact?.custom_fields ?? {}), business_type };
+
+  const { error } = await supabase.from("contacts").update({ custom_fields }).eq("id", contactId);
+  if (error) throw new Error(error.message);
+
+  revalidatePath(`/contactos/${contactId}`);
+  revalidatePath("/contactos");
 }
 
 // Nota de historial ligada a un contacto concreto. El id del contacto se

@@ -1,5 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
-import { addActivity, updateContactStage, updateContactLink } from "@/lib/actions/contacts";
+import { addActivity, updateContactStage, updateContactLink, updateContactBusinessType } from "@/lib/actions/contacts";
 import { notFound } from "next/navigation";
 import { Card, PageHeader, Input, Select, PrimaryButton, GhostButton } from "@/components/ui";
 import { PIPELINE_STAGES, STAGE_LABEL, getStage } from "@/lib/pipeline";
@@ -19,13 +19,17 @@ export default async function ContactoDetailPage({ params }: { params: { id: str
   const addActivityForContact = addActivity.bind(null, params.id);
   const updateStageForContact = updateContactStage.bind(null, params.id);
   const updateLinkForContact = updateContactLink.bind(null, params.id);
+  const updateBusinessTypeForContact = updateContactBusinessType.bind(null, params.id);
   const currentStage = getStage(contact.custom_fields);
   const demoUrl: string = contact.custom_fields?.demo_url ?? "";
+  const businessType: string = contact.custom_fields?.business_type ?? "";
 
   return (
     <div className="max-w-2xl">
       <PageHeader title={contact.full_name} />
       <p className="-mt-6 mb-6 text-sm text-slate">
+        {businessType && <span className="text-ink">{businessType}</span>}
+        {businessType && (contact.phone || contact.email) && " · "}
         {contact.phone} {contact.phone && contact.email && "·"} {contact.email}
         {demoUrl && (
           <>
@@ -53,6 +57,19 @@ export default async function ContactoDetailPage({ params }: { params: { id: str
             ))}
           </Select>
           <GhostButton>Actualizar etapa</GhostButton>
+        </form>
+      </Card>
+
+      <Card className="mb-6">
+        <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-slate">Tipo de negocio</h2>
+        <form action={updateBusinessTypeForContact} className="flex flex-wrap items-center gap-2">
+          <Input
+            name="business_type"
+            placeholder="Ej: centro de estética"
+            defaultValue={businessType}
+            className="flex-1"
+          />
+          <GhostButton>Guardar</GhostButton>
         </form>
       </Card>
 
