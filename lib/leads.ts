@@ -20,12 +20,19 @@ export async function insertLead(input: {
   message?: string;
   origen: LeadOrigin;
 }): Promise<{ ok: boolean; error: string | null }> {
-  const full_name = input.full_name.trim();
-  const email = input.email.trim();
-  const message = (input.message ?? "").trim();
+  const full_name = input.full_name.trim().slice(0, 200);
+  const email = input.email.trim().slice(0, 200);
+  const message = (input.message ?? "").trim().slice(0, 5000);
 
   if (!full_name || !email) {
     return { ok: false, error: "Necesitamos al menos el nombre y el email." };
+  }
+
+  // Validación básica de formato — no es infalible (ni falta que le hace),
+  // solo descarta valores claramente inválidos antes de guardarlos.
+  const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!EMAIL_RE.test(email)) {
+    return { ok: false, error: "El email no parece válido." };
   }
 
   const origenLabel = input.origen === "rldigitalstudios" ? "rldigitalstudios.com" : "zenzia.es";

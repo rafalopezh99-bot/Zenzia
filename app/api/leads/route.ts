@@ -21,7 +21,8 @@ const ALLOWED_ORIGINS = [
 ];
 
 function corsHeaders(origin: string | null): Record<string, string> {
-  const allowed = !!origin && (ALLOWED_ORIGINS.includes(origin) || origin.startsWith("http://localhost"));
+  const isLocalDev = process.env.NODE_ENV !== "production" && !!origin?.startsWith("http://localhost");
+  const allowed = !!origin && (ALLOWED_ORIGINS.includes(origin) || isLocalDev);
   const headers: Record<string, string> = {
     "Access-Control-Allow-Methods": "POST, OPTIONS",
     "Access-Control-Allow-Headers": "Content-Type",
