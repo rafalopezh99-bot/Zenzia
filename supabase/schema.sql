@@ -149,6 +149,32 @@ create table packages (
   created_at timestamptz not null default now()
 );
 
+-- Tarifario por empresa (usado por el vertical academia): nivel + nombre +
+-- horas + precio. Al dar de alta un alumno eligiendo uno de estos, se crea
+-- ya el bono activo en `packages` con esas horas listas para consumir.
+create table bono_types (
+  id uuid primary key default gen_random_uuid(),
+  company_id uuid not null references companies(id) on delete cascade,
+  nivel text not null,
+  name text not null,
+  sessions int not null,
+  price_eur numeric(10, 2) not null,
+  created_at timestamptz not null default now()
+);
+create index on bono_types (company_id);
+
+-- Lista de asignaturas que imparte la empresa (vertical academia): controla
+-- las casillas del formulario de alta de alumno para evitar variaciones del
+-- mismo nombre escritas de forma distinta.
+create table subjects (
+  id uuid primary key default gen_random_uuid(),
+  company_id uuid not null references companies(id) on delete cascade,
+  name text not null,
+  created_at timestamptz not null default now()
+);
+create index on subjects (company_id);
+create unique index subjects_company_name_key on subjects (company_id, name);
+
 -- ============================================================
 -- RLS: aislamiento estricto por empresa
 -- ============================================================
@@ -161,6 +187,8 @@ alter table appointments enable row level security;
 alter table activities enable row level security;
 alter table tasks enable row level security;
 alter table packages enable row level security;
+alter table bono_types enable row level security;
+alter table subjects enable row level security;
 
 -- helper: empresas a las que pertenece el usuario autenticado
 -- security definer: evita la recursión infinita que se produciría si esta
@@ -234,6 +262,18 @@ create policy "member full access tasks" on tasks
 create policy "member full access packages" on packages
   for all using (contact_id in (select id from contacts where company_id in (select auth_company_ids())))
   with check (contact_id in (select id from contacts where company_id in (select auth_company_ids())));
+
+create policy "member full access bono_types" on bono_types
+  for all
+  to authenticated
+  using (company_id in (select auth_company_ids()))
+  with check (company_id in (select auth_company_ids()));
+
+create policy "member full access subjects" on subjects
+  for all
+  to authenticated
+  using (company_id in (select auth_company_ids()))
+  with check (company_id in (select auth_company_ids()));
 
 -- ============================================================
 -- PRESUPUESTOS / ÓRDENES DE TRABAJO

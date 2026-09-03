@@ -4,12 +4,13 @@ import { notFound } from "next/navigation";
 import { Card, PageHeader, Input, Select, PrimaryButton, GhostButton } from "@/components/ui";
 import { PIPELINE_STAGES, STAGE_LABEL, getStage } from "@/lib/pipeline";
 import { getCurrentCompanyProfile } from "@/lib/company";
-import { showsAgencyPipeline } from "@/lib/terminology";
+import { showsAgencyPipeline, showsAcademiaFields } from "@/lib/terminology";
 
 export default async function ContactoDetailPage({ params }: { params: { id: string } }) {
   const supabase = createClient();
   const { vertical } = await getCurrentCompanyProfile();
   const showPipeline = showsAgencyPipeline(vertical);
+  const showAcademia = showsAcademiaFields(vertical);
 
   const { data: contact } = await supabase.from("contacts").select("*").eq("id", params.id).single();
   if (!contact) notFound();
@@ -27,28 +28,39 @@ export default async function ContactoDetailPage({ params }: { params: { id: str
   const currentStage = getStage(contact.custom_fields);
   const demoUrl: string = contact.custom_fields?.demo_url ?? "";
   const businessType: string = contact.custom_fields?.business_type ?? "";
+  const curso: string = contact.custom_fields?.curso ?? "";
+  const subjectList: string[] = contact.custom_fields?.subjects ?? [];
 
   return (
     <div className="max-w-2xl">
       <PageHeader title={contact.full_name} />
-      <p className="-mt-6 mb-6 text-sm text-slate">
-        {showPipeline && businessType && <span className="text-ink">{businessType}</span>}
-        {showPipeline && businessType && (contact.phone || contact.email) && " · "}
-        {contact.phone} {contact.phone && contact.email && "·"} {contact.email}
-        {showPipeline && demoUrl && (
-          <>
-            {" · "}
-            <a
-              href={demoUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-brand hover:underline"
-            >
-              Ver demo →
-            </a>
-          </>
+      <div className="-mt-6 mb-6 text-sm text-slate">
+        <p>
+          {showPipeline && businessType && <span className="text-ink">{businessType}</span>}
+          {showPipeline && businessType && (contact.phone || contact.email) && " · "}
+          {contact.phone} {contact.phone && contact.email && "·"} {contact.email}
+          {showPipeline && demoUrl && (
+            <>
+              {" · "}
+              <a
+                href={demoUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-brand hover:underline"
+              >
+                Ver demo →
+              </a>
+            </>
+          )}
+        </p>
+        {showAcademia && (curso || subjectList.length > 0) && (
+          <p>
+            {curso && <span className="text-ink">{curso}</span>}
+            {curso && subjectList.length > 0 && " · "}
+            {subjectList.join(", ")}
+          </p>
         )}
-      </p>
+      </div>
 
       {showPipeline && (
         <Card className="mb-6">

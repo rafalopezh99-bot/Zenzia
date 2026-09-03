@@ -49,3 +49,10 @@ export function getTerminology(vertical?: string | null): Terminology {
 export function showsAgencyPipeline(vertical?: string | null): boolean {
   return vertical === "agencia";
 }
+
+// Curso, bono (tarifario) y asignaturas solo tienen sentido para clases
+// particulares — el resto de verticales sigue con el alta de contacto tal
+// cual estaba.
+export function showsAcademiaFields(vertical?: string | null): boolean {
+  return vertical === "academia";
+}

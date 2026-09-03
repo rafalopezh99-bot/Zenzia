@@ -14,22 +14,57 @@ export async function createContact(formData: FormData) {
 
   const demo_url = String(formData.get("demo_url") ?? "").trim();
   const business_type = String(formData.get("business_type") ?? "").trim();
+  const curso = String(formData.get("curso") ?? "").trim();
+  const bono_type_id = String(formData.get("bono_type_id") ?? "").trim();
+  // Casillas de asignatura: pueden llegar 0, 1 o varias con el mismo name.
+  const subjects = formData
+    .getAll("subjects")
+    .map((s) => String(s).trim())
+    .filter(Boolean);
+  if (subjects.length > 7) throw new Error("Como máximo se pueden elegir 7 asignaturas");
 
-  const custom_fields: Record<string, string> = {};
+  const custom_fields: Record<string, unknown> = {};
   if (demo_url) custom_fields.demo_url = demo_url;
   if (business_type) custom_fields.business_type = business_type;
+  if (curso) custom_fields.curso = curso;
+  if (subjects.length) custom_fields.subjects = subjects;
 
-  const { error } = await supabase.from("contacts").insert({
-    company_id: companyId,
-    full_name,
-    phone: String(formData.get("phone") ?? "") || null,
-    email: String(formData.get("email") ?? "") || null,
-    status: "active",
-    custom_fields,
-  });
+  const { data: contact, error } = await supabase
+    .from("contacts")
+    .insert({
+      company_id: companyId,
+      full_name,
+      phone: String(formData.get("phone") ?? "") || null,
+      email: String(formData.get("email") ?? "") || null,
+      status: "active",
+      custom_fields,
+    })
+    .select("id")
+    .single();
   if (error) throw new Error(error.message);
 
+  // Si se ha elegido un bono al dar de alta (vertical academia), se activa
+  // ya con sus horas listas para consumir — mismo efecto que crearlo a mano
+  // después desde /bonos, pero sin ese paso extra.
+  if (bono_type_id && contact) {
+    const { data: bonoType } = await supabase
+      .from("bono_types")
+      .select("name, sessions")
+      .eq("id", bono_type_id)
+      .single();
+
+    if (bonoType) {
+      const { error: packageError } = await supabase.from("packages").insert({
+        contact_id: contact.id,
+        name: bonoType.name,
+        total_sessions: bonoType.sessions,
+      });
+      if (packageError) throw new Error(packageError.message);
+    }
+  }
+
   revalidatePath("/contactos");
+  revalidatePath("/bonos");
   redirect("/contactos");
 }
 

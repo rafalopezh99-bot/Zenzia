@@ -3,7 +3,7 @@ import Link from "next/link";
 import { PageHeader, primaryButtonClass, Badge, tableWrap, tableEl, theadEl, thEl, tdEl, trEl } from "@/components/ui";
 import { STAGE_LABEL, STAGE_TONE, getStage } from "@/lib/pipeline";
 import { getCurrentCompanyProfile } from "@/lib/company";
-import { getTerminology, showsAgencyPipeline } from "@/lib/terminology";
+import { getTerminology, showsAgencyPipeline, showsAcademiaFields } from "@/lib/terminology";
 
 export default async function ContactosPage() {
   const supabase = createClient();
@@ -13,6 +13,7 @@ export default async function ContactosPage() {
   // herramienta de RL Digital Studios para captar clientes nuevos — no
   // tiene sentido para una empresa real gestionando sus propios contactos.
   const showPipeline = showsAgencyPipeline(vertical);
+  const showAcademia = showsAcademiaFields(vertical);
 
   const { data: contacts } = await supabase
     .from("contacts")
@@ -35,6 +36,12 @@ export default async function ContactosPage() {
           <thead className={theadEl}>
             <tr>
               <th className={thEl}>Nombre</th>
+              {showAcademia && (
+                <>
+                  <th className={thEl}>Curso</th>
+                  <th className={thEl}>Asignaturas</th>
+                </>
+              )}
               {showPipeline && (
                 <>
                   <th className={thEl}>Tipo de negocio</th>
@@ -48,6 +55,8 @@ export default async function ContactosPage() {
             {(contacts ?? []).map((c: any) => {
               const stage = getStage(c.custom_fields);
               const demoUrl: string = c.custom_fields?.demo_url ?? "";
+              const curso: string = c.custom_fields?.curso ?? "";
+              const subjectList: string[] = c.custom_fields?.subjects ?? [];
               return (
                 <tr key={c.id} className={trEl}>
                   <td className={tdEl}>
@@ -55,6 +64,14 @@ export default async function ContactosPage() {
                       {c.full_name}
                     </Link>
                   </td>
+                  {showAcademia && (
+                    <>
+                      <td className={tdEl}>{curso || <span className="text-slate/50">—</span>}</td>
+                      <td className={tdEl}>
+                        {subjectList.length ? subjectList.join(", ") : <span className="text-slate/50">—</span>}
+                      </td>
+                    </>
+                  )}
                   {showPipeline && (
                     <>
                       <td className={tdEl}>
