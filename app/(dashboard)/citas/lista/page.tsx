@@ -46,6 +46,7 @@ export default async function CitasListaPage() {
               <th className={thEl}>Fecha</th>
               <th className={thEl}>{terms.contact}</th>
               <th className={thEl}>Estado</th>
+              <th className={thEl}></th>
             </tr>
           </thead>
           <tbody>
@@ -57,6 +58,11 @@ export default async function CitasListaPage() {
                   <Badge tone={APPOINTMENT_STATUS_TONE[a.status] ?? "neutral"}>
                     {APPOINTMENT_STATUS_LABEL[a.status] ?? a.status}
                   </Badge>
+                </td>
+                <td className={tdEl}>
+                  <Link href={`/citas/${a.id}/editar`} className="text-brand hover:underline">
+                    Editar
+                  </Link>
                 </td>
               </tr>
             ))}

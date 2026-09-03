@@ -37,12 +37,22 @@ function parseWeekParam(week?: string) {
   return getMonday(new Date());
 }
 
-const HOURS = Array.from({ length: 24 }, (_, i) => i);
+// Franja horaria visible en la agenda: 08:00–20:00. Cada fila cubre una
+// hora completa (la fila "8" va de 08:00 a 09:00 ... la fila "19" va de
+// 19:00 a 20:00), así que estas 12 filas cubren toda la franja.
+const START_HOUR = 8;
+const END_HOUR = 20;
+const HOURS = Array.from({ length: END_HOUR - START_HOUR }, (_, i) => START_HOUR + i);
+const ROW_HEIGHT = 48; // px por hora
+const COLUMN_HEIGHT = ROW_HEIGHT * HOURS.length;
 
-// Vista semanal (lunes a viernes) en columnas, con franjas horarias de 24h.
-// Es la vista principal de "Agenda" (/citas). Navegación por URL
-// (?week=YYYY-MM-DD, el lunes de esa semana) — sin JS en el cliente, igual
-// que el calendario mensual.
+// Vista semanal (lunes a viernes) en columnas, con franjas horarias de
+// 08:00 a 20:00. Es la vista principal de "Agenda" (/citas). Navegación
+// por URL (?week=YYYY-MM-DD, el lunes de esa semana) — sin JS en el
+// cliente, igual que el calendario mensual. Cada cita se dibuja como un
+// bloque posicionado y con la altura de su duración real (una clase de
+// 16:00 a 17:30 ocupa toda esa franja, no solo la hora de inicio), y
+// enlaza a /citas/[id]/editar.
 export default async function CitasPage({ searchParams }: { searchParams: { week?: string } }) {
   const { vertical } = await getCurrentCompanyProfile();
   const terms = getTerminology(vertical);
@@ -59,18 +69,39 @@ export default async function CitasPage({ searchParams }: { searchParams: { week
   const supabase = createClient();
   const { data: appointments } = await supabase
     .from("appointments")
-    .select("id, starts_at, status, contacts(full_name)")
+    .select("id, starts_at, ends_at, status, contacts(full_name)")
     .gte("starts_at", monday.toISOString())
     .lt("starts_at", rangeEnd.toISOString())
     .order("starts_at", { ascending: true });
 
-  // grid[hora][diaIndex] = citas de esa hora ese día (0=lunes..4=viernes)
-  const grid: any[][][] = HOURS.map(() => [[], [], [], [], []]);
+  // Una lista por día (0=lunes..4=viernes) con la posición y altura ya
+  // calculadas en píxeles a partir de starts_at/ends_at. Las citas fuera
+  // de 08:00–20:00 no se muestran en esta vista.
+  const byDay: { id: string; starts_at: string; status: string; contacts: any; top: number; height: number }[][] = [
+    [],
+    [],
+    [],
+    [],
+    [],
+  ];
+  const visibleMinutes = (END_HOUR - START_HOUR) * 60;
   (appointments ?? []).forEach((a: any) => {
-    const dt = new Date(a.starts_at);
-    const dayIdx = (dt.getDay() + 6) % 7;
+    const start = new Date(a.starts_at);
+    const end = new Date(a.ends_at);
+    const dayIdx = (start.getDay() + 6) % 7;
     if (dayIdx > 4) return; // fin de semana no se muestra en esta vista
-    grid[dt.getHours()][dayIdx].push(a);
+
+    const startMinutes = (start.getHours() - START_HOUR) * 60 + start.getMinutes();
+    const endMinutes = (end.getHours() - START_HOUR) * 60 + end.getMinutes();
+    const visibleStart = Math.max(0, startMinutes);
+    const visibleEnd = Math.min(visibleMinutes, endMinutes);
+    if (visibleEnd <= 0 || visibleStart >= visibleMinutes) return; // fuera de la franja
+
+    byDay[dayIdx].push({
+      ...a,
+      top: (visibleStart / 60) * ROW_HEIGHT,
+      height: Math.max(18, ((visibleEnd - visibleStart) / 60) * ROW_HEIGHT),
+    });
   });
 
   const today = new Date();
@@ -148,28 +179,38 @@ export default async function CitasPage({ searchParams }: { searchParams: { week
               );
             })}
 
-            {/* Filas por hora */}
-            {HOURS.map((hour) => (
-              <div key={hour} className="contents">
-                <div className="border-t border-line px-1 py-1 text-right text-[10px] text-slate/50">
+            {/* Columna de horas */}
+            <div>
+              {HOURS.map((hour) => (
+                <div
+                  key={hour}
+                  className="border-t border-line px-1 py-1 text-right text-[10px] text-slate/50"
+                  style={{ height: ROW_HEIGHT }}
+                >
                   {String(hour).padStart(2, "0")}:00
                 </div>
-                {days.map((_, dayIdx) => (
-                  <div key={dayIdx} className="min-h-[44px] border-t border-l border-line p-1">
-                    <div className="space-y-1">
-                      {grid[hour][dayIdx].map((a: any) => (
-                        <div
-                          key={a.id}
-                          className={`truncate rounded px-1 py-0.5 text-[10px] ${
-                            CHIP_TONE_CLASS[APPOINTMENT_STATUS_TONE[a.status] ?? "neutral"]
-                          }`}
-                        >
-                          {new Date(a.starts_at).toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit" })}{" "}
-                          {a.contacts?.full_name}
-                        </div>
-                      ))}
-                    </div>
-                  </div>
+              ))}
+            </div>
+
+            {/* Columnas de días: líneas de hora de fondo + bloques de cita
+                posicionados por encima, con la altura de su duración real. */}
+            {days.map((_, dayIdx) => (
+              <div key={dayIdx} className="relative border-l border-line" style={{ height: COLUMN_HEIGHT }}>
+                {HOURS.map((hour) => (
+                  <div key={hour} className="border-t border-line" style={{ height: ROW_HEIGHT }} />
+                ))}
+                {byDay[dayIdx].map((a) => (
+                  <Link
+                    key={a.id}
+                    href={`/citas/${a.id}/editar`}
+                    className={`absolute left-0.5 right-0.5 overflow-hidden rounded px-1 py-0.5 text-[10px] leading-tight transition hover:brightness-95 ${
+                      CHIP_TONE_CLASS[APPOINTMENT_STATUS_TONE[a.status] ?? "neutral"]
+                    }`}
+                    style={{ top: a.top, height: a.height }}
+                  >
+                    {new Date(a.starts_at).toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit" })}{" "}
+                    {a.contacts?.full_name}
+                  </Link>
                 ))}
               </div>
             ))}

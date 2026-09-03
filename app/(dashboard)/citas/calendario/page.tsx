@@ -128,15 +128,16 @@ export default async function CalendarioPage({ searchParams }: { searchParams: {
                 </div>
                 <div className="space-y-1">
                   {dayAppointments.slice(0, 3).map((a: any) => (
-                    <div
+                    <Link
                       key={a.id}
-                      className={`truncate rounded px-1 py-0.5 text-[10px] ${
+                      href={`/citas/${a.id}/editar`}
+                      className={`block truncate rounded px-1 py-0.5 text-[10px] transition hover:brightness-95 ${
                         CHIP_TONE_CLASS[APPOINTMENT_STATUS_TONE[a.status] ?? "neutral"]
                       }`}
                     >
                       {new Date(a.starts_at).toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit" })}{" "}
                       {a.contacts?.full_name}
-                    </div>
+                    </Link>
                   ))}
                   {dayAppointments.length > 3 && (
                     <div className="text-[10px] text-slate/70">+{dayAppointments.length - 3} más</div>
