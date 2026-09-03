@@ -163,9 +163,13 @@ alter table tasks enable row level security;
 alter table packages enable row level security;
 
 -- helper: empresas a las que pertenece el usuario autenticado
+-- security definer: evita la recursión infinita que se produciría si esta
+-- función (usada dentro de la política RLS de company_users) volviera a
+-- disparar esa misma política al consultar company_users.
 create or replace function auth_company_ids()
 returns setof uuid
-language sql stable
+language sql stable security definer
+set search_path = public
 as $$
   select company_id from company_users where user_id = auth.uid()
 $$;
@@ -192,6 +196,21 @@ create policy "member updates own profile" on company_users
 create policy "member sees own company_modules" on company_modules
   for select using (company_id in (select auth_company_ids()));
 
+-- Faltaban estas dos: sin ellas, el asistente de configuración inicial
+-- (completeOnboarding, que hace upsert en company_modules) fallaba con
+-- 403 la primera vez que alguien distinto de RL Digital Studios pasaba
+-- por /onboarding — ver migración 2026-09-03-company-modules-write-policy.sql.
+create policy "member inserts own company_modules" on company_modules
+  for insert
+  to authenticated
+  with check (company_id in (select auth_company_ids()));
+
+create policy "member updates own company_modules" on company_modules
+  for update
+  to authenticated
+  using (company_id in (select auth_company_ids()))
+  with check (company_id in (select auth_company_ids()));
+
 create policy "member full access contacts" on contacts
   for all using (company_id in (select auth_company_ids()))
   with check (company_id in (select auth_company_ids()));
@@ -213,6 +232,100 @@ create policy "member full access tasks" on tasks
   with check (company_id in (select auth_company_ids()));
 
 create policy "member full access packages" on packages
+  for all using (contact_id in (select id from contacts where company_id in (select auth_company_ids())))
+  with check (contact_id in (select id from contacts where company_id in (select auth_company_ids())));
+
+-- ============================================================
+-- PRESUPUESTOS / ÓRDENES DE TRABAJO
+-- ============================================================
+create table quotes (
+  id uuid primary key default gen_random_uuid(),
+  contact_id uuid not null references contacts(id) on delete cascade,
+  title text not null,
+  amount numeric(10,2) not null default 0,
+  status text not null default 'pendiente' check (status in ('pendiente','aprobado','rechazado','completado')),
+  notes text,
+  created_at timestamptz not null default now()
+);
+create index on quotes (contact_id);
+
+alter table quotes enable row level security;
+create policy "member full access quotes" on quotes
+  for all using (contact_id in (select id from contacts where company_id in (select auth_company_ids())))
+  with check (contact_id in (select id from contacts where company_id in (select auth_company_ids())));
+
+-- ============================================================
+-- FOTOS ANTES/DESPUÉS
+-- ============================================================
+create table photos (
+  id uuid primary key default gen_random_uuid(),
+  contact_id uuid not null references contacts(id) on delete cascade,
+  kind text not null check (kind in ('antes','despues')),
+  storage_path text not null,
+  created_at timestamptz not null default now()
+);
+create index on photos (contact_id);
+
+alter table photos enable row level security;
+create policy "member full access photos" on photos
+  for all using (contact_id in (select id from contacts where company_id in (select auth_company_ids())))
+  with check (contact_id in (select id from contacts where company_id in (select auth_company_ids())));
+
+-- Storage: bucket privado para las fotos. Solo miembros de la empresa del
+-- contacto pueden leer/escribir, comprobando el primer segmento de la ruta
+-- del archivo (debe ser el contact_id) contra sus empresas.
+insert into storage.buckets (id, name, public)
+  values ('photos', 'photos', false)
+  on conflict (id) do nothing;
+
+create policy "member access photos storage" on storage.objects
+  for all using (
+    bucket_id = 'photos'
+    and (storage.foldername(name))[1]::uuid in (
+      select id from contacts where company_id in (select auth_company_ids())
+    )
+  )
+  with check (
+    bucket_id = 'photos'
+    and (storage.foldername(name))[1]::uuid in (
+      select id from contacts where company_id in (select auth_company_ids())
+    )
+  );
+
+-- ============================================================
+-- CONSENTIMIENTOS
+-- ============================================================
+create table consents (
+  id uuid primary key default gen_random_uuid(),
+  contact_id uuid not null references contacts(id) on delete cascade,
+  title text not null,
+  signed boolean not null default false,
+  signed_at timestamptz,
+  notes text,
+  created_at timestamptz not null default now()
+);
+create index on consents (contact_id);
+
+alter table consents enable row level security;
+create policy "member full access consents" on consents
+  for all using (contact_id in (select id from contacts where company_id in (select auth_company_ids())))
+  with check (contact_id in (select id from contacts where company_id in (select auth_company_ids())));
+
+-- ============================================================
+-- FACTURACIÓN
+-- ============================================================
+create table invoices (
+  id uuid primary key default gen_random_uuid(),
+  contact_id uuid not null references contacts(id) on delete cascade,
+  concept text not null,
+  amount numeric(10,2) not null default 0,
+  status text not null default 'pendiente' check (status in ('pendiente','pagada','anulada')),
+  created_at timestamptz not null default now()
+);
+create index on invoices (contact_id);
+
+alter table invoices enable row level security;
+create policy "member full access invoices" on invoices
   for all using (contact_id in (select id from contacts where company_id in (select auth_company_ids())))
   with check (contact_id in (select id from contacts where company_id in (select auth_company_ids())));
 
