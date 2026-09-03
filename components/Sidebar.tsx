@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import type { ModuleDef } from "@/lib/modules";
-import { getTerminology } from "@/lib/terminology";
+import { getTerminology, showsAcademiaFields } from "@/lib/terminology";
 
 // El sidebar no sabe nada de "fisio" ni "taller": solo pinta los módulos
 // que llegan activados. Añadir o quitar una ventana para un cliente es
@@ -30,6 +30,7 @@ export default function Sidebar({
 }) {
   const [open, setOpen] = useState(false);
   const terms = getTerminology(vertical);
+  const showAcademia = showsAcademiaFields(vertical);
   const linkClass = "block rounded-xl px-3 py-2 text-slate transition hover:bg-paper-deep hover:text-ink";
   const close = () => setOpen(false);
 
@@ -112,6 +113,11 @@ export default function Sidebar({
         <Link href="/contactos" className={linkClass} onClick={close}>
           {terms.contacts}
         </Link>
+        {showAcademia && (
+          <Link href="/grupos" className={linkClass} onClick={close}>
+            Grupos
+          </Link>
+        )}
         {isAdmin && (
           <Link href="/clientes" className={linkClass} onClick={close}>
             Clientes

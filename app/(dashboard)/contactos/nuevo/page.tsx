@@ -4,15 +4,7 @@ import { Card, PageHeader, Input, Select, PrimaryButton } from "@/components/ui"
 import { getCurrentCompanyProfile } from "@/lib/company";
 import { getTerminology, showsAgencyPipeline, showsAcademiaFields } from "@/lib/terminology";
 import { createClient } from "@/lib/supabase/server";
-
-// Cursos habituales en clases particulares, agrupados por nivel — los
-// mismos niveles del tarifario (ESO / Bachillerato / Selectividad-EVAU), un
-// paso más concreto para saber en qué curso está cada alumno.
-const CURSOS: { nivel: string; opciones: string[] }[] = [
-  { nivel: "ESO", opciones: ["1º ESO", "2º ESO", "3º ESO", "4º ESO"] },
-  { nivel: "Bachillerato", opciones: ["1º Bachillerato", "2º Bachillerato"] },
-  { nivel: "Otros", opciones: ["Selectividad / EVAU"] },
-];
+import { CURSOS } from "@/lib/academia";
 
 export default async function NuevoContactoPage() {
   const { companyId, vertical } = await getCurrentCompanyProfile();
