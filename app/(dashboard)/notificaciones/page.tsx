@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { convertNotificationToContact, dismissNotification } from "@/lib/actions/notifications";
 import {
@@ -5,6 +6,7 @@ import {
   Badge,
   GhostButton,
   PrimaryButton,
+  secondaryLinkClass,
   tableWrap,
   tableEl,
   theadEl,
@@ -13,21 +15,26 @@ import {
   trEl,
 } from "@/components/ui";
 
-// Bandeja de entrada de leads que TODAVÍA no son contactos: hoy, el
-// formulario de zenzia.es y de rldigitalstudios.com; en el futuro, DMs de
-// Instagram y TikTok (el campo `source` ya admite 'instagram_dm' y
-// 'tiktok_dm', solo falta conectar esos canales). Al pulsar "Contactar" se
-// crea el contacto de verdad — ver lib/actions/notifications.ts.
+// Bandeja de entrada de dos tipos de aviso, distinguidos por "kind":
+// - "lead" (de siempre): formulario de zenzia.es/rldigitalstudios.com y, en
+//   el futuro, DMs de Instagram/TikTok. Al pulsar "Contactar" se crea el
+//   contacto de verdad — ver lib/actions/notifications.ts.
+// - "cobro_pendiente" (vertical academia): lo genera solo el ciclo diario
+//   de facturación (notify_unpaid_invoices, ver migración de facturación
+//   recurrente) cuando un bono lleva más de 5 días vencido sin pagar. El
+//   alumno ya existe, así que aquí no hay "Contactar": se enlaza a su ficha.
 const SOURCE_LABEL: Record<string, string> = {
   formulario_web: "Formulario web",
   instagram_dm: "Instagram DM",
   tiktok_dm: "TikTok DM",
+  facturacion: "Facturación",
 };
 
 const SOURCE_TONE: Record<string, "neutral" | "green" | "amber" | "red" | "violet"> = {
   formulario_web: "neutral",
   instagram_dm: "violet",
   tiktok_dm: "red",
+  facturacion: "amber",
 };
 
 const STATUS_LABEL: Record<string, string> = {
@@ -46,7 +53,7 @@ export default async function NotificacionesPage() {
   const supabase = createClient();
   const { data: notifications } = await supabase
     .from("notifications")
-    .select("id, source, full_name, email, phone, handle, message, status, created_at")
+    .select("id, kind, source, full_name, email, phone, handle, message, status, contact_id, created_at")
     .order("created_at", { ascending: false })
     .limit(100);
 
@@ -92,10 +99,18 @@ export default async function NotificacionesPage() {
                   </td>
                   <td className={tdEl}>
                     {n.status === "nueva" && (
-                      <div className="flex gap-2">
-                        <form action={contactar}>
-                          <PrimaryButton className="px-3 py-1.5 text-xs">Contactar</PrimaryButton>
-                        </form>
+                      <div className="flex items-center gap-2">
+                        {n.kind === "cobro_pendiente" ? (
+                          n.contact_id && (
+                            <Link href={`/contactos/${n.contact_id}`} className={secondaryLinkClass}>
+                              Ver alumno
+                            </Link>
+                          )
+                        ) : (
+                          <form action={contactar}>
+                            <PrimaryButton className="px-3 py-1.5 text-xs">Contactar</PrimaryButton>
+                          </form>
+                        )}
                         <form action={descartar}>
                           <GhostButton>Descartar</GhostButton>
                         </form>

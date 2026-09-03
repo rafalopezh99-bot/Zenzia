@@ -1,9 +1,11 @@
 import { createClient } from "@/lib/supabase/server";
-import { createPackage, usePackageSession } from "@/lib/actions/packages";
+import { createPackage, usePackageSession, togglePackageActive } from "@/lib/actions/packages";
 import { createBonoType, deleteBonoType } from "@/lib/actions/bonoTypes";
-import { Card, PageHeader, Input, Select, PrimaryButton, GhostButton, tableWrap, tableEl, theadEl, thEl, tdEl, trEl } from "@/components/ui";
+import { Card, PageHeader, Input, Select, PrimaryButton, GhostButton, Badge, tableWrap, tableEl, theadEl, thEl, tdEl, trEl } from "@/components/ui";
 import { getCurrentCompanyProfile } from "@/lib/company";
 import { getTerminology, showsAcademiaFields } from "@/lib/terminology";
+
+const PERIODO_LABEL: Record<string, string> = { semanal: "Semanal", mensual: "Mensual" };
 
 export default async function BonosPage() {
   const supabase = createClient();
@@ -13,14 +15,22 @@ export default async function BonosPage() {
   const { data: contacts } = await supabase.from("contacts").select("id, full_name").order("full_name");
   const { data: packages } = await supabase
     .from("packages")
-    .select("id, name, total_sessions, used_sessions, contacts(full_name)")
+    .select("id, name, total_sessions, used_sessions, active, bono_type_id, contacts(full_name)")
     .order("created_at", { ascending: false });
 
-  let bonoTypes: { id: string; nivel: string; name: string; unit: string; sessions: number; price_eur: number }[] = [];
+  let bonoTypes: {
+    id: string;
+    nivel: string;
+    name: string;
+    unit: string;
+    periodo: string;
+    sessions: number;
+    price_eur: number;
+  }[] = [];
   if (showAcademia) {
     const { data } = await supabase
       .from("bono_types")
-      .select("id, nivel, name, unit, sessions, price_eur")
+      .select("id, nivel, name, unit, periodo, sessions, price_eur")
       .eq("company_id", companyId)
       .order("nivel")
       .order("sessions");
@@ -45,6 +55,10 @@ export default async function BonosPage() {
               <option value="clases">Clases</option>
             </Select>
             <Input name="sessions" type="number" min="1" placeholder="Cantidad" required className="w-24" />
+            <Select name="periodo" defaultValue="mensual" className="w-28">
+              <option value="semanal">Bono semanal</option>
+              <option value="mensual">Bono mensual</option>
+            </Select>
             <Input name="price_eur" type="number" min="0" step="0.01" placeholder="Precio €" required className="w-24" />
             <PrimaryButton>Añadir tarifa</PrimaryButton>
           </form>
@@ -55,6 +69,7 @@ export default async function BonosPage() {
                   <th className={thEl}>Nivel</th>
                   <th className={thEl}>Nombre</th>
                   <th className={thEl}>Cantidad</th>
+                  <th className={thEl}>Periodo</th>
                   <th className={thEl}>Precio</th>
                   <th className={thEl}></th>
                 </tr>
@@ -69,6 +84,7 @@ export default async function BonosPage() {
                       <td className={tdEl}>
                         {b.sessions} {b.unit}
                       </td>
+                      <td className={tdEl}>{PERIODO_LABEL[b.periodo] ?? b.periodo}</td>
                       <td className={tdEl}>{b.price_eur} €</td>
                       <td className={tdEl}>
                         <form action={removeBonoType}>
@@ -80,7 +96,7 @@ export default async function BonosPage() {
                 })}
                 {bonoTypes.length === 0 && (
                   <tr className={trEl}>
-                    <td className={tdEl} colSpan={5}>
+                    <td className={tdEl} colSpan={6}>
                       Sin tarifas dadas de alta todavía.
                     </td>
                   </tr>
@@ -114,12 +130,14 @@ export default async function BonosPage() {
               <th className={thEl}>{terms.contact}</th>
               <th className={thEl}>Bono</th>
               <th className={thEl}>Uso</th>
+              {showAcademia && <th className={thEl}>Cobro recurrente</th>}
               <th className={thEl}></th>
             </tr>
           </thead>
           <tbody>
             {(packages ?? []).map((p: any) => {
               const useSession = usePackageSession.bind(null, p.id, p.used_sessions);
+              const toggleActive = togglePackageActive.bind(null, p.id, p.active);
               const agotado = p.used_sessions >= p.total_sessions;
               return (
                 <tr key={p.id} className={trEl}>
@@ -128,10 +146,26 @@ export default async function BonosPage() {
                   <td className={tdEl}>
                     {p.used_sessions} / {p.total_sessions}
                   </td>
+                  {showAcademia && (
+                    <td className={tdEl}>
+                      {p.bono_type_id ? (
+                        <Badge tone={p.active ? "green" : "neutral"}>{p.active ? "Activo" : "De baja"}</Badge>
+                      ) : (
+                        <span className="text-slate/50">—</span>
+                      )}
+                    </td>
+                  )}
                   <td className={tdEl}>
-                    <form action={useSession}>
-                      <GhostButton disabled={agotado}>Usar sesión</GhostButton>
-                    </form>
+                    <div className="flex gap-2">
+                      <form action={useSession}>
+                        <GhostButton disabled={agotado}>Usar sesión</GhostButton>
+                      </form>
+                      {showAcademia && p.bono_type_id && (
+                        <form action={toggleActive}>
+                          <GhostButton>{p.active ? "Dar de baja" : "Reactivar"}</GhostButton>
+                        </form>
+                      )}
+                    </div>
                   </td>
                 </tr>
               );

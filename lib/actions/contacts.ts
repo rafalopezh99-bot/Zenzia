@@ -45,7 +45,10 @@ export async function createContact(formData: FormData) {
 
   // Si se ha elegido un bono al dar de alta (vertical academia), se activa
   // ya con sus horas listas para consumir — mismo efecto que crearlo a mano
-  // después desde /bonos, pero sin ese paso extra.
+  // después desde /bonos, pero sin ese paso extra. Al quedar enlazado a la
+  // tarifa (bono_type_id) entra también en el cobro recurrente: se genera
+  // ya la primera factura pendiente de este periodo, y el ciclo diario se
+  // encargará de las siguientes mientras el bono siga activo.
   if (bono_type_id && contact) {
     const { data: bonoType } = await supabase
       .from("bono_types")
@@ -54,17 +57,30 @@ export async function createContact(formData: FormData) {
       .single();
 
     if (bonoType) {
-      const { error: packageError } = await supabase.from("packages").insert({
-        contact_id: contact.id,
-        name: bonoType.name,
-        total_sessions: bonoType.sessions,
-      });
+      const { data: pkg, error: packageError } = await supabase
+        .from("packages")
+        .insert({
+          contact_id: contact.id,
+          name: bonoType.name,
+          total_sessions: bonoType.sessions,
+          bono_type_id,
+        })
+        .select("id")
+        .single();
       if (packageError) throw new Error(packageError.message);
+
+      if (pkg) {
+        const { error: invoiceError } = await supabase.rpc("generate_invoice_for_package", {
+          p_package_id: pkg.id,
+        });
+        if (invoiceError) throw new Error(invoiceError.message);
+      }
     }
   }
 
   revalidatePath("/contactos");
   revalidatePath("/bonos");
+  revalidatePath("/facturacion");
   redirect("/contactos");
 }
 

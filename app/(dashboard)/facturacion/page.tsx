@@ -11,7 +11,7 @@ export default async function FacturacionPage() {
   const { data: contacts } = await supabase.from("contacts").select("id, full_name").order("full_name");
   const { data: invoices } = await supabase
     .from("invoices")
-    .select("id, concept, amount, status, contacts(full_name)")
+    .select("id, concept, amount, status, due_date, contacts(full_name)")
     .order("created_at", { ascending: false });
 
   const total = (invoices ?? []).reduce((sum: number, i: any) => sum + Number(i.amount), 0);
@@ -57,6 +57,7 @@ export default async function FacturacionPage() {
               <th className={thEl}>{terms.contact}</th>
               <th className={thEl}>Concepto</th>
               <th className={thEl}>Importe</th>
+              <th className={thEl}>Vence</th>
               <th className={thEl}>Estado</th>
               <th className={thEl}></th>
             </tr>
@@ -64,15 +65,21 @@ export default async function FacturacionPage() {
           <tbody>
             {(invoices ?? []).map((i: any) => {
               const pay = markInvoicePaid.bind(null, i.id);
+              const vencida = i.status === "pendiente" && i.due_date && new Date(i.due_date) < new Date();
               return (
                 <tr key={i.id} className={trEl}>
                   <td className={tdEl}>{i.contacts?.full_name}</td>
                   <td className={tdEl}>{i.concept}</td>
                   <td className={tdEl}>{Number(i.amount).toFixed(2)} €</td>
                   <td className={tdEl}>
-                    <Badge tone={i.status === "pagada" ? "green" : "amber"}>
-                      {i.status === "pagada" ? "Pagada" : "Pendiente"}
-                    </Badge>
+                    {i.due_date ? new Date(i.due_date).toLocaleDateString("es-ES") : <span className="text-slate/50">—</span>}
+                  </td>
+                  <td className={tdEl}>
+                    {i.status === "pagada" ? (
+                      <Badge tone="green">Pagada</Badge>
+                    ) : (
+                      <Badge tone={vencida ? "red" : "amber"}>{vencida ? "Vencida" : "Pendiente"}</Badge>
+                    )}
                   </td>
                   <td className={tdEl}>
                     {i.status === "pendiente" && (

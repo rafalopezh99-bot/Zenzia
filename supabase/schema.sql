@@ -150,20 +150,31 @@ create table packages (
 );
 
 -- Tarifario por empresa (usado por el vertical academia): nivel + nombre +
--- cantidad (horas o clases, a elegir) + precio. Al dar de alta un alumno
--- eligiendo uno de estos, se crea ya el bono activo en `packages` con esa
--- cantidad lista para consumir.
+-- cantidad (horas o clases, a elegir) + precio + periodo de cobro (semanal
+-- o mensual). Al dar de alta un alumno eligiendo uno de estos, se crea ya
+-- el bono activo en `packages` con esa cantidad lista para consumir, y
+-- entra en el cobro recurrente según su periodo.
 create table bono_types (
   id uuid primary key default gen_random_uuid(),
   company_id uuid not null references companies(id) on delete cascade,
   nivel text not null,
   name text not null,
   unit text not null default 'horas' check (unit in ('horas', 'clases')),
+  periodo text not null default 'mensual' check (periodo in ('semanal', 'mensual')),
   sessions int not null,
   price_eur numeric(10, 2) not null,
   created_at timestamptz not null default now()
 );
 create index on bono_types (company_id);
+
+-- Si el bono de `packages` viene de una tarifa del tarifario, queda
+-- enlazado aquí para poder refacturarlo solo: ver
+-- generate_recurring_invoices() más abajo. "active" da de baja el cobro
+-- recurrente sin borrar el historial de sesiones ya consumidas.
+alter table packages
+  add column bono_type_id uuid references bono_types(id) on delete set null,
+  add column active boolean not null default true;
+create index on packages (bono_type_id) where bono_type_id is not null;
 
 -- Lista de asignaturas que imparte la empresa (vertical academia): controla
 -- las casillas del formulario de alta de alumno para evitar variaciones del
@@ -362,14 +373,184 @@ create table invoices (
   concept text not null,
   amount numeric(10,2) not null default 0,
   status text not null default 'pendiente' check (status in ('pendiente','pagada','anulada')),
+  -- Solo rellenos en facturas generadas por el cobro recurrente de un bono
+  -- (ver más abajo); las facturas manuales (botón "Crear factura") los
+  -- dejan a null.
+  package_id uuid references packages(id) on delete set null,
+  billing_period text,
+  due_date date,
   created_at timestamptz not null default now()
 );
 create index on invoices (contact_id);
+-- Evita duplicar la factura del mismo bono en el mismo periodo.
+create unique index invoices_package_period_key
+  on invoices (package_id, billing_period)
+  where package_id is not null and billing_period is not null;
 
 alter table invoices enable row level security;
 create policy "member full access invoices" on invoices
   for all using (contact_id in (select id from contacts where company_id in (select auth_company_ids())))
   with check (contact_id in (select id from contacts where company_id in (select auth_company_ids())));
+
+-- ============================================================
+-- COBRO RECURRENTE DE BONOS (vertical academia)
+-- ============================================================
+-- Al elegir un bono al dar de alta un alumno se genera ya la primera
+-- factura pendiente (ver lib/actions/contacts.ts, que llama a
+-- generate_invoice_for_package). Un cron diario (programado aparte con
+-- cron.schedule, ver migración 2026-09-03-bono-recurring-billing.sql)
+-- ejecuta run_billing_cycle(): genera la factura del periodo que toque
+-- para cada bono activo, y avisa en `notifications` de las que llevan más
+-- de 5 días vencidas sin pagar.
+
+create or replace function generate_invoice_for_package(p_package_id uuid)
+returns void
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_package packages%rowtype;
+  v_bono bono_types%rowtype;
+  v_contact contacts%rowtype;
+  v_period_start date;
+  v_period_key text;
+  v_due_date date;
+begin
+  select * into v_package from packages where id = p_package_id and active and bono_type_id is not null;
+  if not found then
+    return;
+  end if;
+
+  select * into v_bono from bono_types where id = v_package.bono_type_id;
+  if not found then
+    return;
+  end if;
+
+  select * into v_contact from contacts where id = v_package.contact_id;
+  if not found then
+    return;
+  end if;
+
+  if v_bono.periodo = 'semanal' then
+    v_period_start := date_trunc('week', current_date)::date;
+    v_period_key := 'S' || to_char(v_period_start, 'IYYY-IW');
+  else
+    v_period_start := date_trunc('month', current_date)::date;
+    v_period_key := 'M' || to_char(v_period_start, 'YYYY-MM');
+  end if;
+  -- Ventana de cobro de 5 días desde el inicio del periodo (para el bono
+  -- mensual: del 1 al 5); vencida a partir del día siguiente.
+  v_due_date := v_period_start + 4;
+
+  insert into invoices (contact_id, concept, amount, status, package_id, billing_period, due_date)
+  values (v_contact.id, v_bono.name, v_bono.price_eur, 'pendiente', v_package.id, v_period_key, v_due_date)
+  on conflict (package_id, billing_period) where package_id is not null and billing_period is not null
+  do nothing;
+end;
+$$;
+
+create or replace function generate_recurring_invoices()
+returns void
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  r record;
+begin
+  for r in select id from packages where active and bono_type_id is not null loop
+    perform generate_invoice_for_package(r.id);
+  end loop;
+end;
+$$;
+
+create or replace function notify_unpaid_invoices()
+returns void
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  insert into notifications (company_id, source, kind, full_name, email, phone, message, status, contact_id, invoice_id)
+  select
+    c.company_id,
+    'facturacion',
+    'cobro_pendiente',
+    c.full_name,
+    c.email,
+    c.phone,
+    'Bono "' || i.concept || '" pendiente de cobro (' || to_char(i.amount, 'FM999999990.00') || ' €), vencido el ' || to_char(i.due_date, 'DD/MM/YYYY') || '.',
+    'nueva',
+    c.id,
+    i.id
+  from invoices i
+  join contacts c on c.id = i.contact_id
+  where i.status = 'pendiente'
+    and i.due_date is not null
+    and i.due_date < current_date
+    and not exists (select 1 from notifications n where n.invoice_id = i.id);
+end;
+$$;
+
+create or replace function run_billing_cycle()
+returns void
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  perform generate_recurring_invoices();
+  perform notify_unpaid_invoices();
+end;
+$$;
+
+-- Programado aparte (requiere la extensión pg_cron, ya activada en el
+-- proyecto): select cron.schedule('zenzia-billing-cycle', '0 5 * * *',
+-- $$select run_billing_cycle();$$);
+
+-- ============================================================
+-- NOTIFICACIONES
+-- ============================================================
+-- Bandeja de dos tipos de aviso, distinguidos por "kind":
+-- - 'lead' (por defecto): leads que TODAVÍA no son contactos — hoy el
+--   formulario de zenzia.es/rldigitalstudios.com ('source' admite también
+--   'instagram_dm'/'tiktok_dm' para cuando se conecten esos canales). Al
+--   pulsar "Contactar" se crea el contacto de verdad.
+-- - 'cobro_pendiente' (vertical academia): la genera solo
+--   notify_unpaid_invoices() de más arriba, cuando un bono lleva más de 5
+--   días vencido sin pagar. El alumno ya existe (contact_id), así que aquí
+--   no hay "Contactar".
+create table notifications (
+  id uuid primary key default gen_random_uuid(),
+  company_id uuid not null references companies(id) on delete cascade,
+  kind text not null default 'lead' check (kind in ('lead', 'cobro_pendiente')),
+  source text not null check (source in ('formulario_web', 'instagram_dm', 'tiktok_dm', 'facturacion')),
+  full_name text,
+  email text,
+  phone text,
+  handle text,           -- @usuario de Instagram/TikTok, cuando no hay email/teléfono
+  message text,
+  status text not null default 'nueva' check (status in ('nueva', 'contactada', 'descartada')),
+  contact_id uuid references contacts(id) on delete set null,
+  invoice_id uuid references invoices(id) on delete cascade,
+  created_at timestamptz not null default now()
+);
+create index on notifications (company_id, created_at desc);
+create unique index notifications_invoice_unique on notifications (invoice_id) where invoice_id is not null;
+
+alter table notifications enable row level security;
+
+create policy "member full access notifications" on notifications
+  for all using (company_id in (select auth_company_ids()))
+  with check (company_id in (select auth_company_ids()));
+
+-- El formulario de la landing (zenzia.es y rldigitalstudios.com) no tiene
+-- sesión, así que inserta como "anon".
+create policy "public landing notification form" on notifications
+  for insert
+  to anon
+  with check (company_id = '5a279e59-d107-4341-80a2-f33bb5f71b24');
 
 -- ============================================================
 -- SEED de ejemplo: una empresa de fisioterapia con sus módulos
