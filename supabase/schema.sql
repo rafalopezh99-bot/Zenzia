@@ -150,13 +150,15 @@ create table packages (
 );
 
 -- Tarifario por empresa (usado por el vertical academia): nivel + nombre +
--- horas + precio. Al dar de alta un alumno eligiendo uno de estos, se crea
--- ya el bono activo en `packages` con esas horas listas para consumir.
+-- cantidad (horas o clases, a elegir) + precio. Al dar de alta un alumno
+-- eligiendo uno de estos, se crea ya el bono activo en `packages` con esa
+-- cantidad lista para consumir.
 create table bono_types (
   id uuid primary key default gen_random_uuid(),
   company_id uuid not null references companies(id) on delete cascade,
   nivel text not null,
   name text not null,
+  unit text not null default 'horas' check (unit in ('horas', 'clases')),
   sessions int not null,
   price_eur numeric(10, 2) not null,
   created_at timestamptz not null default now()

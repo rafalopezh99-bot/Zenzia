@@ -16,11 +16,11 @@ export default async function BonosPage() {
     .select("id, name, total_sessions, used_sessions, contacts(full_name)")
     .order("created_at", { ascending: false });
 
-  let bonoTypes: { id: string; nivel: string; name: string; sessions: number; price_eur: number }[] = [];
+  let bonoTypes: { id: string; nivel: string; name: string; unit: string; sessions: number; price_eur: number }[] = [];
   if (showAcademia) {
     const { data } = await supabase
       .from("bono_types")
-      .select("id, nivel, name, sessions, price_eur")
+      .select("id, nivel, name, unit, sessions, price_eur")
       .eq("company_id", companyId)
       .order("nivel")
       .order("sessions");
@@ -40,7 +40,11 @@ export default async function BonosPage() {
           <form action={createBonoType} className="mb-4 flex flex-wrap items-end gap-2 text-sm">
             <Input name="nivel" placeholder="Nivel (ej. ESO)" required className="w-32" />
             <Input name="name" placeholder="Nombre (ej. Bono 4 horas)" required />
-            <Input name="sessions" type="number" min="1" placeholder="Horas" required className="w-24" />
+            <Select name="unit" defaultValue="horas" className="w-28">
+              <option value="horas">Horas</option>
+              <option value="clases">Clases</option>
+            </Select>
+            <Input name="sessions" type="number" min="1" placeholder="Cantidad" required className="w-24" />
             <Input name="price_eur" type="number" min="0" step="0.01" placeholder="Precio €" required className="w-24" />
             <PrimaryButton>Añadir tarifa</PrimaryButton>
           </form>
@@ -50,7 +54,7 @@ export default async function BonosPage() {
                 <tr>
                   <th className={thEl}>Nivel</th>
                   <th className={thEl}>Nombre</th>
-                  <th className={thEl}>Horas</th>
+                  <th className={thEl}>Cantidad</th>
                   <th className={thEl}>Precio</th>
                   <th className={thEl}></th>
                 </tr>
@@ -62,7 +66,9 @@ export default async function BonosPage() {
                     <tr key={b.id} className={trEl}>
                       <td className={tdEl}>{b.nivel}</td>
                       <td className={tdEl}>{b.name}</td>
-                      <td className={tdEl}>{b.sessions}</td>
+                      <td className={tdEl}>
+                        {b.sessions} {b.unit}
+                      </td>
                       <td className={tdEl}>{b.price_eur} €</td>
                       <td className={tdEl}>
                         <form action={removeBonoType}>
