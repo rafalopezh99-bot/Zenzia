@@ -50,9 +50,11 @@ create policy "admin updates signup requests" on signup_requests
   for update using (is_zenzia_admin())
   with check (is_zenzia_admin());
 
--- El formulario público de /registro no tiene sesión, así que inserta
--- como "anon" — igual que el formulario de contacto de la landing.
+-- El formulario público de /registro es accesible sin sesión, pero
+-- también lo puede rellenar alguien que ya tiene sesión iniciada en el
+-- navegador (p. ej. Rafa probándolo mientras está logueado como admin),
+-- así que la política cubre tanto "anon" como "authenticated".
 create policy "public creates signup requests" on signup_requests
   for insert
-  to anon
+  to anon, authenticated
   with check (true);
