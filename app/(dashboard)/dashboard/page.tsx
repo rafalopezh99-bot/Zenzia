@@ -32,7 +32,7 @@ export default async function DashboardPage() {
     <div>
       <PageHeader
         eyebrow="Dashboard"
-        title={fullName ? `¡Bienvenido a tu CRM, ${fullName}!` : "Panel de control"}
+        title={fullName ? `¡Hola, ${fullName}!` : "Panel de control"}
       />
 
       <div className="mb-8 grid grid-cols-1 gap-4 sm:max-w-2xl sm:grid-cols-3">

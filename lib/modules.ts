@@ -74,9 +74,11 @@ export const VERTICAL_PACKS: Record<string, ModuleKey[]> = {
   asesoria: ["agenda", "presupuestos", "facturacion"],
   fotografia: ["agenda", "presupuestos", "fotos", "facturacion"],
   // Clases particulares: agenda de clases, seguimiento del progreso del
-  // alumno, bonos de clases (muy habitual: "bono 10 clases") e historial de
-  // sesiones. Facturación si dan de alta como autónomos.
-  academia: ["agenda", "seguimiento", "bonos", "historial_clinico", "facturacion"],
+  // alumno, bonos de clases (muy habitual: "bono 10 clases") y facturación
+  // si dan de alta como autónomos. Sin "historial_clinico": ese módulo es
+  // para historiales médicos/clínicos, no encaja en clases particulares —
+  // el progreso del alumno ya lo cubre "seguimiento".
+  academia: ["agenda", "seguimiento", "bonos", "facturacion"],
 };
 
 import { createClient } from "@/lib/supabase/server";
