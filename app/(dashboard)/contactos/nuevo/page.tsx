@@ -1,17 +1,27 @@
 import { createContact } from "@/lib/actions/contacts";
 import { Card, PageHeader, Input, PrimaryButton } from "@/components/ui";
+import { getCurrentCompanyProfile } from "@/lib/company";
+import { getTerminology, showsAgencyPipeline } from "@/lib/terminology";
 
-export default function NuevoContactoPage() {
+export default async function NuevoContactoPage() {
+  const { vertical } = await getCurrentCompanyProfile();
+  const terms = getTerminology(vertical);
+  const showPipeline = showsAgencyPipeline(vertical);
+
   return (
     <div>
-      <PageHeader title="Nuevo contacto" />
+      <PageHeader title={terms.newContact} />
       <Card className="max-w-sm">
         <form action={createContact} className="space-y-3">
           <Input name="full_name" placeholder="Nombre completo" required className="w-full" />
-          <Input name="business_type" placeholder="Tipo de negocio (ej. centro de estética)" className="w-full" />
+          {showPipeline && (
+            <Input name="business_type" placeholder="Tipo de negocio (ej. centro de estética)" className="w-full" />
+          )}
           <Input name="phone" placeholder="Teléfono" className="w-full" />
           <Input name="email" type="email" placeholder="Email" className="w-full" />
-          <Input name="demo_url" type="url" placeholder="Enlace de la demo (opcional)" className="w-full" />
+          {showPipeline && (
+            <Input name="demo_url" type="url" placeholder="Enlace de la demo (opcional)" className="w-full" />
+          )}
           <PrimaryButton>Guardar</PrimaryButton>
         </form>
       </Card>

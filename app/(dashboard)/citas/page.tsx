@@ -2,6 +2,8 @@ import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
 import { Card, PageHeader, primaryButtonClass } from "@/components/ui";
 import { APPOINTMENT_STATUS_TONE } from "@/lib/appointmentStatus";
+import { getCurrentCompanyProfile } from "@/lib/company";
+import { getTerminology } from "@/lib/terminology";
 
 const WEEKDAY_NAMES = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes"];
 
@@ -42,6 +44,8 @@ const HOURS = Array.from({ length: 24 }, (_, i) => i);
 // (?week=YYYY-MM-DD, el lunes de esa semana) — sin JS en el cliente, igual
 // que el calendario mensual.
 export default async function CitasPage({ searchParams }: { searchParams: { week?: string } }) {
+  const { vertical } = await getCurrentCompanyProfile();
+  const terms = getTerminology(vertical);
   const monday = parseWeekParam(searchParams.week);
   const days = Array.from({ length: 5 }, (_, i) => {
     const d = new Date(monday);
@@ -88,7 +92,7 @@ export default async function CitasPage({ searchParams }: { searchParams: { week
   return (
     <div>
       <PageHeader
-        title="Agenda"
+        title={terms.agendaLabel}
         action={
           <div className="flex gap-2">
             <Link href="/citas/calendario" className={primaryButtonClass}>
@@ -101,7 +105,7 @@ export default async function CitasPage({ searchParams }: { searchParams: { week
               Ver lista
             </Link>
             <Link href="/citas/nueva" className={primaryButtonClass}>
-              Nueva cita
+              {terms.newAppointment}
             </Link>
           </div>
         }

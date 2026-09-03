@@ -3,9 +3,13 @@ import { addActivity, updateContactStage, updateContactLink, updateContactBusine
 import { notFound } from "next/navigation";
 import { Card, PageHeader, Input, Select, PrimaryButton, GhostButton } from "@/components/ui";
 import { PIPELINE_STAGES, STAGE_LABEL, getStage } from "@/lib/pipeline";
+import { getCurrentCompanyProfile } from "@/lib/company";
+import { showsAgencyPipeline } from "@/lib/terminology";
 
 export default async function ContactoDetailPage({ params }: { params: { id: string } }) {
   const supabase = createClient();
+  const { vertical } = await getCurrentCompanyProfile();
+  const showPipeline = showsAgencyPipeline(vertical);
 
   const { data: contact } = await supabase.from("contacts").select("*").eq("id", params.id).single();
   if (!contact) notFound();
@@ -28,10 +32,10 @@ export default async function ContactoDetailPage({ params }: { params: { id: str
     <div className="max-w-2xl">
       <PageHeader title={contact.full_name} />
       <p className="-mt-6 mb-6 text-sm text-slate">
-        {businessType && <span className="text-ink">{businessType}</span>}
-        {businessType && (contact.phone || contact.email) && " · "}
+        {showPipeline && businessType && <span className="text-ink">{businessType}</span>}
+        {showPipeline && businessType && (contact.phone || contact.email) && " · "}
         {contact.phone} {contact.phone && contact.email && "·"} {contact.email}
-        {demoUrl && (
+        {showPipeline && demoUrl && (
           <>
             {" · "}
             <a
@@ -46,46 +50,52 @@ export default async function ContactoDetailPage({ params }: { params: { id: str
         )}
       </p>
 
-      <Card className="mb-6">
-        <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-slate">Etapa del cliente</h2>
-        <form action={updateStageForContact} className="flex flex-wrap items-center gap-2">
-          <Select name="stage" defaultValue={currentStage}>
-            {PIPELINE_STAGES.map((s) => (
-              <option key={s} value={s}>
-                {STAGE_LABEL[s]}
-              </option>
-            ))}
-          </Select>
-          <GhostButton>Actualizar etapa</GhostButton>
-        </form>
-      </Card>
+      {showPipeline && (
+        <Card className="mb-6">
+          <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-slate">Etapa del cliente</h2>
+          <form action={updateStageForContact} className="flex flex-wrap items-center gap-2">
+            <Select name="stage" defaultValue={currentStage}>
+              {PIPELINE_STAGES.map((s) => (
+                <option key={s} value={s}>
+                  {STAGE_LABEL[s]}
+                </option>
+              ))}
+            </Select>
+            <GhostButton>Actualizar etapa</GhostButton>
+          </form>
+        </Card>
+      )}
 
-      <Card className="mb-6">
-        <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-slate">Tipo de negocio</h2>
-        <form action={updateBusinessTypeForContact} className="flex flex-wrap items-center gap-2">
-          <Input
-            name="business_type"
-            placeholder="Ej: centro de estética"
-            defaultValue={businessType}
-            className="flex-1"
-          />
-          <GhostButton>Guardar</GhostButton>
-        </form>
-      </Card>
+      {showPipeline && (
+        <Card className="mb-6">
+          <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-slate">Tipo de negocio</h2>
+          <form action={updateBusinessTypeForContact} className="flex flex-wrap items-center gap-2">
+            <Input
+              name="business_type"
+              placeholder="Ej: centro de estética"
+              defaultValue={businessType}
+              className="flex-1"
+            />
+            <GhostButton>Guardar</GhostButton>
+          </form>
+        </Card>
+      )}
 
-      <Card className="mb-6">
-        <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-slate">Enlace de la demo</h2>
-        <form action={updateLinkForContact} className="flex flex-wrap items-center gap-2">
-          <Input
-            name="demo_url"
-            type="url"
-            placeholder="https://cliente-demo.netlify.app"
-            defaultValue={demoUrl}
-            className="flex-1"
-          />
-          <GhostButton>Guardar enlace</GhostButton>
-        </form>
-      </Card>
+      {showPipeline && (
+        <Card className="mb-6">
+          <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-slate">Enlace de la demo</h2>
+          <form action={updateLinkForContact} className="flex flex-wrap items-center gap-2">
+            <Input
+              name="demo_url"
+              type="url"
+              placeholder="https://cliente-demo.netlify.app"
+              defaultValue={demoUrl}
+              className="flex-1"
+            />
+            <GhostButton>Guardar enlace</GhostButton>
+          </form>
+        </Card>
+      )}
 
       <Card>
         <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-slate">

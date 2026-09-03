@@ -35,7 +35,7 @@ export const getCurrentCompanyProfile = cache(async () => {
   // viaje de red en vez de dos.
   const { data: membership } = await supabase
     .from("company_users")
-    .select("company_id, full_name, companies(name, onboarded)")
+    .select("company_id, full_name, companies(name, onboarded, vertical)")
     .eq("user_id", user.id)
     .limit(1)
     .single();
@@ -49,6 +49,7 @@ export const getCurrentCompanyProfile = cache(async () => {
     fullName: (membership.full_name as string | null) ?? null,
     companyName: company?.name ?? "",
     onboarded: company?.onboarded ?? false,
+    vertical: (company?.vertical as string | null) ?? null,
   };
 });
 

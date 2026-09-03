@@ -1,9 +1,13 @@
 import { createClient } from "@/lib/supabase/server";
 import { createInvoice, markInvoicePaid } from "@/lib/actions/invoices";
 import { Card, PageHeader, Input, Select, PrimaryButton, GhostButton, Badge, tableWrap, tableEl, theadEl, thEl, tdEl, trEl } from "@/components/ui";
+import { getCurrentCompanyProfile } from "@/lib/company";
+import { getTerminology } from "@/lib/terminology";
 
 export default async function FacturacionPage() {
   const supabase = createClient();
+  const { vertical } = await getCurrentCompanyProfile();
+  const terms = getTerminology(vertical);
   const { data: contacts } = await supabase.from("contacts").select("id, full_name").order("full_name");
   const { data: invoices } = await supabase
     .from("invoices")
@@ -33,7 +37,7 @@ export default async function FacturacionPage() {
       <Card className="mb-6">
         <form action={createInvoice} className="flex flex-wrap items-end gap-2 text-sm">
           <Select name="contact_id" required>
-            <option value="">Cliente</option>
+            <option value="">{terms.contact}</option>
             {(contacts ?? []).map((c) => (
               <option key={c.id} value={c.id}>
                 {c.full_name}
@@ -50,7 +54,7 @@ export default async function FacturacionPage() {
         <table className={tableEl}>
           <thead className={theadEl}>
             <tr>
-              <th className={thEl}>Cliente</th>
+              <th className={thEl}>{terms.contact}</th>
               <th className={thEl}>Concepto</th>
               <th className={thEl}>Importe</th>
               <th className={thEl}>Estado</th>

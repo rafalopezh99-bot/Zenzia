@@ -2,9 +2,13 @@ import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
 import { PageHeader, primaryButtonClass, Badge, tableWrap, tableEl, theadEl, thEl, tdEl, trEl } from "@/components/ui";
 import { APPOINTMENT_STATUS_LABEL, APPOINTMENT_STATUS_TONE } from "@/lib/appointmentStatus";
+import { getCurrentCompanyProfile } from "@/lib/company";
+import { getTerminology } from "@/lib/terminology";
 
 export default async function CitasListaPage() {
   const supabase = createClient();
+  const { vertical } = await getCurrentCompanyProfile();
+  const terms = getTerminology(vertical);
   const { data: appointments } = await supabase
     .from("appointments")
     .select("id, starts_at, status, contacts(full_name)")
@@ -13,7 +17,7 @@ export default async function CitasListaPage() {
   return (
     <div>
       <PageHeader
-        title="Agenda · Lista"
+        title={`${terms.agendaLabel} · Lista`}
         action={
           <div className="flex gap-2">
             <Link
@@ -29,7 +33,7 @@ export default async function CitasListaPage() {
               Ver mes
             </Link>
             <Link href="/citas/nueva" className={primaryButtonClass}>
-              Nueva cita
+              {terms.newAppointment}
             </Link>
           </div>
         }
@@ -40,7 +44,7 @@ export default async function CitasListaPage() {
           <thead className={theadEl}>
             <tr>
               <th className={thEl}>Fecha</th>
-              <th className={thEl}>Contacto</th>
+              <th className={thEl}>{terms.contact}</th>
               <th className={thEl}>Estado</th>
             </tr>
           </thead>

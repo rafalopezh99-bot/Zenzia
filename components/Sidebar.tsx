@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import type { ModuleDef } from "@/lib/modules";
+import { getTerminology } from "@/lib/terminology";
 
 // El sidebar no sabe nada de "fisio" ni "taller": solo pinta los módulos
 // que llegan activados. Añadir o quitar una ventana para un cliente es
@@ -18,14 +19,17 @@ export default function Sidebar({
   companyName,
   isAdmin = false,
   signupRequestCount = 0,
+  vertical = null,
 }: {
   modules: ModuleDef[];
   notificationCount?: number;
   companyName?: string;
   isAdmin?: boolean;
   signupRequestCount?: number;
+  vertical?: string | null;
 }) {
   const [open, setOpen] = useState(false);
+  const terms = getTerminology(vertical);
   const linkClass = "block rounded-xl px-3 py-2 text-slate transition hover:bg-paper-deep hover:text-ink";
   const close = () => setOpen(false);
 
@@ -106,11 +110,13 @@ export default function Sidebar({
           Dashboard
         </Link>
         <Link href="/contactos" className={linkClass} onClick={close}>
-          Contactos
+          {terms.contacts}
         </Link>
-        <Link href="/clientes" className={linkClass} onClick={close}>
-          Clientes
-        </Link>
+        {isAdmin && (
+          <Link href="/clientes" className={linkClass} onClick={close}>
+            Clientes
+          </Link>
+        )}
         <Link href="/notificaciones" className={`${linkClass} flex items-center justify-between`} onClick={close}>
           <span>Notificaciones</span>
           {notificationCount > 0 && (
@@ -121,7 +127,7 @@ export default function Sidebar({
         </Link>
         {modules.map((m) => (
           <Link key={m.key} href={m.href} className={linkClass} onClick={close}>
-            {m.label}
+            {m.key === "agenda" ? terms.agendaLabel : m.label}
           </Link>
         ))}
         {isAdmin && (

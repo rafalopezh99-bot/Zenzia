@@ -1,11 +1,15 @@
 import { createClient } from "@/lib/supabase/server";
 import { addProgress } from "@/lib/actions/progress";
 import { Card, PageHeader, Input, Select, PrimaryButton } from "@/components/ui";
+import { getCurrentCompanyProfile } from "@/lib/company";
+import { getTerminology } from "@/lib/terminology";
 
 // Módulo "seguimiento": entradas de progreso genéricas (peso, dolor,
 // medidas...) — cada vertical usa la métrica que necesita sin tocar código.
 export default async function SeguimientoPage() {
   const supabase = createClient();
+  const { vertical } = await getCurrentCompanyProfile();
+  const terms = getTerminology(vertical);
   const { data: contacts } = await supabase.from("contacts").select("id, full_name").order("full_name");
   const { data: entries } = await supabase
     .from("activities")
@@ -21,7 +25,7 @@ export default async function SeguimientoPage() {
       <Card className="mb-6">
         <form action={addProgress} className="flex flex-wrap items-end gap-2 text-sm">
           <Select name="contact_id" required>
-            <option value="">Contacto</option>
+            <option value="">{terms.contact}</option>
             {(contacts ?? []).map((c) => (
               <option key={c.id} value={c.id}>
                 {c.full_name}

@@ -2,9 +2,18 @@ import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
 import { PageHeader, primaryButtonClass, Badge, tableWrap, tableEl, theadEl, thEl, tdEl, trEl } from "@/components/ui";
 import { STAGE_LABEL, STAGE_TONE, getStage } from "@/lib/pipeline";
+import { getCurrentCompanyProfile } from "@/lib/company";
+import { getTerminology, showsAgencyPipeline } from "@/lib/terminology";
 
 export default async function ContactosPage() {
   const supabase = createClient();
+  const { vertical } = await getCurrentCompanyProfile();
+  const terms = getTerminology(vertical);
+  // El pipeline de ventas (etapa, tipo de negocio, enlace de demo) es una
+  // herramienta de RL Digital Studios para captar clientes nuevos — no
+  // tiene sentido para una empresa real gestionando sus propios contactos.
+  const showPipeline = showsAgencyPipeline(vertical);
+
   const { data: contacts } = await supabase
     .from("contacts")
     .select("id, full_name, status, custom_fields")
@@ -13,10 +22,10 @@ export default async function ContactosPage() {
   return (
     <div>
       <PageHeader
-        title="Contactos"
+        title={terms.contacts}
         action={
           <Link href="/contactos/nuevo" className={primaryButtonClass}>
-            Nuevo contacto
+            {terms.newContact}
           </Link>
         }
       />
@@ -26,9 +35,13 @@ export default async function ContactosPage() {
           <thead className={theadEl}>
             <tr>
               <th className={thEl}>Nombre</th>
-              <th className={thEl}>Tipo de negocio</th>
-              <th className={thEl}>Etapa</th>
-              <th className={thEl}>Demo</th>
+              {showPipeline && (
+                <>
+                  <th className={thEl}>Tipo de negocio</th>
+                  <th className={thEl}>Etapa</th>
+                  <th className={thEl}>Demo</th>
+                </>
+              )}
             </tr>
           </thead>
           <tbody>
@@ -42,26 +55,30 @@ export default async function ContactosPage() {
                       {c.full_name}
                     </Link>
                   </td>
-                  <td className={tdEl}>
-                    {c.custom_fields?.business_type || <span className="text-slate/50">—</span>}
-                  </td>
-                  <td className={tdEl}>
-                    <Badge tone={STAGE_TONE[stage]}>{STAGE_LABEL[stage]}</Badge>
-                  </td>
-                  <td className={tdEl}>
-                    {demoUrl ? (
-                      <a
-                        href={demoUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-brand hover:underline"
-                      >
-                        Ver demo →
-                      </a>
-                    ) : (
-                      <span className="text-slate/50">—</span>
-                    )}
-                  </td>
+                  {showPipeline && (
+                    <>
+                      <td className={tdEl}>
+                        {c.custom_fields?.business_type || <span className="text-slate/50">—</span>}
+                      </td>
+                      <td className={tdEl}>
+                        <Badge tone={STAGE_TONE[stage]}>{STAGE_LABEL[stage]}</Badge>
+                      </td>
+                      <td className={tdEl}>
+                        {demoUrl ? (
+                          <a
+                            href={demoUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-brand hover:underline"
+                          >
+                            Ver demo →
+                          </a>
+                        ) : (
+                          <span className="text-slate/50">—</span>
+                        )}
+                      </td>
+                    </>
+                  )}
                 </tr>
               );
             })}

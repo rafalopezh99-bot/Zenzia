@@ -44,6 +44,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
         companyName={profile.companyName}
         isAdmin={isAdmin}
         signupRequestCount={signupRequestCount}
+        vertical={profile.vertical}
       />
       <main className="flex-1 overflow-x-hidden p-4 sm:p-8">{children}</main>
     </div>

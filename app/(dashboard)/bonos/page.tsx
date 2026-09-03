@@ -1,9 +1,13 @@
 import { createClient } from "@/lib/supabase/server";
 import { createPackage, usePackageSession } from "@/lib/actions/packages";
 import { Card, PageHeader, Input, Select, PrimaryButton, GhostButton, tableWrap, tableEl, theadEl, thEl, tdEl, trEl } from "@/components/ui";
+import { getCurrentCompanyProfile } from "@/lib/company";
+import { getTerminology } from "@/lib/terminology";
 
 export default async function BonosPage() {
   const supabase = createClient();
+  const { vertical } = await getCurrentCompanyProfile();
+  const terms = getTerminology(vertical);
   const { data: contacts } = await supabase.from("contacts").select("id, full_name").order("full_name");
   const { data: packages } = await supabase
     .from("packages")
@@ -17,7 +21,7 @@ export default async function BonosPage() {
       <Card className="mb-6">
         <form action={createPackage} className="flex flex-wrap items-end gap-2 text-sm">
           <Select name="contact_id" required>
-            <option value="">Contacto</option>
+            <option value="">{terms.contact}</option>
             {(contacts ?? []).map((c) => (
               <option key={c.id} value={c.id}>
                 {c.full_name}
@@ -34,7 +38,7 @@ export default async function BonosPage() {
         <table className={tableEl}>
           <thead className={theadEl}>
             <tr>
-              <th className={thEl}>Contacto</th>
+              <th className={thEl}>{terms.contact}</th>
               <th className={thEl}>Bono</th>
               <th className={thEl}>Uso</th>
               <th className={thEl}></th>
