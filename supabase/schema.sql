@@ -79,9 +79,30 @@ create table contacts (
   tags text[] not null default '{}',
   custom_fields jsonb not null default '{}',   -- campos específicos del módulo/vertical
   status text not null default 'active' check (status in ('lead','active','inactive')),
+  contact_number integer,   -- ID secuencial por empresa, para referenciar al alumno/cliente
   created_at timestamptz not null default now()
 );
 create index on contacts (company_id);
+create unique index contacts_company_number_key on contacts (company_id, contact_number);
+
+-- Asigna automáticamente el siguiente contact_number libre dentro de la
+-- empresa cuando no se indica uno explícito.
+create or replace function assign_contact_number()
+returns trigger
+language plpgsql
+as $function$
+begin
+  if new.contact_number is null then
+    select coalesce(max(contact_number), 0) + 1 into new.contact_number
+    from contacts
+    where company_id = new.company_id;
+  end if;
+  return new;
+end;
+$function$;
+
+create trigger contacts_assign_number before insert on contacts
+  for each row execute function assign_contact_number();
 
 -- Activo opcional colgado del contacto (p. ej. vehículo en talleres)
 create table assets (
@@ -379,6 +400,8 @@ create table invoices (
   package_id uuid references packages(id) on delete set null,
   billing_period text,
   due_date date,
+  payment_method text,     -- 'efectivo' | 'bizum', se rellena al marcar pagada
+  paid_at timestamptz,     -- fecha de cobro, para el Historial de pagos
   created_at timestamptz not null default now()
 );
 create index on invoices (contact_id);
