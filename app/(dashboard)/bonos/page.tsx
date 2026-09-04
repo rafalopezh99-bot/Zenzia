@@ -1,22 +1,22 @@
 import { createClient } from "@/lib/supabase/server";
-import { createPackage, usePackageSession, togglePackageActive } from "@/lib/actions/packages";
+import { createPackage } from "@/lib/actions/packages";
 import { createBonoType, deleteBonoType } from "@/lib/actions/bonoTypes";
-import { Card, PageHeader, Input, Select, PrimaryButton, GhostButton, Badge, tableWrap, tableEl, theadEl, thEl, tdEl, trEl } from "@/components/ui";
+import { Card, PageHeader, Input, Select, PrimaryButton, GhostButton, tableWrap, tableEl, theadEl, thEl, tdEl, trEl } from "@/components/ui";
 import { getCurrentCompanyProfile } from "@/lib/company";
 import { getTerminology, showsAcademiaFields } from "@/lib/terminology";
 
 const PERIODO_LABEL: Record<string, string> = { semanal: "Semanal", mensual: "Mensual" };
 
+// El listado de bonos por alumno con su uso (X/Y sesiones) se quitó de aquí:
+// en el vertical academia el consumo ahora es automático (se descuenta solo
+// al terminar la clase) y su seguimiento vive en /seguimiento, con las
+// horas gastadas por alumno cada mes.
 export default async function BonosPage() {
   const supabase = createClient();
   const { companyId, vertical } = await getCurrentCompanyProfile();
   const terms = getTerminology(vertical);
   const showAcademia = showsAcademiaFields(vertical);
   const { data: contacts } = await supabase.from("contacts").select("id, full_name").order("full_name");
-  const { data: packages } = await supabase
-    .from("packages")
-    .select("id, name, total_sessions, used_sessions, active, bono_type_id, contacts(full_name)")
-    .order("created_at", { ascending: false });
 
   let bonoTypes: {
     id: string;
@@ -122,57 +122,6 @@ export default async function BonosPage() {
           <PrimaryButton>Crear bono</PrimaryButton>
         </form>
       </Card>
-
-      <div className={tableWrap}>
-        <table className={tableEl}>
-          <thead className={theadEl}>
-            <tr>
-              <th className={thEl}>{terms.contact}</th>
-              <th className={thEl}>Bono</th>
-              <th className={thEl}>Uso</th>
-              {showAcademia && <th className={thEl}>Cobro recurrente</th>}
-              <th className={thEl}></th>
-            </tr>
-          </thead>
-          <tbody>
-            {(packages ?? []).map((p: any) => {
-              const useSession = usePackageSession.bind(null, p.id, p.used_sessions);
-              const toggleActive = togglePackageActive.bind(null, p.id, p.active);
-              const agotado = p.used_sessions >= p.total_sessions;
-              return (
-                <tr key={p.id} className={trEl}>
-                  <td className={tdEl}>{p.contacts?.full_name}</td>
-                  <td className={tdEl}>{p.name}</td>
-                  <td className={tdEl}>
-                    {p.used_sessions} / {p.total_sessions}
-                  </td>
-                  {showAcademia && (
-                    <td className={tdEl}>
-                      {p.bono_type_id ? (
-                        <Badge tone={p.active ? "green" : "neutral"}>{p.active ? "Activo" : "De baja"}</Badge>
-                      ) : (
-                        <span className="text-slate/50">—</span>
-                      )}
-                    </td>
-                  )}
-                  <td className={tdEl}>
-                    <div className="flex gap-2">
-                      <form action={useSession}>
-                        <GhostButton disabled={agotado}>Usar sesión</GhostButton>
-                      </form>
-                      {showAcademia && p.bono_type_id && (
-                        <form action={toggleActive}>
-                          <GhostButton>{p.active ? "Dar de baja" : "Reactivar"}</GhostButton>
-                        </form>
-                      )}
-                    </div>
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-      </div>
     </div>
   );
 }

@@ -1,7 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { Card, PageHeader } from "@/components/ui";
 import { getCurrentCompanyProfile } from "@/lib/company";
-import { getTerminology } from "@/lib/terminology";
+import { getTerminology, showsAcademiaFields } from "@/lib/terminology";
 import { appLocalParts, fromAppLocalInput } from "@/lib/timezone";
 import LiveClock from "@/components/LiveClock";
 
@@ -13,6 +13,13 @@ export default async function DashboardPage() {
   const { fullName, vertical } = await getCurrentCompanyProfile();
   const terms = getTerminology(vertical);
   const appointmentsLower = terms.appointments.toLowerCase();
+
+  // Procesa las clases de academia ya terminadas (marca completadas y
+  // descuenta las horas del bono) antes de leer nada, para que las cifras
+  // de abajo estén al día sin esperar al ciclo diario.
+  if (showsAcademiaFields(vertical)) {
+    await supabase.rpc("complete_finished_academia_appointments");
+  }
 
   // Rango del mes actual en hora de Sevilla/Madrid (no la del servidor),
   // para sumar lo cobrado "este mes" tal y como lo entiende el usuario.

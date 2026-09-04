@@ -3,8 +3,9 @@ import Link from "next/link";
 import { Card, PageHeader, primaryButtonClass } from "@/components/ui";
 import { APPOINTMENT_STATUS_TONE } from "@/lib/appointmentStatus";
 import { getCurrentCompanyProfile } from "@/lib/company";
-import { getTerminology } from "@/lib/terminology";
+import { getTerminology, showsAcademiaFields } from "@/lib/terminology";
 import { appLocalParts, formatAppTime } from "@/lib/timezone";
+import NowLine from "@/components/NowLine";
 
 const WEEKDAY_NAMES = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes"];
 
@@ -68,6 +69,9 @@ export default async function CitasPage({ searchParams }: { searchParams: { week
   rangeEnd.setDate(rangeEnd.getDate() + 7);
 
   const supabase = createClient();
+  if (showsAcademiaFields(vertical)) {
+    await supabase.rpc("complete_finished_academia_appointments");
+  }
   const { data: appointments } = await supabase
     .from("appointments")
     .select("id, starts_at, ends_at, status, contacts(full_name)")
@@ -197,11 +201,12 @@ export default async function CitasPage({ searchParams }: { searchParams: { week
 
             {/* Columnas de días: líneas de hora de fondo + bloques de cita
                 posicionados por encima, con la altura de su duración real. */}
-            {days.map((_, dayIdx) => (
+            {days.map((d, dayIdx) => (
               <div key={dayIdx} className="relative border-l border-line" style={{ height: COLUMN_HEIGHT }}>
                 {HOURS.map((hour) => (
                   <div key={hour} className="border-t border-line" style={{ height: ROW_HEIGHT }} />
                 ))}
+                <NowLine dateStr={formatWeekParam(d)} startHour={START_HOUR} endHour={END_HOUR} rowHeight={ROW_HEIGHT} />
                 {byDay[dayIdx].map((a) => (
                   <Link
                     key={a.id}

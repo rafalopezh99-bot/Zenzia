@@ -3,6 +3,8 @@ import Link from "next/link";
 import { Card, PageHeader, primaryButtonClass } from "@/components/ui";
 import { APPOINTMENT_STATUS_TONE } from "@/lib/appointmentStatus";
 import { appLocalParts, formatAppTime } from "@/lib/timezone";
+import { getCurrentCompanyProfile } from "@/lib/company";
+import { showsAcademiaFields } from "@/lib/terminology";
 
 const WEEKDAYS = ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"];
 const MONTH_NAMES = [
@@ -42,6 +44,10 @@ export default async function CalendarioPage({ searchParams }: { searchParams: {
   const firstWeekday = (firstOfMonth.getDay() + 6) % 7; // 0 = lunes ... 6 = domingo
 
   const supabase = createClient();
+  const { vertical } = await getCurrentCompanyProfile();
+  if (showsAcademiaFields(vertical)) {
+    await supabase.rpc("complete_finished_academia_appointments");
+  }
   const { data: appointments } = await supabase
     .from("appointments")
     .select("id, starts_at, status, contacts(full_name)")
