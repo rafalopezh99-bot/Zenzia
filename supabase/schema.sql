@@ -38,6 +38,12 @@ create table company_users (
   created_at timestamptz not null default now(),
   unique (company_id, user_id)
 );
+-- El índice único de arriba (company_id, user_id) no sirve para filtrar por
+-- user_id solo (no es la primera columna) — y auth_company_ids() hace
+-- justo eso en CADA fila protegida por RLS, es decir, en prácticamente
+-- toda consulta de la app. Sin este índice era un escaneo completo de la
+-- tabla en cada petición.
+create index on company_users (user_id);
 
 -- ============================================================
 -- MÓDULOS: catálogo fijo + activación por empresa
@@ -199,6 +205,10 @@ alter table packages
   add column bono_type_id uuid references bono_types(id) on delete set null,
   add column active boolean not null default true;
 create index on packages (bono_type_id) where bono_type_id is not null;
+-- complete_finished_academia_appointments() la consulta por contact_id en
+-- cada clase de academia recién terminada, y esa función se llama en cada
+-- carga de dashboard/citas/seguimiento del vertical academia.
+create index on packages (contact_id);
 
 -- Lista de asignaturas que imparte la empresa (vertical academia): controla
 -- las casillas del formulario de alta de alumno para evitar variaciones del

@@ -10,11 +10,14 @@ export default async function FacturacionPage() {
   const supabase = createClient();
   const { vertical } = await getCurrentCompanyProfile();
   const terms = getTerminology(vertical);
-  const { data: contacts } = await supabase.from("contacts").select("id, full_name").order("full_name");
-  const { data: invoices } = await supabase
-    .from("invoices")
-    .select("id, concept, amount, status, due_date, contacts(full_name)")
-    .order("created_at", { ascending: false });
+  // Independientes entre sí: se piden a la vez en vez de una detrás de otra.
+  const [{ data: contacts }, { data: invoices }] = await Promise.all([
+    supabase.from("contacts").select("id, full_name").order("full_name"),
+    supabase
+      .from("invoices")
+      .select("id, concept, amount, status, due_date, contacts(full_name)")
+      .order("created_at", { ascending: false }),
+  ]);
 
   const total = (invoices ?? []).reduce((sum: number, i: any) => sum + Number(i.amount), 0);
   const pendiente = (invoices ?? [])

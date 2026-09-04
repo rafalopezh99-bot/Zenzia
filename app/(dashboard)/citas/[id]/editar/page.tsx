@@ -12,17 +12,17 @@ export default async function EditarCitaPage({ params }: { params: { id: string 
   const { vertical } = await getCurrentCompanyProfile();
   const terms = getTerminology(vertical);
 
-  const { data: appointment } = await supabase
-    .from("appointments")
-    .select("id, contact_id, starts_at, ends_at, status, notes")
-    .eq("id", params.id)
-    .single();
+  // Ninguna depende de la otra, así que se piden a la vez en vez de una
+  // detrás de otra.
+  const [{ data: appointment }, { data: contacts }] = await Promise.all([
+    supabase
+      .from("appointments")
+      .select("id, contact_id, starts_at, ends_at, status, notes")
+      .eq("id", params.id)
+      .single(),
+    supabase.from("contacts").select("id, full_name, custom_fields").order("full_name"),
+  ]);
   if (!appointment) notFound();
-
-  const { data: contacts } = await supabase
-    .from("contacts")
-    .select("id, full_name, custom_fields")
-    .order("full_name");
   const contactOptions = (contacts ?? []).map((c: any) => ({
     id: c.id,
     full_name: c.full_name,

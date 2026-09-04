@@ -4,12 +4,15 @@ import { Card, PageHeader, Input, Select, PrimaryButton, tableWrap, tableEl, the
 
 export default async function VehiculosPage() {
   const supabase = createClient();
-  const { data: contacts } = await supabase.from("contacts").select("id, full_name").order("full_name");
-  const { data: vehicles } = await supabase
-    .from("assets")
-    .select("id, custom_fields, contacts(full_name)")
-    .eq("type", "vehicle")
-    .order("created_at", { ascending: false });
+  // Independientes entre sí: se piden a la vez en vez de una detrás de otra.
+  const [{ data: contacts }, { data: vehicles }] = await Promise.all([
+    supabase.from("contacts").select("id, full_name").order("full_name"),
+    supabase
+      .from("assets")
+      .select("id, custom_fields, contacts(full_name)")
+      .eq("type", "vehicle")
+      .order("created_at", { ascending: false }),
+  ]);
 
   return (
     <div>

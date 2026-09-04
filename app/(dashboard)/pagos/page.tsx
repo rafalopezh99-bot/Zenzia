@@ -24,8 +24,6 @@ export default async function PagosPage({
   const { vertical } = await getCurrentCompanyProfile();
   const terms = getTerminology(vertical);
 
-  const { data: contacts } = await supabase.from("contacts").select("id, full_name").order("full_name");
-
   let query = supabase
     .from("invoices")
     .select("id, concept, amount, payment_method, paid_at, contacts(full_name)")
@@ -35,7 +33,11 @@ export default async function PagosPage({
   if (searchParams.contact_id) query = query.eq("contact_id", searchParams.contact_id);
   if (searchParams.method) query = query.eq("payment_method", searchParams.method);
 
-  const { data: allPaid } = await query;
+  // Independientes entre sí: se piden a la vez en vez de una detrás de otra.
+  const [{ data: contacts }, { data: allPaid }] = await Promise.all([
+    supabase.from("contacts").select("id, full_name").order("full_name"),
+    query,
+  ]);
 
   // Año/mes se filtran en JS (hora de Sevilla/Madrid) en vez de en la
   // consulta: paid_at es un instante y el "mes" que ve el usuario depende

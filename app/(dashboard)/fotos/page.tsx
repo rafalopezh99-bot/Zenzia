@@ -6,11 +6,17 @@ const KIND_LABEL: Record<string, string> = { antes: "Antes", despues: "Después"
 
 export default async function FotosPage() {
   const supabase = createClient();
-  const { data: contacts } = await supabase.from("contacts").select("id, full_name").order("full_name");
-  const { data: photos } = await supabase
-    .from("photos")
-    .select("id, kind, storage_path, created_at, contacts(full_name)")
-    .order("created_at", { ascending: false });
+  // Sin límite esto se iría haciendo más lento con cada foto subida (más
+  // filas a traer y una llamada al Storage por cada una, ver abajo) — se
+  // enseñan las 60 más recientes, que ya llenan varias pantallas de sobra.
+  const [{ data: contacts }, { data: photos }] = await Promise.all([
+    supabase.from("contacts").select("id, full_name").order("full_name"),
+    supabase
+      .from("photos")
+      .select("id, kind, storage_path, created_at, contacts(full_name)")
+      .order("created_at", { ascending: false })
+      .limit(60),
+  ]);
 
   const withUrls = await Promise.all(
     (photos ?? []).map(async (p: any) => {

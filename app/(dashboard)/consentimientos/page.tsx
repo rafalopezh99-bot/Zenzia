@@ -4,11 +4,14 @@ import { Card, PageHeader, Input, Select, PrimaryButton, GhostButton, Badge, tab
 
 export default async function ConsentimientosPage() {
   const supabase = createClient();
-  const { data: contacts } = await supabase.from("contacts").select("id, full_name").order("full_name");
-  const { data: consents } = await supabase
-    .from("consents")
-    .select("id, title, signed, signed_at, contacts(full_name)")
-    .order("created_at", { ascending: false });
+  // Independientes entre sí: se piden a la vez en vez de una detrás de otra.
+  const [{ data: contacts }, { data: consents }] = await Promise.all([
+    supabase.from("contacts").select("id, full_name").order("full_name"),
+    supabase
+      .from("consents")
+      .select("id, title, signed, signed_at, contacts(full_name)")
+      .order("created_at", { ascending: false }),
+  ]);
 
   return (
     <div>

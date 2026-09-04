@@ -16,9 +16,19 @@ export default async function BonosPage() {
   const { companyId, vertical } = await getCurrentCompanyProfile();
   const terms = getTerminology(vertical);
   const showAcademia = showsAcademiaFields(vertical);
-  const { data: contacts } = await supabase.from("contacts").select("id, full_name").order("full_name");
-
-  let bonoTypes: {
+  // Independientes entre sí: se piden a la vez en vez de una detrás de otra.
+  const [{ data: contacts }, { data: bonoTypesData }] = await Promise.all([
+    supabase.from("contacts").select("id, full_name").order("full_name"),
+    showAcademia
+      ? supabase
+          .from("bono_types")
+          .select("id, nivel, name, unit, periodo, sessions, price_eur")
+          .eq("company_id", companyId)
+          .order("nivel")
+          .order("sessions")
+      : Promise.resolve({ data: null }),
+  ]);
+  const bonoTypes: {
     id: string;
     nivel: string;
     name: string;
@@ -26,16 +36,7 @@ export default async function BonosPage() {
     periodo: string;
     sessions: number;
     price_eur: number;
-  }[] = [];
-  if (showAcademia) {
-    const { data } = await supabase
-      .from("bono_types")
-      .select("id, nivel, name, unit, periodo, sessions, price_eur")
-      .eq("company_id", companyId)
-      .order("nivel")
-      .order("sessions");
-    bonoTypes = data ?? [];
-  }
+  }[] = bonoTypesData ?? [];
 
   return (
     <div>

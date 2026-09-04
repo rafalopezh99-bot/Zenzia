@@ -12,14 +12,17 @@ export default async function ContactoDetailPage({ params }: { params: { id: str
   const showPipeline = showsAgencyPipeline(vertical);
   const showAcademia = showsAcademiaFields(vertical);
 
-  const { data: contact } = await supabase.from("contacts").select("*").eq("id", params.id).single();
+  // Ninguna depende de la otra (ambas filtran directamente por params.id),
+  // así que se piden a la vez en vez de una detrás de otra.
+  const [{ data: contact }, { data: activities }] = await Promise.all([
+    supabase.from("contacts").select("*").eq("id", params.id).single(),
+    supabase
+      .from("activities")
+      .select("id, type, content, created_at")
+      .eq("contact_id", params.id)
+      .order("created_at", { ascending: false }),
+  ]);
   if (!contact) notFound();
-
-  const { data: activities } = await supabase
-    .from("activities")
-    .select("id, type, content, created_at")
-    .eq("contact_id", params.id)
-    .order("created_at", { ascending: false });
 
   const addActivityForContact = addActivity.bind(null, params.id);
   const updateStageForContact = updateContactStage.bind(null, params.id);

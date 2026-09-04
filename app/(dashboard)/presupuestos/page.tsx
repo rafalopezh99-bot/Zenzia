@@ -23,11 +23,14 @@ const NEXT_LABEL: Record<string, string> = {
 
 export default async function PresupuestosPage() {
   const supabase = createClient();
-  const { data: contacts } = await supabase.from("contacts").select("id, full_name").order("full_name");
-  const { data: quotes } = await supabase
-    .from("quotes")
-    .select("id, title, amount, status, contacts(full_name)")
-    .order("created_at", { ascending: false });
+  // Independientes entre sí: se piden a la vez en vez de una detrás de otra.
+  const [{ data: contacts }, { data: quotes }] = await Promise.all([
+    supabase.from("contacts").select("id, full_name").order("full_name"),
+    supabase
+      .from("quotes")
+      .select("id, title, amount, status, contacts(full_name)")
+      .order("created_at", { ascending: false }),
+  ]);
 
   return (
     <div>
