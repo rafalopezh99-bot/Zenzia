@@ -4,6 +4,7 @@ import { PageHeader, primaryButtonClass, Badge, tableWrap, tableEl, theadEl, thE
 import { APPOINTMENT_STATUS_LABEL, APPOINTMENT_STATUS_TONE } from "@/lib/appointmentStatus";
 import { getCurrentCompanyProfile } from "@/lib/company";
 import { getTerminology } from "@/lib/terminology";
+import { formatAppDateTime } from "@/lib/timezone";
 
 export default async function CitasListaPage() {
   const supabase = createClient();
@@ -52,7 +53,7 @@ export default async function CitasListaPage() {
           <tbody>
             {(appointments ?? []).map((a: any) => (
               <tr key={a.id} className={trEl}>
-                <td className={tdEl}>{new Date(a.starts_at).toLocaleString("es-ES")}</td>
+                <td className={tdEl}>{formatAppDateTime(a.starts_at)}</td>
                 <td className={tdEl}>{a.contacts?.full_name}</td>
                 <td className={tdEl}>
                   <Badge tone={APPOINTMENT_STATUS_TONE[a.status] ?? "neutral"}>

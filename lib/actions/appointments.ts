@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getCurrentCompanyId } from "@/lib/company";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { fromAppLocalInput } from "@/lib/timezone";
 
 export async function createAppointment(formData: FormData) {
   const companyId = await getCurrentCompanyId();
@@ -16,7 +17,10 @@ export async function createAppointment(formData: FormData) {
 
   if (!contact_id || !starts_at) throw new Error("Contacto y fecha son obligatorios");
 
-  const start = new Date(starts_at);
+  // El input datetime-local no lleva zona horaria: el valor tecleado se
+  // interpreta como hora de Sevilla/Madrid (fromAppLocalInput), no como
+  // hora del servidor (Netlify corre en UTC).
+  const start = fromAppLocalInput(starts_at);
   const end = new Date(start.getTime() + duration_minutes * 60000);
 
   const { error } = await supabase.from("appointments").insert({
@@ -55,20 +59,34 @@ export async function updateAppointment(appointmentId: string, formData: FormDat
 
   if (!contact_id || !starts_at) throw new Error("Contacto y fecha son obligatorios");
 
-  const start = new Date(starts_at);
+  // Mismo criterio que al crear: el valor del input se interpreta como
+  // hora de Sevilla/Madrid, no como hora del servidor.
+  const start = fromAppLocalInput(starts_at);
   const end = new Date(start.getTime() + duration_minutes * 60000);
 
-  const { error } = await supabase
-    .from("appointments")
-    .update({
-      contact_id,
-      starts_at: start.toISOString(),
-      ends_at: end.toISOString(),
-      status,
-      notes: String(formData.get("notes") ?? "") || null,
-    })
-    .eq("id", appointmentId);
-  if (error) throw new Error(error.message);
+  const payload = {
+    contact_id,
+    starts_at: start.toISOString(),
+    ends_at: end.toISOString(),
+    status,
+    notes: String(formData.get("notes") ?? "") || null,
+  };
+
+  const { error } = await supabase.from("appointments").update(payload).eq("id", appointmentId);
+  if (error) {
+    // Si la nueva fecha/hora choca con otra cita ya generada por el mismo
+    // horario recurrente (schedule_id + starts_at es único), esta cita se
+    // desvincula de la serie en vez de fallar el guardado.
+    if (error.code === "23505") {
+      const { error: retryError } = await supabase
+        .from("appointments")
+        .update({ ...payload, schedule_id: null })
+        .eq("id", appointmentId);
+      if (retryError) throw new Error(retryError.message);
+    } else {
+      throw new Error(error.message);
+    }
+  }
 
   revalidatePath("/citas");
   redirect("/citas");

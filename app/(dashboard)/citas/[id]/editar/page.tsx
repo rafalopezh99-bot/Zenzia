@@ -5,6 +5,7 @@ import { Card, PageHeader, Input, Select, Textarea, PrimaryButton, GhostButton }
 import { APPOINTMENT_STATUS_LABEL } from "@/lib/appointmentStatus";
 import { getCurrentCompanyProfile } from "@/lib/company";
 import { getTerminology } from "@/lib/terminology";
+import { toAppLocalInput } from "@/lib/timezone";
 
 export default async function EditarCitaPage({ params }: { params: { id: string } }) {
   const supabase = createClient();
@@ -28,11 +29,10 @@ export default async function EditarCitaPage({ params }: { params: { id: string 
     curso: c.custom_fields?.curso ?? null,
   }));
 
-  // datetime-local no lleva zona horaria: se reconstruye a partir de los
-  // mismos componentes UTC con los que createAppointment/updateAppointment
-  // guardan la fecha, para que reabrir y guardar sin tocar nada no mueva
-  // la hora.
-  const startsAtLocal = new Date(appointment.starts_at).toISOString().slice(0, 16);
+  // El input se prellena en hora de Sevilla/Madrid (igual que createAppointment/
+  // updateAppointment la interpretan al guardar), para que lo que se ve aquí
+  // sea la hora real de la clase y reabrir sin tocar nada no la mueva.
+  const startsAtLocal = toAppLocalInput(appointment.starts_at);
   const durationHours =
     (new Date(appointment.ends_at).getTime() - new Date(appointment.starts_at).getTime()) / 3600000;
 

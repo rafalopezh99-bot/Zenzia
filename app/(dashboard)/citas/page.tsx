@@ -4,6 +4,7 @@ import { Card, PageHeader, primaryButtonClass } from "@/components/ui";
 import { APPOINTMENT_STATUS_TONE } from "@/lib/appointmentStatus";
 import { getCurrentCompanyProfile } from "@/lib/company";
 import { getTerminology } from "@/lib/terminology";
+import { appLocalParts, formatAppTime } from "@/lib/timezone";
 
 const WEEKDAY_NAMES = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes"];
 
@@ -86,13 +87,15 @@ export default async function CitasPage({ searchParams }: { searchParams: { week
   ];
   const visibleMinutes = (END_HOUR - START_HOUR) * 60;
   (appointments ?? []).forEach((a: any) => {
-    const start = new Date(a.starts_at);
-    const end = new Date(a.ends_at);
-    const dayIdx = (start.getDay() + 6) % 7;
+    // Posición y día calculados en hora de Sevilla/Madrid, no en la del
+    // servidor (Netlify corre en UTC).
+    const start = appLocalParts(a.starts_at);
+    const end = appLocalParts(a.ends_at);
+    const dayIdx = (start.weekday + 6) % 7;
     if (dayIdx > 4) return; // fin de semana no se muestra en esta vista
 
-    const startMinutes = (start.getHours() - START_HOUR) * 60 + start.getMinutes();
-    const endMinutes = (end.getHours() - START_HOUR) * 60 + end.getMinutes();
+    const startMinutes = (start.hour - START_HOUR) * 60 + start.minute;
+    const endMinutes = (end.hour - START_HOUR) * 60 + end.minute;
     const visibleStart = Math.max(0, startMinutes);
     const visibleEnd = Math.min(visibleMinutes, endMinutes);
     if (visibleEnd <= 0 || visibleStart >= visibleMinutes) return; // fuera de la franja
@@ -208,8 +211,7 @@ export default async function CitasPage({ searchParams }: { searchParams: { week
                     }`}
                     style={{ top: a.top, height: a.height }}
                   >
-                    {new Date(a.starts_at).toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit" })}{" "}
-                    {a.contacts?.full_name}
+                    {formatAppTime(a.starts_at)} {a.contacts?.full_name}
                   </Link>
                 ))}
               </div>

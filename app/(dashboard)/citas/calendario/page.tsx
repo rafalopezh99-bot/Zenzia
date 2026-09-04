@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
 import { Card, PageHeader, primaryButtonClass } from "@/components/ui";
 import { APPOINTMENT_STATUS_TONE } from "@/lib/appointmentStatus";
+import { appLocalParts, formatAppTime } from "@/lib/timezone";
 
 const WEEKDAYS = ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"];
 const MONTH_NAMES = [
@@ -50,7 +51,8 @@ export default async function CalendarioPage({ searchParams }: { searchParams: {
 
   const byDay = new Map<number, any[]>();
   (appointments ?? []).forEach((a: any) => {
-    const day = new Date(a.starts_at).getDate();
+    // Agrupado por día en hora de Sevilla/Madrid, no la del servidor.
+    const day = appLocalParts(a.starts_at).day;
     if (!byDay.has(day)) byDay.set(day, []);
     byDay.get(day)!.push(a);
   });
@@ -135,8 +137,7 @@ export default async function CalendarioPage({ searchParams }: { searchParams: {
                         CHIP_TONE_CLASS[APPOINTMENT_STATUS_TONE[a.status] ?? "neutral"]
                       }`}
                     >
-                      {new Date(a.starts_at).toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit" })}{" "}
-                      {a.contacts?.full_name}
+                      {formatAppTime(a.starts_at)} {a.contacts?.full_name}
                     </Link>
                   ))}
                   {dayAppointments.length > 3 && (
