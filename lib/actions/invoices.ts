@@ -20,9 +20,17 @@ export async function createInvoice(formData: FormData) {
   redirect("/facturacion");
 }
 
-export async function markInvoicePaid(invoiceId: string) {
+export async function markInvoicePaid(invoiceId: string, formData: FormData) {
   const supabase = createClient();
-  const { error } = await supabase.from("invoices").update({ status: "pagada" }).eq("id", invoiceId);
+  const payment_method = String(formData.get("payment_method") ?? "");
+  if (!payment_method) throw new Error("Indica el método de pago");
+
+  const { error } = await supabase
+    .from("invoices")
+    .update({ status: "pagada", payment_method, paid_at: new Date().toISOString() })
+    .eq("id", invoiceId);
   if (error) throw new Error(error.message);
   revalidatePath("/facturacion");
+  revalidatePath("/pagos");
+  revalidatePath("/dashboard");
 }

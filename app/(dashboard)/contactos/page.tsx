@@ -17,7 +17,7 @@ export default async function ContactosPage() {
 
   const { data: contacts } = await supabase
     .from("contacts")
-    .select("id, full_name, status, custom_fields")
+    .select("id, full_name, status, custom_fields, contact_number, created_at")
     .order("created_at", { ascending: false });
 
   return (
@@ -35,6 +35,7 @@ export default async function ContactosPage() {
         <table className={tableEl}>
           <thead className={theadEl}>
             <tr>
+              <th className={thEl}>ID</th>
               <th className={thEl}>Nombre</th>
               {showAcademia && (
                 <>
@@ -42,6 +43,7 @@ export default async function ContactosPage() {
                   <th className={thEl}>Asignaturas</th>
                 </>
               )}
+              <th className={thEl}>Alta</th>
               {showPipeline && (
                 <>
                   <th className={thEl}>Tipo de negocio</th>
@@ -60,6 +62,9 @@ export default async function ContactosPage() {
               return (
                 <tr key={c.id} className={trEl}>
                   <td className={tdEl}>
+                    <span className="text-slate/70">#{c.contact_number ?? "—"}</span>
+                  </td>
+                  <td className={tdEl}>
                     <Link href={`/contactos/${c.id}`} className="text-ink hover:text-brand">
                       {c.full_name}
                     </Link>
@@ -72,6 +77,11 @@ export default async function ContactosPage() {
                       </td>
                     </>
                   )}
+                  <td className={tdEl}>
+                    {c.created_at
+                      ? new Date(c.created_at).toLocaleDateString("es-ES", { timeZone: "Europe/Madrid" })
+                      : "—"}
+                  </td>
                   {showPipeline && (
                     <>
                       <td className={tdEl}>

@@ -3,6 +3,8 @@ import { createInvoice, markInvoicePaid } from "@/lib/actions/invoices";
 import { Card, PageHeader, Input, Select, PrimaryButton, GhostButton, Badge, tableWrap, tableEl, theadEl, thEl, tdEl, trEl } from "@/components/ui";
 import { getCurrentCompanyProfile } from "@/lib/company";
 import { getTerminology } from "@/lib/terminology";
+import { PAYMENT_METHOD_LABEL, PAYMENT_METHODS } from "@/lib/paymentMethod";
+import Link from "next/link";
 
 export default async function FacturacionPage() {
   const supabase = createClient();
@@ -21,7 +23,17 @@ export default async function FacturacionPage() {
 
   return (
     <div>
-      <PageHeader title="Facturación" />
+      <PageHeader
+        title="Facturación"
+        action={
+          <Link
+            href="/pagos"
+            className="inline-block rounded-full border border-line px-5 py-2.5 text-sm font-medium text-ink transition hover:border-brand hover:text-brand"
+          >
+            Historial de pagos
+          </Link>
+        }
+      />
 
       <div className="mb-6 grid max-w-md grid-cols-2 gap-4">
         <Card>
@@ -83,7 +95,15 @@ export default async function FacturacionPage() {
                   </td>
                   <td className={tdEl}>
                     {i.status === "pendiente" && (
-                      <form action={pay}>
+                      <form action={pay} className="flex items-center gap-1">
+                        <Select name="payment_method" required className="!py-1 !text-xs">
+                          <option value="">Método</option>
+                          {PAYMENT_METHODS.map((m) => (
+                            <option key={m} value={m}>
+                              {PAYMENT_METHOD_LABEL[m]}
+                            </option>
+                          ))}
+                        </Select>
                         <GhostButton>Marcar pagada</GhostButton>
                       </form>
                     )}

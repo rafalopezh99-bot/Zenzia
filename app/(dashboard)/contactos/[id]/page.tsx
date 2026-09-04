@@ -30,15 +30,32 @@ export default async function ContactoDetailPage({ params }: { params: { id: str
   const businessType: string = contact.custom_fields?.business_type ?? "";
   const curso: string = contact.custom_fields?.curso ?? "";
   const subjectList: string[] = contact.custom_fields?.subjects ?? [];
+  // wa.me solo admite dígitos: se limpian espacios/guiones/+ del teléfono
+  // tal cual esté guardado.
+  const whatsappDigits = (contact.phone ?? "").replace(/[^\d]/g, "");
 
   return (
     <div className="max-w-2xl">
-      <PageHeader title={contact.full_name} />
+      <PageHeader title={`#${contact.contact_number ?? "—"} · ${contact.full_name}`} />
       <div className="-mt-6 mb-6 text-sm text-slate">
         <p>
           {showPipeline && businessType && <span className="text-ink">{businessType}</span>}
           {showPipeline && businessType && (contact.phone || contact.email) && " · "}
-          {contact.phone} {contact.phone && contact.email && "·"} {contact.email}
+          {contact.phone && (
+            <a href={`https://wa.me/${whatsappDigits}`} target="_blank" rel="noopener noreferrer" className="text-brand hover:underline">
+              {contact.phone}
+            </a>
+          )}
+          {contact.phone && contact.email && " · "}
+          {contact.email && (
+            <a href={`mailto:${contact.email}`} className="text-brand hover:underline">
+              {contact.email}
+            </a>
+          )}
+          {" · "}
+          <span className="text-slate/70">
+            Alta: {new Date(contact.created_at).toLocaleDateString("es-ES", { timeZone: "Europe/Madrid" })}
+          </span>
           {showPipeline && demoUrl && (
             <>
               {" · "}

@@ -33,7 +33,7 @@ const VERTICAL_TERMS: Record<string, Partial<Terminology>> = {
     appointment: "Clase",
     appointments: "Clases",
     newAppointment: "Nueva clase",
-    agendaLabel: "Clases",
+    agendaLabel: "Calendario",
   },
 };
 
