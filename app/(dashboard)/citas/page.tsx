@@ -1,7 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
 import { Card, PageHeader, primaryButtonClass } from "@/components/ui";
-import { APPOINTMENT_STATUS_TONE } from "@/lib/appointmentStatus";
 import { getCurrentCompanyProfile } from "@/lib/company";
 import { getTerminology, showsAcademiaFields } from "@/lib/terminology";
 import { appLocalParts, formatAppTime } from "@/lib/timezone";
@@ -9,12 +8,84 @@ import NowLine from "@/components/NowLine";
 
 const WEEKDAY_NAMES = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes"];
 
-const CHIP_TONE_CLASS: Record<string, string> = {
-  green: "bg-emerald-50 text-emerald-700",
-  amber: "bg-amber-50 text-amber-700",
-  red: "bg-red-50 text-red-700 line-through",
-  neutral: "bg-paper-deep text-slate",
-};
+// Un color distinto por alumno (no por estado): antes, dos clases a la
+// misma hora ocupaban el mismo hueco y solo se veía el nombre de una. Ahora
+// se colocan una al lado de la otra (layoutDayAppointments) y cada alumno
+// tiene siempre el mismo color en todo el calendario, para diferenciarlas
+// de un vistazo.
+const CONTACT_COLOR_PALETTE = [
+  "bg-blue-50 text-blue-700",
+  "bg-purple-50 text-purple-700",
+  "bg-pink-50 text-pink-700",
+  "bg-indigo-50 text-indigo-700",
+  "bg-teal-50 text-teal-700",
+  "bg-orange-50 text-orange-700",
+  "bg-cyan-50 text-cyan-700",
+  "bg-rose-50 text-rose-700",
+  "bg-lime-50 text-lime-700",
+  "bg-fuchsia-50 text-fuchsia-700",
+];
+
+function hashString(s: string) {
+  let h = 0;
+  for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) >>> 0;
+  return h;
+}
+
+function colorForContact(key: string) {
+  return CONTACT_COLOR_PALETTE[hashString(key) % CONTACT_COLOR_PALETTE.length];
+}
+
+// Reparte en columnas las citas que se solapan en el tiempo dentro de un
+// mismo día, para que ninguna tape a otra. Primero agrupa en "racimos" de
+// citas conectadas por solape (recorriendo por hora de inicio y fusionando
+// mientras el hueco siga abierto), y dentro de cada racimo asigna columnas
+// con el clásico algoritmo greedy de intervalos (óptimo para este caso).
+function layoutDayAppointments<T extends { id: string; top: number; height: number }>(items: T[]) {
+  const sorted = [...items].sort((a, b) => a.top - b.top || a.height - b.height);
+  const layout = new Map<string, { col: number; cols: number }>();
+
+  let clusterItems: T[] = [];
+  let clusterEnd = -Infinity;
+
+  const flushCluster = () => {
+    if (clusterItems.length === 0) return;
+    const colEnds: number[] = [];
+    const colOf = new Map<string, number>();
+    for (const it of clusterItems) {
+      let placed = false;
+      for (let c = 0; c < colEnds.length; c++) {
+        if (colEnds[c] <= it.top) {
+          colEnds[c] = it.top + it.height;
+          colOf.set(it.id, c);
+          placed = true;
+          break;
+        }
+      }
+      if (!placed) {
+        colEnds.push(it.top + it.height);
+        colOf.set(it.id, colEnds.length - 1);
+      }
+    }
+    const cols = colEnds.length;
+    for (const it of clusterItems) layout.set(it.id, { col: colOf.get(it.id)!, cols });
+    clusterItems = [];
+  };
+
+  for (const it of sorted) {
+    if (clusterItems.length > 0 && it.top < clusterEnd) {
+      clusterItems.push(it);
+      clusterEnd = Math.max(clusterEnd, it.top + it.height);
+    } else {
+      flushCluster();
+      clusterItems = [it];
+      clusterEnd = it.top + it.height;
+    }
+  }
+  flushCluster();
+
+  return layout;
+}
 
 function getMonday(d: Date) {
   const date = new Date(d);
@@ -74,7 +145,7 @@ export default async function CitasPage({ searchParams }: { searchParams: { week
   }
   const { data: appointments } = await supabase
     .from("appointments")
-    .select("id, starts_at, ends_at, status, contacts(full_name)")
+    .select("id, starts_at, ends_at, status, contacts(id, full_name)")
     .gte("starts_at", monday.toISOString())
     .lt("starts_at", rangeEnd.toISOString())
     .order("starts_at", { ascending: true });
@@ -110,6 +181,9 @@ export default async function CitasPage({ searchParams }: { searchParams: { week
       height: Math.max(18, ((visibleEnd - visibleStart) / 60) * ROW_HEIGHT),
     });
   });
+
+  // Columna/nº de columnas por cita, para las que se solapan en el tiempo.
+  const dayLayouts = byDay.map((dayItems) => layoutDayAppointments(dayItems));
 
   const today = new Date();
   today.setHours(0, 0, 0, 0);
@@ -207,18 +281,27 @@ export default async function CitasPage({ searchParams }: { searchParams: { week
                   <div key={hour} className="border-t border-line" style={{ height: ROW_HEIGHT }} />
                 ))}
                 <NowLine dateStr={formatWeekParam(d)} startHour={START_HOUR} endHour={END_HOUR} rowHeight={ROW_HEIGHT} />
-                {byDay[dayIdx].map((a) => (
-                  <Link
-                    key={a.id}
-                    href={`/citas/${a.id}/editar`}
-                    className={`absolute left-0.5 right-0.5 overflow-hidden rounded px-1 py-0.5 text-[10px] leading-tight transition hover:brightness-95 ${
-                      CHIP_TONE_CLASS[APPOINTMENT_STATUS_TONE[a.status] ?? "neutral"]
-                    }`}
-                    style={{ top: a.top, height: a.height }}
-                  >
-                    {formatAppTime(a.starts_at)} {a.contacts?.full_name}
-                  </Link>
-                ))}
+                {byDay[dayIdx].map((a) => {
+                  const { col, cols } = dayLayouts[dayIdx].get(a.id) ?? { col: 0, cols: 1 };
+                  const colorKey = a.contacts?.id ?? a.contacts?.full_name ?? a.id;
+                  return (
+                    <Link
+                      key={a.id}
+                      href={`/citas/${a.id}/editar`}
+                      className={`absolute overflow-hidden rounded px-1 py-0.5 text-[10px] leading-tight transition hover:brightness-95 ${colorForContact(
+                        colorKey
+                      )} ${a.status === "cancelled" ? "line-through opacity-60" : a.status === "no_show" ? "opacity-60" : ""}`}
+                      style={{
+                        top: a.top,
+                        height: a.height,
+                        left: `calc(${(col / cols) * 100}% + 2px)`,
+                        width: `calc(${(1 / cols) * 100}% - 4px)`,
+                      }}
+                    >
+                      {formatAppTime(a.starts_at)} {a.contacts?.full_name}
+                    </Link>
+                  );
+                })}
               </div>
             ))}
           </div>
