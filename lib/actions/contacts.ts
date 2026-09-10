@@ -94,6 +94,27 @@ export async function createContact(formData: FormData) {
   redirect("/contactos");
 }
 
+// Nombre, teléfono y email son columnas reales de la tabla (no
+// custom_fields como el resto), y hasta ahora no había ninguna forma de
+// editarlos una vez creado el contacto.
+export async function updateContactBasicInfo(contactId: string, formData: FormData) {
+  const full_name = String(formData.get("full_name") ?? "").trim();
+  if (!full_name) throw new Error("El nombre es obligatorio");
+  const phone = String(formData.get("phone") ?? "").trim();
+  const email = String(formData.get("email") ?? "").trim();
+
+  const supabase = createClient();
+  const { error } = await supabase
+    .from("contacts")
+    .update({ full_name, phone: phone || null, email: email || null })
+    .eq("id", contactId);
+  if (error) throw new Error(error.message);
+
+  revalidatePath(`/contactos/${contactId}`);
+  revalidatePath("/contactos");
+  redirect(`/contactos/${contactId}`);
+}
+
 // Cambia la etapa del pipeline de venta (nuevo lead → contactado →
 // propuesta enviada → negociación → cliente/perdido). Se guarda en
 // custom_fields para no tocar el esquema — no todos los verticales lo usan.

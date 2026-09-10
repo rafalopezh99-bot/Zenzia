@@ -1,5 +1,11 @@
 import { createClient } from "@/lib/supabase/server";
-import { addActivity, updateContactStage, updateContactLink, updateContactLeadInfo } from "@/lib/actions/contacts";
+import {
+  addActivity,
+  updateContactStage,
+  updateContactLink,
+  updateContactLeadInfo,
+  updateContactBasicInfo,
+} from "@/lib/actions/contacts";
 import { notFound } from "next/navigation";
 import { Card, PageHeader, Input, Select, PrimaryButton, GhostButton } from "@/components/ui";
 import { PIPELINE_STAGES, STAGE_LABEL, CONTACT_CHANNELS, CHANNEL_LABEL, getStage } from "@/lib/pipeline";
@@ -25,6 +31,7 @@ export default async function ContactoDetailPage({ params }: { params: { id: str
   if (!contact) notFound();
 
   const addActivityForContact = addActivity.bind(null, params.id);
+  const updateBasicInfoForContact = updateContactBasicInfo.bind(null, params.id);
   const updateStageForContact = updateContactStage.bind(null, params.id);
   const updateLinkForContact = updateContactLink.bind(null, params.id);
   const updateLeadInfoForContact = updateContactLeadInfo.bind(null, params.id);
@@ -99,6 +106,16 @@ export default async function ContactoDetailPage({ params }: { params: { id: str
           </p>
         )}
       </div>
+
+      <Card className="mb-6">
+        <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-slate">Datos básicos</h2>
+        <form action={updateBasicInfoForContact} className="flex flex-wrap items-center gap-2">
+          <Input name="full_name" placeholder="Nombre completo" required defaultValue={contact.full_name} className="flex-1" />
+          <Input name="phone" placeholder="Teléfono" defaultValue={contact.phone ?? ""} className="flex-1" />
+          <Input name="email" type="email" placeholder="Email" defaultValue={contact.email ?? ""} className="flex-1" />
+          <GhostButton>Guardar</GhostButton>
+        </form>
+      </Card>
 
       {showPipeline && (
         <Card className="mb-6">
