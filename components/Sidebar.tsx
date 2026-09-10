@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import type { ModuleDef } from "@/lib/modules";
 import { getTerminology, showsAcademiaFields } from "@/lib/terminology";
+import ThemeToggle from "@/components/ThemeToggle";
 
 // El sidebar no sabe nada de "fisio" ni "taller": solo pinta los módulos
 // que llegan activados. Añadir o quitar una ventana para un cliente es
@@ -16,14 +17,12 @@ import { getTerminology, showsAcademiaFields } from "@/lib/terminology";
 export default function Sidebar({
   modules,
   notificationCount = 0,
-  companyName,
   isAdmin = false,
   signupRequestCount = 0,
   vertical = null,
 }: {
   modules: ModuleDef[];
   notificationCount?: number;
-  companyName?: string;
   isAdmin?: boolean;
   signupRequestCount?: number;
   vertical?: string | null;
@@ -37,11 +36,10 @@ export default function Sidebar({
   return (
     <>
       {/* Barra superior: solo en móvil */}
-      <div className="flex items-center justify-between border-b border-line bg-white px-4 py-3 sm:hidden">
+      <div className="flex items-center justify-between border-b border-line bg-surface px-4 py-3 sm:hidden">
         <Link href="/dashboard" className="flex items-center" onClick={close}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/zenzia-icon.png" alt="Zenzia" width={24} height={24} className="h-6 w-6 mr-1" />
-          <span className="text-base font-black uppercase tracking-tight text-ink">enzia</span>
+          <img src="/zenzia-wordmark.png" alt="Zenzia" width={122} height={24} className="h-6 w-auto" />
         </Link>
         <button
           type="button"
@@ -66,35 +64,22 @@ export default function Sidebar({
 
       {/* Nav: cajón deslizante en móvil, columna fija en escritorio */}
       <nav
-        className={`fixed inset-y-0 left-0 z-50 w-64 transform overflow-y-auto border-r border-line bg-white p-4 text-sm transition-transform duration-200 ease-out sm:static sm:z-auto sm:w-56 sm:shrink-0 sm:translate-x-0 sm:transition-none ${
+        className={`fixed inset-y-0 left-0 z-50 flex w-64 transform flex-col overflow-y-auto border-r border-line bg-surface p-4 text-sm transition-transform duration-200 ease-out sm:static sm:z-auto sm:w-56 sm:shrink-0 sm:translate-x-0 sm:transition-none ${
           open ? "translate-x-0" : "-translate-x-full"
         }`}
       >
         <div className="mb-6 hidden px-1 sm:block">
           <div className="flex items-center">
-            {/* El icono hace de "Z" inicial — el texto sigue en "enzia" para no repetirla. */}
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/zenzia-icon.png" alt="Zenzia" width={34} height={34} className="h-[34px] w-[34px] mr-1" />
-            <span className="text-lg font-black uppercase tracking-tight text-ink">enzia</span>
+            <img src="/zenzia-wordmark.png" alt="Zenzia" width={153} height={30} className="h-[30px] w-auto" />
           </div>
-          {companyName && (
-            <div className="mt-1 truncate text-xs text-slate/70" title={companyName}>
-              {companyName}
-            </div>
-          )}
         </div>
         <div className="mb-4 flex items-start justify-between px-1 sm:hidden">
           <div>
             <div className="flex items-center">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/zenzia-icon.png" alt="Zenzia" width={28} height={28} className="h-7 w-7 mr-1" />
-              <span className="text-base font-black uppercase tracking-tight text-ink">enzia</span>
+              <img src="/zenzia-wordmark.png" alt="Zenzia" width={142} height={28} className="h-7 w-auto" />
             </div>
-            {companyName && (
-              <div className="mt-1 truncate text-xs text-slate/70" title={companyName}>
-                {companyName}
-              </div>
-            )}
           </div>
           <button
             type="button"
@@ -146,6 +131,13 @@ export default function Sidebar({
             )}
           </Link>
         )}
+
+        <div className="mt-auto flex items-center justify-between gap-2 border-t border-line pt-3">
+          <Link href="/perfil" className={`${linkClass} flex-1 px-2`} onClick={close}>
+            Perfil del negocio
+          </Link>
+          <ThemeToggle />
+        </div>
       </nav>
     </>
   );

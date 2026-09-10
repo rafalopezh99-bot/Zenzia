@@ -32,10 +32,8 @@ export default function LoginPage() {
         className="w-80 space-y-4 rounded-2xl border border-line bg-white p-6 shadow-sm"
       >
         <div className="flex items-center justify-center pb-1">
-          {/* El icono hace de "Z" inicial — el texto sigue en "enzia" para no repetirla. */}
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/zenzia-icon.png" alt="Zenzia" width={56} height={56} className="h-14 w-14 mr-1.5" />
-          <h1 className="text-3xl font-black uppercase tracking-tight text-ink">enzia</h1>
+          <img src="/zenzia-wordmark.png" alt="Zenzia" width={245} height={48} className="h-12 w-auto" />
         </div>
         <Input name="email" type="email" placeholder="Email" required className="w-full" />
         <Input name="password" type="password" placeholder="Contraseña" required className="w-full" />

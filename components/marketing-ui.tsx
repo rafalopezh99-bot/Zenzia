@@ -21,24 +21,22 @@ export function Mono({
   );
 }
 
-// El icono hace de "Z" inicial de la palabra: el texto que va al lado
-// empieza en "enzia" (no "Zenzia") para no repetir la letra. Por eso el
-// icono se pinta grande y pegado al texto, casi como una letra capital.
-function ZenziaWordmark({ size, textClassName }: { size: number; textClassName: string }) {
+// Logotipo completo (la palabra "ZENZIA" ya viene dibujada en la propia
+// imagen, con degradado turquesa y motivo de circuito) — antes esto era un
+// icono con forma de "Z" seguido del texto "enzia" en HTML; ahora que el
+// logo nuevo ya trae la palabra entera no tiene sentido repetirla al lado.
+// `size` sigue marcando el alto en píxeles; el ancho sale solo de la
+// proporción real de la imagen (ratio ≈ 5.1:1).
+function ZenziaWordmark({ size }: { size: number }) {
   return (
-    <span className="flex items-center">
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img
-        src="/zenzia-icon.png"
-        alt="Zenzia"
-        width={size}
-        height={size}
-        style={{ height: size, width: size, marginRight: size * 0.04 }}
-      />
-      <span className={`${textClassName} uppercase`} style={{ color: INK }}>
-        enzia
-      </span>
-    </span>
+    // eslint-disable-next-line @next/next/no-img-element
+    <img
+      src="/zenzia-wordmark.png"
+      alt="Zenzia"
+      width={Math.round(size * 5.1)}
+      height={size}
+      style={{ height: size, width: "auto" }}
+    />
   );
 }
 
@@ -50,7 +48,7 @@ export function MarketingHeader({ minimal = false }: { minimal?: boolean }) {
       }`}
     >
       <Link href="/" className="justify-self-start">
-        <ZenziaWordmark size={46} textClassName="text-2xl font-black tracking-tight" />
+        <ZenziaWordmark size={40} />
       </Link>
       {minimal ? (
         <Link

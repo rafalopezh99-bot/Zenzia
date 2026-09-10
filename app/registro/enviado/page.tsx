@@ -7,8 +7,7 @@ export default function RegistroEnviadoPage() {
       <Card className="w-full max-w-sm text-center">
         <div className="mb-2 flex items-center justify-center">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/zenzia-icon.png" alt="Zenzia" width={38} height={38} className="h-[38px] w-[38px] mr-1" />
-          <h1 className="text-lg font-black uppercase tracking-tight text-ink">enzia</h1>
+          <img src="/zenzia-wordmark.png" alt="Zenzia" width={194} height={38} className="h-[38px] w-auto" />
         </div>
         <h2 className="mb-2 text-base font-bold text-ink">Solicitud enviada</h2>
         <p className="mb-5 text-sm text-slate">
