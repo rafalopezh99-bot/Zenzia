@@ -1,8 +1,8 @@
 import { createClient } from "@/lib/supabase/server";
-import { addActivity, updateContactStage, updateContactLink, updateContactBusinessType } from "@/lib/actions/contacts";
+import { addActivity, updateContactStage, updateContactLink, updateContactLeadInfo } from "@/lib/actions/contacts";
 import { notFound } from "next/navigation";
 import { Card, PageHeader, Input, Select, PrimaryButton, GhostButton } from "@/components/ui";
-import { PIPELINE_STAGES, STAGE_LABEL, getStage } from "@/lib/pipeline";
+import { PIPELINE_STAGES, STAGE_LABEL, CONTACT_CHANNELS, CHANNEL_LABEL, getStage } from "@/lib/pipeline";
 import { getCurrentCompanyProfile } from "@/lib/company";
 import { showsAgencyPipeline, showsAcademiaFields } from "@/lib/terminology";
 
@@ -27,10 +27,12 @@ export default async function ContactoDetailPage({ params }: { params: { id: str
   const addActivityForContact = addActivity.bind(null, params.id);
   const updateStageForContact = updateContactStage.bind(null, params.id);
   const updateLinkForContact = updateContactLink.bind(null, params.id);
-  const updateBusinessTypeForContact = updateContactBusinessType.bind(null, params.id);
+  const updateLeadInfoForContact = updateContactLeadInfo.bind(null, params.id);
   const currentStage = getStage(contact.custom_fields);
   const demoUrl: string = contact.custom_fields?.demo_url ?? "";
   const businessType: string = contact.custom_fields?.business_type ?? "";
+  const instagramHandle: string = contact.custom_fields?.instagram_handle ?? "";
+  const contactedVia: string = contact.custom_fields?.contacted_via ?? "";
   const curso: string = contact.custom_fields?.curso ?? "";
   const subjectList: string[] = contact.custom_fields?.subjects ?? [];
   // wa.me solo admite dígitos: se limpian espacios/guiones/+ del teléfono
@@ -55,10 +57,26 @@ export default async function ContactoDetailPage({ params }: { params: { id: str
               {contact.email}
             </a>
           )}
+          {showPipeline && instagramHandle && (contact.phone || contact.email) && " · "}
+          {showPipeline && instagramHandle && (
+            <a
+              href={`https://instagram.com/${instagramHandle}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-brand hover:underline"
+            >
+              @{instagramHandle}
+            </a>
+          )}
           {" · "}
           <span className="text-slate/70">
             Alta: {new Date(contact.created_at).toLocaleDateString("es-ES", { timeZone: "Europe/Madrid" })}
           </span>
+          {showPipeline && contactedVia && (
+            <span className="text-slate/70">
+              {" · "}Contactado por: {CHANNEL_LABEL[contactedVia as keyof typeof CHANNEL_LABEL] ?? contactedVia}
+            </span>
+          )}
           {showPipeline && demoUrl && (
             <>
               {" · "}
@@ -100,14 +118,28 @@ export default async function ContactoDetailPage({ params }: { params: { id: str
 
       {showPipeline && (
         <Card className="mb-6">
-          <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-slate">Tipo de negocio</h2>
-          <form action={updateBusinessTypeForContact} className="flex flex-wrap items-center gap-2">
+          <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-slate">Datos del prospecto</h2>
+          <form action={updateLeadInfoForContact} className="flex flex-wrap items-center gap-2">
             <Input
               name="business_type"
-              placeholder="Ej: centro de estética"
+              placeholder="Tipo de negocio (ej. centro de estética)"
               defaultValue={businessType}
               className="flex-1"
             />
+            <Input
+              name="instagram_handle"
+              placeholder="Instagram (usuario, sin @)"
+              defaultValue={instagramHandle}
+              className="flex-1"
+            />
+            <Select name="contacted_via" defaultValue={contactedVia}>
+              <option value="">Contactado a través de</option>
+              {CONTACT_CHANNELS.map((c) => (
+                <option key={c} value={c}>
+                  {CHANNEL_LABEL[c]}
+                </option>
+              ))}
+            </Select>
             <GhostButton>Guardar</GhostButton>
           </form>
         </Card>

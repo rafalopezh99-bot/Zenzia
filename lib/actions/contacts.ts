@@ -14,6 +14,11 @@ export async function createContact(formData: FormData) {
 
   const demo_url = String(formData.get("demo_url") ?? "").trim();
   const business_type = String(formData.get("business_type") ?? "").trim();
+  const instagram_handle = String(formData.get("instagram_handle") ?? "")
+    .trim()
+    .replace(/^@/, "");
+  const contacted_via = String(formData.get("contacted_via") ?? "").trim();
+  const stage = String(formData.get("stage") ?? "").trim();
   const curso = String(formData.get("curso") ?? "").trim();
   const bono_type_id = String(formData.get("bono_type_id") ?? "").trim();
   // Casillas de asignatura: pueden llegar 0, 1 o varias con el mismo name.
@@ -26,6 +31,11 @@ export async function createContact(formData: FormData) {
   const custom_fields: Record<string, unknown> = {};
   if (demo_url) custom_fields.demo_url = demo_url;
   if (business_type) custom_fields.business_type = business_type;
+  if (instagram_handle) custom_fields.instagram_handle = instagram_handle;
+  if (contacted_via) custom_fields.contacted_via = contacted_via;
+  // La etapa se elige ya al dar de alta — antes quedaba fija en "nuevo
+  // lead" hasta que alguien entraba a la ficha a cambiarla a mano.
+  if (stage) custom_fields.pipeline_stage = stage;
   if (curso) custom_fields.curso = curso;
   if (subjects.length) custom_fields.subjects = subjects;
 
@@ -104,6 +114,10 @@ export async function updateContactStage(contactId: string, formData: FormData) 
 
   revalidatePath(`/contactos/${contactId}`);
   revalidatePath("/contactos");
+  // Ya estamos en /contactos/[id]: este redirect no navega a ningún sitio
+  // nuevo, pero fuerza a Next a refrescar la página con los datos ya
+  // actualizados (con solo revalidatePath a veces no se notaba el cambio).
+  redirect(`/contactos/${contactId}`);
 }
 
 // Enlace libre asociado al contacto (demo, propuesta, drive...). Se guarda
@@ -124,12 +138,18 @@ export async function updateContactLink(contactId: string, formData: FormData) {
   if (error) throw new Error(error.message);
 
   revalidatePath(`/contactos/${contactId}`);
+  redirect(`/contactos/${contactId}`);
 }
 
-// Tipo de negocio del contacto (ej. "centro de estética"), igual que el
-// enlace de la demo: se guarda en custom_fields, sin migración de esquema.
-export async function updateContactBusinessType(contactId: string, formData: FormData) {
+// Datos del prospecto (tipo de negocio, Instagram, canal por el que
+// contactó), todos juntos en un mismo formulario — igual que el resto de
+// campos libres del pipeline, se guardan en custom_fields sin migración.
+export async function updateContactLeadInfo(contactId: string, formData: FormData) {
   const business_type = String(formData.get("business_type") ?? "").trim();
+  const instagram_handle = String(formData.get("instagram_handle") ?? "")
+    .trim()
+    .replace(/^@/, "");
+  const contacted_via = String(formData.get("contacted_via") ?? "").trim();
   const supabase = createClient();
 
   const { data: contact } = await supabase
@@ -138,13 +158,19 @@ export async function updateContactBusinessType(contactId: string, formData: For
     .eq("id", contactId)
     .single();
 
-  const custom_fields = { ...(contact?.custom_fields ?? {}), business_type };
+  const custom_fields = {
+    ...(contact?.custom_fields ?? {}),
+    business_type,
+    instagram_handle,
+    contacted_via,
+  };
 
   const { error } = await supabase.from("contacts").update({ custom_fields }).eq("id", contactId);
   if (error) throw new Error(error.message);
 
   revalidatePath(`/contactos/${contactId}`);
   revalidatePath("/contactos");
+  redirect(`/contactos/${contactId}`);
 }
 
 // Nota de historial ligada a un contacto concreto. El id del contacto se
@@ -165,4 +191,5 @@ export async function addActivity(contactId: string, formData: FormData) {
   if (error) throw new Error(error.message);
 
   revalidatePath(`/contactos/${contactId}`);
+  redirect(`/contactos/${contactId}`);
 }

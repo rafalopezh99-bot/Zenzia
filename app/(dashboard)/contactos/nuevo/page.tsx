@@ -5,6 +5,7 @@ import { getCurrentCompanyProfile } from "@/lib/company";
 import { getTerminology, showsAgencyPipeline, showsAcademiaFields } from "@/lib/terminology";
 import { createClient } from "@/lib/supabase/server";
 import { CURSOS } from "@/lib/academia";
+import { PIPELINE_STAGES, STAGE_LABEL, CONTACT_CHANNELS, CHANNEL_LABEL } from "@/lib/pipeline";
 
 export default async function NuevoContactoPage() {
   const { companyId, vertical } = await getCurrentCompanyProfile();
@@ -43,10 +44,34 @@ export default async function NuevoContactoPage() {
           {showPipeline && (
             <Input name="business_type" placeholder="Tipo de negocio (ej. centro de estética)" className="w-full" />
           )}
+          {showPipeline && (
+            <Input name="instagram_handle" placeholder="Instagram (usuario, sin @)" className="w-full" />
+          )}
           <Input name="phone" placeholder="Teléfono (opcional)" className="w-full" />
           <Input name="email" type="email" placeholder="Email (opcional)" className="w-full" />
           {showPipeline && (
             <Input name="demo_url" type="url" placeholder="Enlace de la demo (opcional)" className="w-full" />
+          )}
+          {showPipeline && (
+            <Select name="contacted_via" defaultValue="" className="w-full">
+              <option value="" disabled>
+                Contactado a través de
+              </option>
+              {CONTACT_CHANNELS.map((c) => (
+                <option key={c} value={c}>
+                  {CHANNEL_LABEL[c]}
+                </option>
+              ))}
+            </Select>
+          )}
+          {showPipeline && (
+            <Select name="stage" defaultValue="nuevo_lead" className="w-full">
+              {PIPELINE_STAGES.map((s) => (
+                <option key={s} value={s}>
+                  {STAGE_LABEL[s]}
+                </option>
+              ))}
+            </Select>
           )}
 
           {showAcademia && (

@@ -40,3 +40,19 @@ export function getStage(customFields: Record<string, unknown> | null | undefine
   const value = customFields?.pipeline_stage;
   return isPipelineStage(value) ? value : "nuevo_lead";
 }
+
+// Cómo llegó el lead (para saber qué canal está funcionando mejor). Igual
+// que el pipeline, se guarda en contacts.custom_fields.contacted_via —
+// lista cerrada en el formulario para no acabar con mil variantes del
+// mismo canal escritas a mano.
+export const CONTACT_CHANNELS = ["gmail", "instagram", "facebook", "presencial", "otro"] as const;
+
+export type ContactChannel = (typeof CONTACT_CHANNELS)[number];
+
+export const CHANNEL_LABEL: Record<ContactChannel, string> = {
+  gmail: "Gmail",
+  instagram: "Instagram",
+  facebook: "Facebook",
+  presencial: "Presencial",
+  otro: "Otro",
+};
