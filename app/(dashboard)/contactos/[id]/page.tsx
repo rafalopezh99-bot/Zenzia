@@ -1,16 +1,11 @@
 import { createClient } from "@/lib/supabase/server";
-import {
-  addActivity,
-  updateContactStage,
-  updateContactLink,
-  updateContactLeadInfo,
-  updateContactBasicInfo,
-} from "@/lib/actions/contacts";
+import { addActivity, updateContact } from "@/lib/actions/contacts";
 import { notFound } from "next/navigation";
-import { Card, PageHeader, Input, Select, PrimaryButton, GhostButton } from "@/components/ui";
+import { Card, PageHeader, Input, Select, PrimaryButton } from "@/components/ui";
 import { PIPELINE_STAGES, STAGE_LABEL, CONTACT_CHANNELS, CHANNEL_LABEL, getStage } from "@/lib/pipeline";
 import { getCurrentCompanyProfile } from "@/lib/company";
 import { showsAgencyPipeline, showsAcademiaFields } from "@/lib/terminology";
+import { BILLING_FREQUENCIES, BILLING_FREQUENCY_LABEL } from "@/lib/billing";
 
 export default async function ContactoDetailPage({ params }: { params: { id: string } }) {
   const supabase = createClient();
@@ -31,10 +26,7 @@ export default async function ContactoDetailPage({ params }: { params: { id: str
   if (!contact) notFound();
 
   const addActivityForContact = addActivity.bind(null, params.id);
-  const updateBasicInfoForContact = updateContactBasicInfo.bind(null, params.id);
-  const updateStageForContact = updateContactStage.bind(null, params.id);
-  const updateLinkForContact = updateContactLink.bind(null, params.id);
-  const updateLeadInfoForContact = updateContactLeadInfo.bind(null, params.id);
+  const updateContactForContact = updateContact.bind(null, params.id);
   const currentStage = getStage(contact.custom_fields);
   const demoUrl: string = contact.custom_fields?.demo_url ?? "";
   const businessType: string = contact.custom_fields?.business_type ?? "";
@@ -42,6 +34,12 @@ export default async function ContactoDetailPage({ params }: { params: { id: str
   const contactedVia: string = contact.custom_fields?.contacted_via ?? "";
   const curso: string = contact.custom_fields?.curso ?? "";
   const subjectList: string[] = contact.custom_fields?.subjects ?? [];
+  const taxId: string = contact.custom_fields?.tax_id ?? "";
+  const billingAddress: string = contact.custom_fields?.billing_address ?? "";
+  const postalCode: string = contact.custom_fields?.postal_code ?? "";
+  const province: string = contact.custom_fields?.province ?? "";
+  const country: string = contact.custom_fields?.country ?? "España";
+  const billingFrequency: string = contact.custom_fields?.billing_frequency ?? "";
   // wa.me solo admite dígitos: se limpian espacios/guiones/+ del teléfono
   // tal cual esté guardado.
   const whatsappDigits = (contact.phone ?? "").replace(/[^\d]/g, "");
@@ -107,20 +105,19 @@ export default async function ContactoDetailPage({ params }: { params: { id: str
         )}
       </div>
 
-      <Card className="mb-6">
-        <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-slate">Datos básicos</h2>
-        <form action={updateBasicInfoForContact} className="flex flex-wrap items-center gap-2">
-          <Input name="full_name" placeholder="Nombre completo" required defaultValue={contact.full_name} className="flex-1" />
-          <Input name="phone" placeholder="Teléfono" defaultValue={contact.phone ?? ""} className="flex-1" />
-          <Input name="email" type="email" placeholder="Email" defaultValue={contact.email ?? ""} className="flex-1" />
-          <GhostButton>Guardar</GhostButton>
-        </form>
-      </Card>
-
-      {showPipeline && (
+      <form action={updateContactForContact}>
         <Card className="mb-6">
-          <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-slate">Etapa del cliente</h2>
-          <form action={updateStageForContact} className="flex flex-wrap items-center gap-2">
+          <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-slate">Datos básicos</h2>
+          <div className="flex flex-wrap items-center gap-2">
+            <Input name="full_name" placeholder="Nombre completo" required defaultValue={contact.full_name} className="flex-1" />
+            <Input name="phone" placeholder="Teléfono" defaultValue={contact.phone ?? ""} className="flex-1" />
+            <Input name="email" type="email" placeholder="Email" defaultValue={contact.email ?? ""} className="flex-1" />
+          </div>
+        </Card>
+
+        {showPipeline && (
+          <Card className="mb-6">
+            <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-slate">Etapa del cliente</h2>
             <Select name="stage" defaultValue={currentStage}>
               {PIPELINE_STAGES.map((s) => (
                 <option key={s} value={s}>
@@ -128,57 +125,77 @@ export default async function ContactoDetailPage({ params }: { params: { id: str
                 </option>
               ))}
             </Select>
-            <GhostButton>Actualizar etapa</GhostButton>
-          </form>
-        </Card>
-      )}
+          </Card>
+        )}
 
-      {showPipeline && (
-        <Card className="mb-6">
-          <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-slate">Datos del prospecto</h2>
-          <form action={updateLeadInfoForContact} className="flex flex-wrap items-center gap-2">
-            <Input
-              name="business_type"
-              placeholder="Tipo de negocio (ej. centro de estética)"
-              defaultValue={businessType}
-              className="flex-1"
-            />
-            <Input
-              name="instagram_handle"
-              placeholder="Instagram (usuario, sin @)"
-              defaultValue={instagramHandle}
-              className="flex-1"
-            />
-            <Select name="contacted_via" defaultValue={contactedVia}>
-              <option value="">Contactado a través de</option>
-              {CONTACT_CHANNELS.map((c) => (
-                <option key={c} value={c}>
-                  {CHANNEL_LABEL[c]}
-                </option>
-              ))}
-            </Select>
-            <GhostButton>Guardar</GhostButton>
-          </form>
-        </Card>
-      )}
+        {showPipeline && (
+          <Card className="mb-6">
+            <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-slate">Datos del prospecto</h2>
+            <div className="flex flex-wrap items-center gap-2">
+              <Input
+                name="business_type"
+                placeholder="Tipo de negocio (ej. centro de estética)"
+                defaultValue={businessType}
+                className="flex-1"
+              />
+              <Input
+                name="instagram_handle"
+                placeholder="Instagram (usuario, sin @)"
+                defaultValue={instagramHandle}
+                className="flex-1"
+              />
+              <Select name="contacted_via" defaultValue={contactedVia}>
+                <option value="">Contactado a través de</option>
+                {CONTACT_CHANNELS.map((c) => (
+                  <option key={c} value={c}>
+                    {CHANNEL_LABEL[c]}
+                  </option>
+                ))}
+              </Select>
+            </div>
+          </Card>
+        )}
 
-      {showPipeline && (
-        <Card className="mb-6">
-          <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-slate">Enlace de la demo</h2>
-          <form action={updateLinkForContact} className="flex flex-wrap items-center gap-2">
+        {showPipeline && (
+          <Card className="mb-6">
+            <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-slate">Enlace de la demo</h2>
             <Input
               name="demo_url"
               type="url"
               placeholder="https://cliente-demo.netlify.app"
               defaultValue={demoUrl}
-              className="flex-1"
+              className="w-full"
             />
-            <GhostButton>Guardar enlace</GhostButton>
-          </form>
-        </Card>
-      )}
+          </Card>
+        )}
 
-      <Card>
+        <Card className="mb-6">
+          <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-slate">Datos de facturación</h2>
+          <div className="space-y-2">
+            <div className="flex flex-wrap gap-2">
+              <Input name="tax_id" placeholder="DNI / CIF" defaultValue={taxId} className="flex-1" />
+              <Input name="billing_address" placeholder="Dirección" defaultValue={billingAddress} className="flex-[2]" />
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <Input name="postal_code" placeholder="Código postal" defaultValue={postalCode} className="w-28" />
+              <Input name="province" placeholder="Provincia" defaultValue={province} className="flex-1" />
+              <Input name="country" placeholder="País" defaultValue={country} className="flex-1" />
+            </div>
+            <Select name="billing_frequency" defaultValue={billingFrequency} className="w-full">
+              <option value="">Facturación (opcional)</option>
+              {BILLING_FREQUENCIES.map((f) => (
+                <option key={f} value={f}>
+                  {BILLING_FREQUENCY_LABEL[f]}
+                </option>
+              ))}
+            </Select>
+          </div>
+        </Card>
+
+        <PrimaryButton className="w-full">Guardar</PrimaryButton>
+      </form>
+
+      <Card className="mt-6">
         <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-slate">
           Notas / resumen de conversaciones
         </h2>

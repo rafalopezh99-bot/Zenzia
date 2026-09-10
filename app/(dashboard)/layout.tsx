@@ -41,7 +41,6 @@ export default async function DashboardLayout({ children }: { children: React.Re
       <Sidebar
         modules={modules}
         notificationCount={notificationCount ?? 0}
-        companyName={profile.companyName}
         isAdmin={isAdmin}
         signupRequestCount={signupRequestCount}
         vertical={profile.vertical}

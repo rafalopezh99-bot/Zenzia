@@ -2,14 +2,46 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Fondo por defecto: el "paper" claro de la landing pública (zenzia.es).
-   El panel (login, onboarding, dashboard) pinta su propio fondo oscuro en
-   el div raíz de cada pantalla, así que este valor solo se ve un instante
-   antes de hidratar o en zonas de overscroll — nunca en el panel. */
+/* Paleta del panel como variables CSS: tailwind.config.ts las expone como
+   los colores "paper"/"ink"/"slate"/etc. de siempre. Modo claro son los
+   valores originales; [data-theme="dark"] (puesto en <html> por el script
+   de arranque + ThemeToggle, ver app/layout.tsx) los redefine. Ningún
+   componente necesita saber que existe el modo oscuro: sigue escribiendo
+   bg-paper/text-ink y el tema activo decide qué hex sale. */
+:root {
+  --color-paper: #f7f8f6;
+  --color-paper-deep: #edf1ef;
+  --color-ink: #0f1113;
+  --color-slate: #5b6a63;
+  --color-line: #d6deda;
+  --color-brand: #2c6c82;
+  --color-brand-pale: #e1eef0;
+  --color-mint: #bfe3d3;
+  --color-surface: #ffffff;
+  color-scheme: light;
+}
+
+[data-theme="dark"] {
+  --color-paper: #10161a;
+  --color-paper-deep: #1a2226;
+  --color-ink: #eef2f0;
+  --color-slate: #93a5a0;
+  --color-line: #2a3538;
+  --color-brand: #6bb3ca;
+  --color-brand-pale: #1d343b;
+  --color-mint: #274238;
+  --color-surface: #171f22;
+  color-scheme: dark;
+}
+
+/* Fondo por defecto: el "paper" del tema activo. El panel (login,
+   onboarding, dashboard) pinta su propio fondo en el div raíz de cada
+   pantalla, así que este valor solo se ve un instante antes de hidratar o
+   en zonas de overscroll. */
 html,
 body {
-  background-color: #f7f8f6;
-  color: #0f1113;
+  background-color: var(--color-paper);
+  color: var(--color-ink);
 }
 
 /* ---------- Dashboard mockup (landing hero) ---------- */

@@ -1,6 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { createInvoice, markInvoicePaid } from "@/lib/actions/invoices";
-import { Card, PageHeader, Input, Select, PrimaryButton, GhostButton, Badge, tableWrap, tableEl, theadEl, thEl, tdEl, trEl } from "@/components/ui";
+import { Card, PageHeader, Input, Select, PrimaryButton, GhostButton, ghostLinkClass, Badge, tableWrap, tableEl, theadEl, thEl, tdEl, trEl } from "@/components/ui";
 import { getCurrentCompanyProfile } from "@/lib/company";
 import { getTerminology } from "@/lib/terminology";
 import { PAYMENT_METHOD_LABEL, PAYMENT_METHODS } from "@/lib/paymentMethod";
@@ -96,7 +96,7 @@ export default async function FacturacionPage() {
                       <Badge tone={vencida ? "red" : "amber"}>{vencida ? "Vencida" : "Pendiente"}</Badge>
                     )}
                   </td>
-                  <td className={tdEl}>
+                  <td className={`${tdEl} flex flex-wrap items-center gap-2`}>
                     {i.status === "pendiente" && (
                       <form action={pay} className="flex items-center gap-1">
                         <Select name="payment_method" required className="!py-1 !text-xs">
@@ -110,6 +110,9 @@ export default async function FacturacionPage() {
                         <GhostButton>Marcar pagada</GhostButton>
                       </form>
                     )}
+                    <a href={`/api/facturas/${i.id}/pdf`} target="_blank" rel="noopener noreferrer" className={ghostLinkClass}>
+                      Descargar factura
+                    </a>
                   </td>
                 </tr>
               );

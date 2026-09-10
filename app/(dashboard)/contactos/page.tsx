@@ -1,9 +1,11 @@
 import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
-import { PageHeader, primaryButtonClass, Badge, tableWrap, tableEl, theadEl, thEl, tdEl, trEl } from "@/components/ui";
-import { STAGE_LABEL, STAGE_TONE, getStage } from "@/lib/pipeline";
+import { PageHeader, primaryButtonClass, tableWrap, tableEl, theadEl, thEl, tdEl, trEl } from "@/components/ui";
+import { getStage, CHANNEL_LABEL } from "@/lib/pipeline";
 import { getCurrentCompanyProfile } from "@/lib/company";
 import { getTerminology, showsAgencyPipeline, showsAcademiaFields } from "@/lib/terminology";
+import { updateContactStageInline } from "@/lib/actions/contacts";
+import StageSelect from "@/components/StageSelect";
 
 const contactIconLinkClass =
   "inline-flex h-7 w-7 items-center justify-center rounded-full border border-line transition hover:border-brand";
@@ -50,25 +52,29 @@ export default async function ContactosPage() {
         }
       />
 
+      {/* En móvil la tabla completa no cabe y obliga a hacer scroll lateral
+          para ver nada útil: de ID/Nombre/Tipo de negocio/Etapa para abajo,
+          el resto de columnas solo se muestran a partir de "sm" (escritorio). */}
       <div className={tableWrap}>
         <table className={tableEl}>
           <thead className={theadEl}>
             <tr>
               <th className={thEl}>ID</th>
               <th className={thEl}>Nombre</th>
-              <th className={thEl}>Contacto</th>
+              <th className={`${thEl} hidden sm:table-cell`}>Contacto</th>
               {showAcademia && (
                 <>
-                  <th className={thEl}>Curso</th>
-                  <th className={thEl}>Asignaturas</th>
+                  <th className={`${thEl} hidden sm:table-cell`}>Curso</th>
+                  <th className={`${thEl} hidden sm:table-cell`}>Asignaturas</th>
                 </>
               )}
-              <th className={thEl}>Alta</th>
+              <th className={`${thEl} hidden sm:table-cell`}>Alta</th>
               {showPipeline && (
                 <>
                   <th className={thEl}>Tipo de negocio</th>
+                  <th className={`${thEl} hidden sm:table-cell`}>Contactado por</th>
                   <th className={thEl}>Etapa</th>
-                  <th className={thEl}>Demo</th>
+                  <th className={`${thEl} hidden sm:table-cell`}>Demo</th>
                 </>
               )}
             </tr>
@@ -77,6 +83,7 @@ export default async function ContactosPage() {
             {(contacts ?? []).map((c: any) => {
               const stage = getStage(c.custom_fields);
               const demoUrl: string = c.custom_fields?.demo_url ?? "";
+              const contactedVia: string = c.custom_fields?.contacted_via ?? "";
               const curso: string = c.custom_fields?.curso ?? "";
               const subjectList: string[] = c.custom_fields?.subjects ?? [];
               const whatsappDigits: string = (c.phone ?? "").replace(/[^\d]/g, "");
@@ -90,7 +97,7 @@ export default async function ContactosPage() {
                       {c.full_name}
                     </Link>
                   </td>
-                  <td className={tdEl}>
+                  <td className={`${tdEl} hidden sm:table-cell`}>
                     <div className="flex items-center gap-1.5">
                       {c.phone && (
                         <a
@@ -113,13 +120,15 @@ export default async function ContactosPage() {
                   </td>
                   {showAcademia && (
                     <>
-                      <td className={tdEl}>{curso || <span className="text-slate/50">—</span>}</td>
-                      <td className={tdEl}>
+                      <td className={`${tdEl} hidden sm:table-cell`}>
+                        {curso || <span className="text-slate/50">—</span>}
+                      </td>
+                      <td className={`${tdEl} hidden sm:table-cell`}>
                         {subjectList.length ? subjectList.join(", ") : <span className="text-slate/50">—</span>}
                       </td>
                     </>
                   )}
-                  <td className={tdEl}>
+                  <td className={`${tdEl} hidden sm:table-cell`}>
                     {c.created_at
                       ? new Date(c.created_at).toLocaleDateString("es-ES", { timeZone: "Europe/Madrid" })
                       : "—"}
@@ -129,10 +138,17 @@ export default async function ContactosPage() {
                       <td className={tdEl}>
                         {c.custom_fields?.business_type || <span className="text-slate/50">—</span>}
                       </td>
-                      <td className={tdEl}>
-                        <Badge tone={STAGE_TONE[stage]}>{STAGE_LABEL[stage]}</Badge>
+                      <td className={`${tdEl} hidden sm:table-cell`}>
+                        {contactedVia ? (
+                          CHANNEL_LABEL[contactedVia as keyof typeof CHANNEL_LABEL] ?? contactedVia
+                        ) : (
+                          <span className="text-slate/50">—</span>
+                        )}
                       </td>
                       <td className={tdEl}>
+                        <StageSelect contactId={c.id} stage={stage} updateStage={updateContactStageInline} />
+                      </td>
+                      <td className={`${tdEl} hidden sm:table-cell`}>
                         {demoUrl ? (
                           <a
                             href={demoUrl}

@@ -13,16 +13,28 @@ export function PageHeader({
   eyebrow,
   title,
   action,
+  logoUrl,
 }: {
   eyebrow?: string;
   title: string;
   action?: ReactNode;
+  logoUrl?: string | null;
 }) {
   return (
     <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
-      <div>
-        {eyebrow && <div className="mb-1 text-xs font-semibold uppercase tracking-widest text-brand">{eyebrow}</div>}
-        <h1 className="text-2xl font-black uppercase tracking-tight text-ink">{title}</h1>
+      <div className="flex items-center gap-3">
+        {logoUrl && (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={logoUrl}
+            alt=""
+            className="h-11 w-11 shrink-0 rounded-lg border border-line bg-surface object-contain p-1"
+          />
+        )}
+        <div>
+          {eyebrow && <div className="mb-1 text-xs font-semibold uppercase tracking-widest text-brand">{eyebrow}</div>}
+          <h1 className="text-2xl font-black uppercase tracking-tight text-ink">{title}</h1>
+        </div>
       </div>
       {action}
     </div>
@@ -31,7 +43,7 @@ export function PageHeader({
 
 export function Card({ children, className = "" }: { children: ReactNode; className?: string }) {
   return (
-    <div className={`rounded-2xl border border-line bg-white p-5 shadow-sm ${className}`}>{children}</div>
+    <div className={`rounded-2xl border border-line bg-surface p-5 shadow-sm ${className}`}>{children}</div>
   );
 }
 
@@ -39,7 +51,7 @@ export function Input(props: InputHTMLAttributes<HTMLInputElement>) {
   return (
     <input
       {...props}
-      className={`rounded-lg border border-line bg-white px-3 py-2 text-sm text-ink placeholder:text-slate/60 focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand/30 ${
+      className={`rounded-lg border border-line bg-surface px-3 py-2 text-sm text-ink placeholder:text-slate/60 focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand/30 ${
         props.className ?? ""
       }`}
     />
@@ -50,7 +62,7 @@ export function Textarea(props: TextareaHTMLAttributes<HTMLTextAreaElement>) {
   return (
     <textarea
       {...props}
-      className={`rounded-lg border border-line bg-white px-3 py-2 text-sm text-ink placeholder:text-slate/60 focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand/30 ${
+      className={`rounded-lg border border-line bg-surface px-3 py-2 text-sm text-ink placeholder:text-slate/60 focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand/30 ${
         props.className ?? ""
       }`}
     />
@@ -61,7 +73,7 @@ export function Select(props: SelectHTMLAttributes<HTMLSelectElement>) {
   return (
     <select
       {...props}
-      className={`rounded-lg border border-line bg-white px-3 py-2 text-sm text-ink focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand/30 ${
+      className={`rounded-lg border border-line bg-surface px-3 py-2 text-sm text-ink focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand/30 ${
         props.className ?? ""
       }`}
     />
@@ -100,12 +112,18 @@ export function GhostButton(props: ButtonHTMLAttributes<HTMLButtonElement>) {
   );
 }
 
+// Mismas clases que GhostButton pero para un <a> (descargas, enlaces con
+// target="_blank"...), donde anidar un <button> dentro de un <a> no es
+// válido en HTML.
+export const ghostLinkClass =
+  "inline-block rounded-full border border-line px-3 py-1.5 text-xs font-medium text-slate transition hover:border-brand hover:text-brand";
+
 const BADGE_TONES: Record<string, string> = {
   neutral: "bg-paper-deep text-slate",
-  green: "bg-emerald-50 text-emerald-700",
-  amber: "bg-amber-50 text-amber-700",
-  red: "bg-red-50 text-red-700",
-  violet: "bg-violet-50 text-violet-700",
+  green: "bg-emerald-50 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300",
+  amber: "bg-amber-50 text-amber-700 dark:bg-amber-500/15 dark:text-amber-300",
+  red: "bg-red-50 text-red-700 dark:bg-red-500/15 dark:text-red-300",
+  violet: "bg-violet-50 text-violet-700 dark:bg-violet-500/15 dark:text-violet-300",
 };
 
 export function Badge({

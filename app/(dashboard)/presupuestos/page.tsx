@@ -1,6 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { createQuote, advanceQuoteStatus, rejectQuote } from "@/lib/actions/quotes";
-import { Card, PageHeader, Input, Select, PrimaryButton, GhostButton, Badge, tableWrap, tableEl, theadEl, thEl, tdEl, trEl } from "@/components/ui";
+import { Card, PageHeader, Input, Select, PrimaryButton, GhostButton, ghostLinkClass, Badge, tableWrap, tableEl, theadEl, thEl, tdEl, trEl } from "@/components/ui";
 
 const STATUS_LABEL: Record<string, string> = {
   pendiente: "Pendiente",
@@ -77,7 +77,7 @@ export default async function PresupuestosPage() {
                   <td className={tdEl}>
                     <Badge tone={STATUS_TONE[q.status]}>{STATUS_LABEL[q.status]}</Badge>
                   </td>
-                  <td className={`${tdEl} flex gap-2`}>
+                  <td className={`${tdEl} flex flex-wrap gap-2`}>
                     {nextLabel && (
                       <form action={advance}>
                         <GhostButton>{nextLabel}</GhostButton>
@@ -88,6 +88,9 @@ export default async function PresupuestosPage() {
                         <GhostButton>Rechazar</GhostButton>
                       </form>
                     )}
+                    <a href={`/api/presupuestos/${q.id}/pdf`} target="_blank" rel="noopener noreferrer" className={ghostLinkClass}>
+                      Descargar presupuesto
+                    </a>
                   </td>
                 </tr>
               );

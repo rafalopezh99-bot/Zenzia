@@ -6,6 +6,7 @@
 export const PIPELINE_STAGES = [
   "nuevo_lead",
   "contactado",
+  "no_contesta",
   "propuesta_enviada",
   "negociacion",
   "ganado",
@@ -17,6 +18,7 @@ export type PipelineStage = (typeof PIPELINE_STAGES)[number];
 export const STAGE_LABEL: Record<PipelineStage, string> = {
   nuevo_lead: "Nuevo lead",
   contactado: "Contactado",
+  no_contesta: "No contesta",
   propuesta_enviada: "Propuesta enviada",
   negociacion: "En negociación",
   ganado: "Cliente",
@@ -26,6 +28,7 @@ export const STAGE_LABEL: Record<PipelineStage, string> = {
 export const STAGE_TONE: Record<PipelineStage, "neutral" | "amber" | "violet" | "green" | "red"> = {
   nuevo_lead: "neutral",
   contactado: "amber",
+  no_contesta: "red",
   propuesta_enviada: "violet",
   negociacion: "violet",
   ganado: "green",

@@ -1,16 +1,17 @@
 import { createClient } from "@/lib/supabase/server";
-import { Card, PageHeader } from "@/components/ui";
+import { Card, PageHeader, Badge } from "@/components/ui";
 import { getCurrentCompanyProfile } from "@/lib/company";
 import { getTerminology, showsAcademiaFields } from "@/lib/terminology";
 import { appLocalParts, fromAppLocalInput } from "@/lib/timezone";
 import LiveClock from "@/components/LiveClock";
+import { PIPELINE_STAGES, STAGE_LABEL, STAGE_TONE, getStage } from "@/lib/pipeline";
 
 export default async function DashboardPage() {
   const supabase = createClient();
   // getCurrentCompanyProfile() está cacheada por petición (ver lib/company.ts):
   // el layout ya la llamó justo antes, así que esto no repite el viaje a
   // Supabase, solo reutiliza el resultado.
-  const { fullName, vertical } = await getCurrentCompanyProfile();
+  const { fullName, vertical, logoUrl } = await getCurrentCompanyProfile();
   const terms = getTerminology(vertical);
   const appointmentsLower = terms.appointments.toLowerCase();
 
@@ -32,7 +33,7 @@ export default async function DashboardPage() {
   // lanzan todas a la vez en vez de una detrás de otra — antes el
   // dashboard tardaba la suma de todas, ahora tarda lo que tarda la más
   // lenta.
-  const [{ count: contactCount }, { count: newNotifications }, { data: upcoming }, { data: paidThisMonth }] =
+  const [{ count: contactCount }, { count: newNotifications }, { data: upcoming }, { data: paidThisMonth }, { data: pipelineContacts }] =
     await Promise.all([
       supabase.from("contacts").select("*", { count: "exact", head: true }).eq("status", "active"),
       supabase.from("notifications").select("*", { count: "exact", head: true }).eq("status", "nueva"),
@@ -49,9 +50,22 @@ export default async function DashboardPage() {
         .eq("status", "pagada")
         .gte("paid_at", monthStart.toISOString())
         .lt("paid_at", monthEnd.toISOString()),
+      // Para el desglose de leads por etapa: cuántos siguen adelante, cuántos
+      // no contestan, cuántos se han perdido... de un vistazo, sin entrar a
+      // /contactos a contarlos a mano.
+      supabase.from("contacts").select("custom_fields"),
     ]);
 
   const earnedThisMonth = (paidThisMonth ?? []).reduce((sum: number, i: any) => sum + Number(i.amount), 0);
+
+  const stageCounts = PIPELINE_STAGES.reduce(
+    (acc, s) => ({ ...acc, [s]: 0 }),
+    {} as Record<(typeof PIPELINE_STAGES)[number], number>
+  );
+  for (const c of pipelineContacts ?? []) {
+    const stage = getStage((c as any).custom_fields);
+    stageCounts[stage] += 1;
+  }
 
   return (
     <div>
@@ -59,6 +73,7 @@ export default async function DashboardPage() {
         eyebrow="Dashboard"
         title={fullName ? `¡Hola, ${fullName}!` : "Panel de control"}
         action={<LiveClock />}
+        logoUrl={logoUrl}
       />
 
       <div className="mb-8 grid grid-cols-1 gap-4 sm:max-w-3xl sm:grid-cols-4">
@@ -79,6 +94,18 @@ export default async function DashboardPage() {
           <div className="text-sm text-slate">Ganado este mes</div>
         </Card>
       </div>
+
+      <Card className="mb-8">
+        <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-slate">Leads por etapa</h2>
+        <div className="flex flex-wrap gap-2">
+          {PIPELINE_STAGES.map((s) => (
+            <div key={s} className="flex items-center gap-2 rounded-xl border border-line px-3 py-2">
+              <span className="text-lg font-semibold text-ink tabular-nums">{stageCounts[s]}</span>
+              <Badge tone={STAGE_TONE[s]}>{STAGE_LABEL[s]}</Badge>
+            </div>
+          ))}
+        </div>
+      </Card>
 
       <Card>
         <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-slate">Próximas {appointmentsLower}</h2>

@@ -42,12 +42,15 @@ export function getTerminology(vertical?: string | null): Terminology {
   return { ...DEFAULT_TERMS, ...overrides };
 }
 
-// Los campos de pipeline de ventas (etapa del lead, enlace de demo, tipo de
-// negocio del prospecto) solo tienen sentido para RL Digital Studios
-// vendiendo Zenzia a nuevos clientes — no para una empresa real usando
-// Zenzia para gestionar a sus propios contactos/alumnos/pacientes.
-export function showsAgencyPipeline(vertical?: string | null): boolean {
-  return vertical === "agencia";
+// Campos de seguimiento de leads (tipo de negocio, Instagram, contactado a
+// través de, etapa del pipeline, enlace de demo/presupuesto). Antes solo se
+// mostraban para vertical "agencia" (pensado para RL Digital Studios
+// captando clientes de Zenzia), pero cualquier empresa que gestiona sus
+// propios contactos también quiere saber cómo llegó el lead y en qué punto
+// de la venta está — así que se muestran para todas las cuentas,
+// independientemente del vertical o de cómo se hayan dado de alta.
+export function showsAgencyPipeline(_vertical?: string | null): boolean {
+  return true;
 }
 
 // Curso, bono (tarifario) y asignaturas solo tienen sentido para clases

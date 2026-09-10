@@ -35,7 +35,7 @@ export const getCurrentCompanyProfile = cache(async () => {
   // viaje de red en vez de dos.
   const { data: membership } = await supabase
     .from("company_users")
-    .select("company_id, full_name, companies(name, onboarded, vertical)")
+    .select("company_id, full_name, companies(name, onboarded, vertical, logo_path)")
     .eq("user_id", user.id)
     .limit(1)
     .single();
@@ -44,12 +44,20 @@ export const getCurrentCompanyProfile = cache(async () => {
 
   const company = Array.isArray(membership.companies) ? membership.companies[0] : membership.companies;
 
+  // URL pública del logo (bucket "logos", ver Perfil del negocio): se
+  // calcula ya aquí para que cualquier pantalla del panel pueda pintarlo
+  // sin tener que volver a consultar la tabla companies.
+  const logoUrl = company?.logo_path
+    ? supabase.storage.from("logos").getPublicUrl(company.logo_path).data.publicUrl
+    : null;
+
   return {
     companyId: membership.company_id as string,
     fullName: (membership.full_name as string | null) ?? null,
     companyName: company?.name ?? "",
     onboarded: company?.onboarded ?? false,
     vertical: (company?.vertical as string | null) ?? null,
+    logoUrl,
   };
 });
 
@@ -59,4 +67,27 @@ export const getCurrentCompanyProfile = cache(async () => {
 export async function getCurrentCompanyId(): Promise<string> {
   const { companyId } = await getCurrentCompanyProfile();
   return companyId;
+}
+
+// Datos de facturación de la empresa (nombre, NIF/CIF, dirección,
+// contacto): lo que sale como emisor en las facturas/presupuestos en PDF.
+// Aparte de getCurrentCompanyProfile porque esos campos no hacen falta en
+// casi ninguna otra pantalla del panel — no tiene sentido cargarlos siempre.
+export async function getCurrentCompanyBillingInfo() {
+  const supabase = createClient();
+  const companyId = await getCurrentCompanyId();
+
+  const { data: company } = await supabase
+    .from("companies")
+    .select("name, tax_id, address, phone, email")
+    .eq("id", companyId)
+    .single();
+
+  return {
+    name: company?.name ?? "",
+    taxId: (company?.tax_id as string | null) ?? null,
+    address: (company?.address as string | null) ?? null,
+    phone: (company?.phone as string | null) ?? null,
+    email: (company?.email as string | null) ?? null,
+  };
 }
