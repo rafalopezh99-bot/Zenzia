@@ -1,7 +1,8 @@
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentCompanyProfile } from "@/lib/company";
 import { updateCompanyProfile } from "@/lib/actions/company";
-import { Card, PageHeader, Input, Select, PrimaryButton } from "@/components/ui";
+import { signOut } from "@/lib/actions/auth";
+import { Card, PageHeader, Input, Select, PrimaryButton, GhostButton } from "@/components/ui";
 import { VERTICAL_CATALOG, VERTICAL_CATEGORIES } from "@/lib/verticals";
 
 export const dynamic = "force-dynamic";
@@ -27,7 +28,16 @@ export default async function PerfilPage() {
 
   return (
     <div className="max-w-2xl">
-      <PageHeader title="Perfil del negocio" />
+      <PageHeader
+        title="Perfil del negocio"
+        action={
+          <form action={signOut}>
+            <GhostButton className="text-red-600 hover:border-red-300 hover:text-red-600 dark:text-red-400 dark:hover:text-red-400">
+              Cerrar sesión
+            </GhostButton>
+          </form>
+        }
+      />
 
       <form action={updateCompanyProfile}>
         <Card className="mb-6">

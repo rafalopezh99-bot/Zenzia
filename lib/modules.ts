@@ -12,7 +12,8 @@ export type ModuleKey =
   | "bonos"
   | "fotos"
   | "consentimientos"
-  | "facturacion";
+  | "facturacion"
+  | "sitio_web";
 
 export interface ModuleDef {
   key: ModuleKey;
@@ -30,12 +31,18 @@ export const MODULE_CATALOG: ModuleDef[] = [
   { key: "fotos", label: "Fotos", href: "/fotos" },
   { key: "consentimientos", label: "Consentimientos", href: "/consentimientos" },
   { key: "facturacion", label: "Facturación", href: "/facturacion" },
+  { key: "sitio_web", label: "Mi Web", href: "/mi-web" },
 ];
 
 // Packs por vertical: qué módulos se activan por defecto al dar de alta
 // una empresa nueva de ese tipo. Es solo el valor inicial que se inserta
 // en company_modules — el cliente sigue pudiendo activar/desactivar
 // cualquier módulo después desde el panel de administración.
+//
+// "sitio_web" NO aparece en ningún pack a propósito: es el módulo que se
+// vende suelto (edición de su plantilla) a clientes que no quieren
+// contratar el CRM. Se activa a mano por empresa cuando lo compran, nunca
+// por defecto al elegir un vertical.
 export const VERTICAL_PACKS: Record<string, ModuleKey[]> = {
   fisio: ["agenda", "historial_clinico", "seguimiento", "bonos"],
   nutricion: ["agenda", "historial_clinico", "seguimiento"],
