@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { FONT_SANS, FONT_MONO, PAPER, INK, SLATE, LINE } from "@/lib/marketing-theme";
+import { FONT_SANS, FONT_SERIF, FONT_MONO, PAPER, INK, SLATE, LINE, BLUE } from "@/lib/marketing-theme";
 
 // Piezas compartidas entre la landing pública (app/page.tsx) y las páginas
 // legales (aviso-legal, privacidad, cookies) — para que compartan cabecera,
@@ -21,77 +21,61 @@ export function Mono({
   );
 }
 
-// Logotipo completo (la palabra "ZENZIA" ya viene dibujada en la propia
-// imagen, con degradado turquesa y motivo de circuito) — antes esto era un
-// icono con forma de "Z" seguido del texto "enzia" en HTML; ahora que el
-// logo nuevo ya trae la palabra entera no tiene sentido repetirla al lado.
-// `size` sigue marcando el alto en píxeles; el ancho sale solo de la
-// proporción real de la imagen (ratio ≈ 5.1:1).
+// Wordmark en texto (Georgia, minúscula) en vez de la imagen anterior —
+// aquella traía un degradado turquesa pensado para la estética antigua y
+// desentonaría con la paleta índigo/crema nueva. Si más adelante se quiere
+// un logo gráfico propio para esta identidad, sustituir esto por un <img>.
 function ZenziaWordmark({ size }: { size: number }) {
   return (
-    // eslint-disable-next-line @next/next/no-img-element
-    <img
-      src="/zenzia-wordmark.png"
-      alt="Zenzia"
-      width={Math.round(size * 5.1)}
-      height={size}
-      style={{ height: size, width: "auto" }}
-    />
+    <span style={{ fontFamily: FONT_SERIF, fontSize: size * 0.6, fontWeight: 700, color: "inherit" }}>zenzia</span>
   );
 }
 
 export function MarketingHeader({ minimal = false }: { minimal?: boolean }) {
   return (
-    <header
-      className={`mx-auto grid max-w-6xl items-center gap-4 px-6 py-6 ${
-        minimal ? "grid-cols-[1fr_auto]" : "grid-cols-[1fr_auto_1fr]"
-      }`}
-    >
-      <Link href="/" className="justify-self-start">
-        <ZenziaWordmark size={40} />
-      </Link>
-      {minimal ? (
-        <Link
-          href="/"
-          className="justify-self-end text-sm uppercase tracking-wide transition hover:opacity-70"
-          style={{ fontFamily: FONT_MONO, color: SLATE }}
-        >
-          ‹ Volver a Zenzia
+    <header className="sticky top-0 z-10" style={{ backgroundColor: INK }}>
+      <div
+        className={`mx-auto grid max-w-6xl items-center gap-4 px-6 py-4 ${
+          minimal ? "grid-cols-[1fr_auto]" : "grid-cols-[1fr_auto_1fr]"
+        }`}
+      >
+        <Link href="/" className="justify-self-start" style={{ color: PAPER }}>
+          <ZenziaWordmark size={36} />
         </Link>
-      ) : (
-        <>
-          <nav className="hidden items-center gap-6 sm:flex">
-            <a
-              href="#funcionalidades"
-              className="text-sm uppercase tracking-wide transition hover:opacity-70"
-              style={{ fontFamily: FONT_MONO, color: SLATE }}
-            >
-              Funcionalidades
-            </a>
-            <a
-              href="#sectores"
-              className="text-sm uppercase tracking-wide transition hover:opacity-70"
-              style={{ fontFamily: FONT_MONO, color: SLATE }}
-            >
-              Sectores
-            </a>
-            <a
-              href="#contacto"
-              className="text-sm uppercase tracking-wide transition hover:opacity-70"
-              style={{ fontFamily: FONT_MONO, color: SLATE }}
-            >
-              Contacto
-            </a>
-          </nav>
+        {minimal ? (
           <Link
-            href="/login"
-            className="justify-self-end rounded-full px-5 py-2 text-sm font-medium text-white transition hover:brightness-110"
-            style={{ backgroundColor: INK, fontFamily: FONT_MONO }}
+            href="/"
+            className="justify-self-end text-sm transition hover:opacity-80"
+            style={{ fontFamily: FONT_SANS, color: "#C9D2E0" }}
           >
-            acceder()
+            ‹ Volver a Zenzia
           </Link>
-        </>
-      )}
+        ) : (
+          <>
+            <nav className="hidden items-center gap-6 sm:flex">
+              <a href="#servicios" className="text-sm transition hover:opacity-80" style={{ fontFamily: FONT_SANS, color: "#C9D2E0" }}>
+                Servicios
+              </a>
+              <a href="#funcionalidades" className="text-sm transition hover:opacity-80" style={{ fontFamily: FONT_SANS, color: "#C9D2E0" }}>
+                Funcionalidades
+              </a>
+              <a href="#automatizaciones" className="text-sm transition hover:opacity-80" style={{ fontFamily: FONT_SANS, color: "#C9D2E0" }}>
+                Automatizaciones
+              </a>
+              <a href="#sectores" className="text-sm transition hover:opacity-80" style={{ fontFamily: FONT_SANS, color: "#C9D2E0" }}>
+                Para tu negocio
+              </a>
+            </nav>
+            <Link
+              href="/login"
+              className="justify-self-end rounded-full px-5 py-2 text-sm font-semibold text-white transition-transform duration-200 hover:scale-105"
+              style={{ backgroundColor: BLUE, fontFamily: FONT_SANS }}
+            >
+              Acceder
+            </Link>
+          </>
+        )}
+      </div>
     </header>
   );
 }
@@ -102,12 +86,10 @@ export function MarketingFooter() {
       <div className="mx-auto max-w-6xl px-6 py-8">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div className="flex items-baseline gap-2">
-            <span className="text-sm font-black" style={{ color: INK }}>
-              Zenzia
-            </span>
-            <Mono className="text-[11px]" style={{ color: SLATE }}>
+            <span style={{ fontFamily: FONT_SERIF, fontSize: 15, fontWeight: 700, color: INK }}>zenzia</span>
+            <span className="text-[11px]" style={{ fontFamily: FONT_SANS, color: SLATE }}>
               un producto de RL Digital Studios
-            </Mono>
+            </span>
           </div>
           <nav className="flex flex-wrap items-center gap-x-5 gap-y-2">
             <Link href="/privacidad" className="text-xs hover:underline" style={{ color: SLATE }}>
@@ -121,9 +103,9 @@ export function MarketingFooter() {
             </Link>
           </nav>
         </div>
-        <Mono className="mt-4 block text-[11px]" style={{ color: SLATE }}>
+        <span className="mt-4 block text-[11px]" style={{ fontFamily: FONT_SANS, color: SLATE }}>
           © 2026 Zenzia. Todos los derechos reservados.
-        </Mono>
+        </span>
       </div>
     </footer>
   );
@@ -148,7 +130,9 @@ export function LegalLayout({
         <Mono className="text-xs uppercase tracking-widest" style={{ color: SLATE }}>
           Última actualización: {updated}
         </Mono>
-        <h1 className="mt-2 text-3xl font-black uppercase leading-tight sm:text-4xl">{title}</h1>
+        <h1 style={{ fontFamily: FONT_SERIF }} className="mt-2 text-3xl font-bold leading-tight sm:text-4xl">
+          {title}
+        </h1>
         <div className="legal-prose mt-10 space-y-6 text-sm leading-relaxed" style={{ color: SLATE }}>
           {children}
         </div>
