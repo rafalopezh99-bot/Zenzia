@@ -108,6 +108,61 @@ export async function createContact(formData: FormData) {
   redirect("/contactos");
 }
 
+// Usada tanto por "dar de baja" como por "eliminar": para de generar
+// clases nuevas (desactiva sus horarios recurrentes, si tiene) y borra las
+// que ya estaban puestas en el calendario pero todavía no han pasado. Las
+// clases ya dadas se dejan tal cual — son historial, no algo que "quitar
+// del calendario".
+async function clearFutureClasses(supabase: ReturnType<typeof createClient>, contactId: string) {
+  await supabase.from("class_schedules").update({ active: false }).eq("contact_id", contactId);
+
+  const { error } = await supabase
+    .from("appointments")
+    .delete()
+    .eq("contact_id", contactId)
+    .gte("starts_at", new Date().toISOString());
+  if (error) throw new Error(error.message);
+}
+
+function revalidateCalendars() {
+  revalidatePath("/citas");
+  revalidatePath("/citas/calendario");
+  revalidatePath("/citas/lista");
+  revalidatePath("/citas/semana");
+}
+
+// "Dar de baja": el alumno deja las clases (se le desactiva el horario
+// recurrente y se le quitan del calendario las que ya estaban generadas a
+// futuro), pero sigue apareciendo en /contactos — a diferencia de
+// "eliminar", esto no lo archiva. Para cuando la baja es de las clases,
+// no del alumno como contacto (ficha, historial de facturación...).
+export async function unenrollContact(contactId: string) {
+  const supabase = createClient();
+  await clearFutureClasses(supabase, contactId);
+  revalidateCalendars();
+}
+
+// Elimina un contacto DE LA LISTA sin borrar la fila de verdad: pone
+// status="inactive" y /contactos deja de mostrarlo (ver el filtro
+// .eq("status", "active") en esa página). Un contacto real casi siempre
+// tiene facturas, presupuestos, citas o bonos enganchados — borrarlo de la
+// tabla de verdad los dejaría huérfanos o haría fallar el borrado. Con este
+// archivado la ficha y su historial de facturación se conservan intactos
+// por si hace falta consultarlos más adelante. También le quita del
+// calendario las clases futuras, igual que "dar de baja" — un contacto
+// eliminado no debería seguir generando clases nuevas ni aparecer en citas
+// que ya no se van a dar.
+export async function deleteContact(contactId: string) {
+  const supabase = createClient();
+  await clearFutureClasses(supabase, contactId);
+
+  const { error } = await supabase.from("contacts").update({ status: "inactive" }).eq("id", contactId);
+  if (error) throw new Error(error.message);
+
+  revalidatePath("/contactos");
+  revalidateCalendars();
+}
+
 // Cambia solo la etapa del pipeline, para el desplegable en línea del
 // listado de contactos (Rafa quería poder mover la etapa sin entrar en la
 // ficha de cada contacto). No redirige: la fila ya está en /contactos,

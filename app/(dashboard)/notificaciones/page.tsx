@@ -15,19 +15,24 @@ import {
   trEl,
 } from "@/components/ui";
 
-// Bandeja de entrada de dos tipos de aviso, distinguidos por "kind":
+// Bandeja de entrada de tres tipos de aviso, distinguidos por "kind":
 // - "lead" (de siempre): formulario de zenzia.es/rldigitalstudios.com y, en
 //   el futuro, DMs de Instagram/TikTok. Al pulsar "Contactar" se crea el
 //   contacto de verdad — ver lib/actions/notifications.ts.
 // - "cobro_pendiente" (vertical academia): lo genera solo el ciclo diario
 //   de facturación (notify_unpaid_invoices, ver migración de facturación
-//   recurrente) cuando un bono lleva más de 5 días vencido sin pagar. El
-//   alumno ya existe, así que aquí no hay "Contactar": se enlaza a su ficha.
+//   recurrente) cuando un bono lleva más de 5 días vencido sin pagar.
+// - "horas_excedidas" (vertical academia): lo genera
+//   notify_academia_hour_overages() cuando un alumno se pasa de las horas
+//   de su bono en el mes en curso (ver /seguimiento).
+// En "cobro_pendiente" y "horas_excedidas" el alumno ya existe, así que
+// aquí no hay "Contactar": se enlaza directo a su ficha.
 const SOURCE_LABEL: Record<string, string> = {
   formulario_web: "Formulario web",
   instagram_dm: "Instagram DM",
   tiktok_dm: "TikTok DM",
   facturacion: "Facturación",
+  academia: "Academia",
 };
 
 const SOURCE_TONE: Record<string, "neutral" | "green" | "amber" | "red" | "violet"> = {
@@ -35,6 +40,7 @@ const SOURCE_TONE: Record<string, "neutral" | "green" | "amber" | "red" | "viole
   instagram_dm: "violet",
   tiktok_dm: "red",
   facturacion: "amber",
+  academia: "red",
 };
 
 const STATUS_LABEL: Record<string, string> = {
@@ -100,16 +106,16 @@ export default async function NotificacionesPage() {
                   <td className={tdEl}>
                     {n.status === "nueva" && (
                       <div className="flex items-center gap-2">
-                        {n.kind === "cobro_pendiente" ? (
+                        {n.kind === "lead" ? (
+                          <form action={contactar}>
+                            <PrimaryButton className="px-3 py-1.5 text-xs">Contactar</PrimaryButton>
+                          </form>
+                        ) : (
                           n.contact_id && (
                             <Link href={`/contactos/${n.contact_id}`} className={secondaryLinkClass}>
                               Ver alumno
                             </Link>
                           )
-                        ) : (
-                          <form action={contactar}>
-                            <PrimaryButton className="px-3 py-1.5 text-xs">Contactar</PrimaryButton>
-                          </form>
                         )}
                         <form action={descartar}>
                           <GhostButton>Descartar</GhostButton>

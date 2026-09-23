@@ -43,14 +43,15 @@ export function getTerminology(vertical?: string | null): Terminology {
 }
 
 // Campos de seguimiento de leads (tipo de negocio, Instagram, contactado a
-// través de, etapa del pipeline, enlace de demo/presupuesto). Antes solo se
-// mostraban para vertical "agencia" (pensado para RL Digital Studios
-// captando clientes de Zenzia), pero cualquier empresa que gestiona sus
-// propios contactos también quiere saber cómo llegó el lead y en qué punto
-// de la venta está — así que se muestran para todas las cuentas,
-// independientemente del vertical o de cómo se hayan dado de alta.
-export function showsAgencyPipeline(_vertical?: string | null): boolean {
-  return true;
+// través de, etapa del pipeline, enlace de demo/presupuesto). Se muestran
+// para todas las cuentas — cualquier empresa que gestiona sus propios
+// contactos quiere saber cómo llegó el lead y en qué punto de la venta
+// está — excepto "academia": un alumno no es un lead que se está
+// intentando cerrar, así que esos campos no pegan en la pestaña de
+// alumnos (ver showsAcademiaFields, que sí les da sus propios campos:
+// curso, asignaturas...).
+export function showsAgencyPipeline(vertical?: string | null): boolean {
+  return vertical !== "academia";
 }
 
 // Curso, bono (tarifario) y asignaturas solo tienen sentido para clases
