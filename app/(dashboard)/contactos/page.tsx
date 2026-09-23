@@ -4,8 +4,10 @@ import { PageHeader, primaryButtonClass, tableWrap, tableEl, theadEl, thEl, tdEl
 import { getStage, CHANNEL_LABEL } from "@/lib/pipeline";
 import { getCurrentCompanyProfile } from "@/lib/company";
 import { getTerminology, showsAgencyPipeline, showsAcademiaFields } from "@/lib/terminology";
-import { updateContactStageInline } from "@/lib/actions/contacts";
+import { updateContactStageInline, deleteContact, unenrollContact } from "@/lib/actions/contacts";
 import StageSelect from "@/components/StageSelect";
+import DeleteContactButton from "@/components/DeleteContactButton";
+import UnenrollContactButton from "@/components/UnenrollContactButton";
 
 const contactIconLinkClass =
   "inline-flex h-7 w-7 items-center justify-center rounded-full border border-line transition hover:border-brand";
@@ -39,6 +41,7 @@ export default async function ContactosPage() {
   const { data: contacts } = await supabase
     .from("contacts")
     .select("id, full_name, status, custom_fields, contact_number, created_at, phone, email")
+    .eq("status", "active")
     .order("created_at", { ascending: false });
 
   return (
@@ -68,7 +71,7 @@ export default async function ContactosPage() {
                   <th className={`${thEl} hidden sm:table-cell`}>Asignaturas</th>
                 </>
               )}
-              <th className={`${thEl} hidden sm:table-cell`}>Alta</th>
+              {!showAcademia && <th className={`${thEl} hidden sm:table-cell`}>Alta</th>}
               {showPipeline && (
                 <>
                   <th className={thEl}>Tipo de negocio</th>
@@ -77,6 +80,7 @@ export default async function ContactosPage() {
                   <th className={`${thEl} hidden sm:table-cell`}>Demo</th>
                 </>
               )}
+              <th className={thEl}>Acciones</th>
             </tr>
           </thead>
           <tbody>
@@ -128,11 +132,13 @@ export default async function ContactosPage() {
                       </td>
                     </>
                   )}
-                  <td className={`${tdEl} hidden sm:table-cell`}>
-                    {c.created_at
-                      ? new Date(c.created_at).toLocaleDateString("es-ES", { timeZone: "Europe/Madrid" })
-                      : "—"}
-                  </td>
+                  {!showAcademia && (
+                    <td className={`${tdEl} hidden sm:table-cell`}>
+                      {c.created_at
+                        ? new Date(c.created_at).toLocaleDateString("es-ES", { timeZone: "Europe/Madrid" })
+                        : "—"}
+                    </td>
+                  )}
                   {showPipeline && (
                     <>
                       <td className={tdEl}>
@@ -164,6 +170,18 @@ export default async function ContactosPage() {
                       </td>
                     </>
                   )}
+                  <td className={tdEl}>
+                    <div className="flex items-center gap-1.5">
+                      {showAcademia && (
+                        <UnenrollContactButton
+                          contactId={c.id}
+                          contactName={c.full_name}
+                          unenrollContact={unenrollContact}
+                        />
+                      )}
+                      <DeleteContactButton contactId={c.id} contactName={c.full_name} deleteContact={deleteContact} />
+                    </div>
+                  </td>
                 </tr>
               );
             })}
