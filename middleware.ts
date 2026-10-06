@@ -20,6 +20,8 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
+  // El layout del panel lo usa para bloquear rutas que el plan no incluye.
+  request.headers.set("x-pathname", request.nextUrl.pathname);
   return await updateSession(request);
 }
 

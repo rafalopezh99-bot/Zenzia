@@ -1,10 +1,13 @@
 "use server";
 
 import { createClient } from "@/lib/supabase/server";
+import { assertWithinLimit } from "@/lib/plans";
+import { getCurrentCompanyProfile } from "@/lib/company";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
 export async function createQuote(formData: FormData) {
+  await assertWithinLimit((await getCurrentCompanyProfile()).plan, "quotes");
   const supabase = createClient();
 
   const contact_id = String(formData.get("contact_id") ?? "");

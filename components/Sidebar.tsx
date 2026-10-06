@@ -21,12 +21,14 @@ export default function Sidebar({
   isAdmin = false,
   signupRequestCount = 0,
   vertical = null,
+  showSuppliers = true,
 }: {
   modules: ModuleDef[];
   notificationCount?: number;
   isAdmin?: boolean;
   signupRequestCount?: number;
   vertical?: string | null;
+  showSuppliers?: boolean;
 }) {
   const [open, setOpen] = useState(false);
   const terms = getTerminology(vertical);
@@ -96,9 +98,11 @@ export default function Sidebar({
         <Link href="/contactos" className={linkClass} onClick={close}>
           {terms.contacts}
         </Link>
-        <Link href="/proveedores" className={linkClass} onClick={close}>
-          Proveedores
-        </Link>
+        {showSuppliers && (
+          <Link href="/proveedores" className={linkClass} onClick={close}>
+            Proveedores
+          </Link>
+        )}
         {showAcademia && (
           <Link href="/grupos" className={linkClass} onClick={close}>
             Grupos

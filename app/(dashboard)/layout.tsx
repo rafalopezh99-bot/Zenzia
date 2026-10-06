@@ -3,6 +3,9 @@ import Sidebar from "@/components/Sidebar";
 import { getEnabledModules } from "@/lib/modules";
 import { getCurrentCompanyProfile, ZENZIA_ADMIN_COMPANY_ID } from "@/lib/company";
 import { createClient } from "@/lib/supabase/server";
+import { headers } from "next/headers";
+import { MODULE_CATALOG } from "@/lib/modules";
+import { filterModulesByPlan, planAllowsSuppliers } from "@/lib/plans";
 
 // Todo lo que cuelga de este layout depende de la sesión y de los módulos
 // activados por empresa — nunca se prerenderiza estático.
@@ -24,7 +27,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
   // lenta, no la suma de todas. "Solicitudes" solo existe para la empresa
   // de Rafa, así que esa consulta ni se hace para el resto.
   const supabase = createClient();
-  const [modules, { count: notificationCount }, signupRequestCount] = await Promise.all([
+  const [allModules, { count: notificationCount }, signupRequestCount] = await Promise.all([
     getEnabledModules(profile.companyId),
     supabase.from("notifications").select("*", { count: "exact", head: true }).eq("status", "nueva"),
     isAdmin
@@ -36,6 +39,15 @@ export default async function DashboardLayout({ children }: { children: React.Re
       : Promise.resolve(0),
   ]);
 
+  // El plan contratado recorta los módulos activados (ver lib/plans.ts).
+  // Además de ocultarlos del menú, se bloquea la ruta: escribir la URL a
+  // mano de algo que el plan no incluye lleva al dashboard.
+  const modules = filterModulesByPlan(allModules, profile.plan, profile.vertical);
+  const pathname = headers().get("x-pathname") ?? "";
+  const inPath = (href: string) => pathname === href || pathname.startsWith(`${href}/`);
+  const blockedModule = MODULE_CATALOG.some((m) => inPath(m.href) && !modules.some((x) => x.key === m.key));
+  if (blockedModule || (inPath("/proveedores") && !planAllowsSuppliers(profile.plan))) redirect("/dashboard");
+
   return (
     <div className="flex min-h-screen flex-col bg-paper text-ink sm:flex-row">
       <Sidebar
@@ -44,6 +56,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
         isAdmin={isAdmin}
         signupRequestCount={signupRequestCount}
         vertical={profile.vertical}
+        showSuppliers={planAllowsSuppliers(profile.plan)}
       />
       <main className="flex-1 overflow-x-hidden p-4 sm:p-8">{children}</main>
     </div>

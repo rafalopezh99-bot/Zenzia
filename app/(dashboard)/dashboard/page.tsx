@@ -7,6 +7,7 @@ import { appLocalParts, fromAppLocalInput, formatAppTime } from "@/lib/timezone"
 import LiveClock from "@/components/LiveClock";
 import { PIPELINE_STAGES, STAGE_LABEL, STAGE_TONE, getStage } from "@/lib/pipeline";
 import { getWidgetCatalog, resolveEnabledWidgets } from "@/lib/widgets";
+import { planAllowsWidget } from "@/lib/plans";
 import DashboardWidgetsEditor from "@/components/DashboardWidgetsEditor";
 import { StatCard } from "@/components/StatCard";
 import { BillingBarChart } from "@/components/charts/BillingBarChart";
@@ -19,12 +20,14 @@ export default async function DashboardPage() {
   // getCurrentCompanyProfile() está cacheada por petición (ver lib/company.ts):
   // el layout ya la llamó justo antes, así que esto no repite el viaje a
   // Supabase, solo reutiliza el resultado.
-  const { fullName, vertical, logoUrl, dashboardWidgets } = await getCurrentCompanyProfile();
+  const { fullName, vertical, logoUrl, dashboardWidgets, plan } = await getCurrentCompanyProfile();
   const terms = getTerminology(vertical);
   const appointmentsLower = terms.appointments.toLowerCase();
   const isAcademia = showsAcademiaFields(vertical);
-  const widgetCatalog = getWidgetCatalog(isAcademia);
-  const enabledWidgets = resolveEnabledWidgets(dashboardWidgets, isAcademia);
+  const widgetCatalog = getWidgetCatalog(isAcademia).filter((w) => planAllowsWidget(plan, w.key));
+  const enabledWidgets = new Set(
+    Array.from(resolveEnabledWidgets(dashboardWidgets, isAcademia)).filter((k) => planAllowsWidget(plan, k))
+  );
   const show = (key: (typeof widgetCatalog)[number]["key"]) => enabledWidgets.has(key);
 
   // Procesa las clases de academia ya terminadas (marca completadas y

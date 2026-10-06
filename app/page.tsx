@@ -4,6 +4,68 @@ import LandingContactForm from "@/components/LandingContactForm";
 import DashboardMockup from "@/components/DashboardMockup";
 import FeatureTabs, { type TabDef } from "@/components/FeatureTabs";
 
+// Contenido de la sección de precios. Los límites reales que aplica el
+// panel están en lib/plans.ts — si cambian allí, actualizar aquí también.
+const PLANS = [
+  {
+    name: "Start",
+    claim: "Organiza tus clientes, tu agenda y tus cobros.",
+    price: 29,
+    from: false,
+    setup: "Sin cuota de implantación",
+    includes: null,
+    features: [
+      "Clientes con ficha y notas · 30 nuevos/mes",
+      "Agenda de citas",
+      "Facturas en PDF · 30/mes",
+      "Presupuestos · 10/mes",
+      "Módulo principal de tu sector",
+      "Dashboard y notificaciones",
+      "1 usuario",
+    ],
+    cta: "Quiero Start",
+    featured: false,
+  },
+  {
+    name: "Smart",
+    claim: "Recibe reservas online y olvídate de los recordatorios.",
+    price: 59,
+    from: false,
+    setup: "Implantación: 290 €",
+    includes: "Todo lo de Start, más:",
+    features: [
+      "Reservas online 24/7",
+      "Recordatorios de citas por email",
+      "Todos los módulos de tu sector",
+      "150 clientes y facturas/mes",
+      "Presupuestos · 50/mes",
+      "Gráficas de facturación completas",
+      "Proveedores · 3 usuarios",
+    ],
+    cta: "Quiero Smart",
+    featured: true,
+  },
+  {
+    name: "Pro",
+    claim: "Te digitalizamos el negocio y lo mantenemos.",
+    price: 119,
+    from: true,
+    setup: "Implantación: desde 690 €",
+    includes: "Todo lo de Smart, más:",
+    features: [
+      "Web profesional conectada a Zenzia",
+      "Recordatorios por WhatsApp",
+      "Todo ilimitado",
+      "Usuarios ilimitados",
+      "Auditoría y automatizaciones a medida",
+      "Mantenimiento y soporte prioritario",
+      "Hosting y dominio el primer año",
+    ],
+    cta: "Solicitar auditoría",
+    featured: false,
+  },
+];
+
 // Landing pública de Zenzia (dominio raíz, zenzia.es). Quinta versión del
 // rediseño 2026. Rafa pidió esta vez calcar la ARQUITECTURA de
 // monday.com/crm sección por sección (no solo "inspirarse" como la v4):
@@ -319,6 +381,53 @@ export default function LandingPage() {
                 </div>
               );
             })}
+          </div>
+        </div>
+      </section>
+
+      {/* ============ PLANES ============ */}
+      <section id="planes" className="border-b border-mk-line">
+        <div className="mx-auto max-w-6xl px-6 py-20">
+          <span className={EYEBROW}>Planes</span>
+          <h2 className={`mt-2 ${H2}`}>Un único precio por negocio</h2>
+          <p className="mt-4 max-w-xl text-sm text-mk-muted">Sin pagar por usuario. Empieza en Start y crece cuando lo necesites.</p>
+          <div className="mt-12 grid overflow-hidden rounded-3xl border border-mk-line md:grid-cols-3">
+            {PLANS.map((p) => (
+              <div
+                key={p.name}
+                className={`relative flex flex-col border-mk-line p-8 md:border-r md:last:border-r-0 ${p.featured ? "bg-mk-raised" : "bg-mk-bg"}`}
+              >
+                {p.featured && (
+                  <span className="absolute left-8 top-4 rounded-full bg-mk-coral px-3 py-1 text-[11px] font-bold tracking-wider text-white">
+                    RECOMENDADO
+                  </span>
+                )}
+                <span className="mt-4 text-sm font-bold text-mk-coral">Zenzia {p.name}</span>
+                <h3 className="mt-2 min-h-[3.5rem] text-lg font-bold text-mk-ink">{p.claim}</h3>
+                <div className="mt-4 text-4xl font-black text-mk-accent">
+                  {p.from && <span className="mr-1 text-sm text-mk-coral">Desde</span>}
+                  {p.price} €<span className="ml-1 text-sm font-normal text-mk-muted">/mes</span>
+                </div>
+                <p className="mt-1 text-xs text-mk-muted">{p.setup}</p>
+                {p.includes && <p className="mt-6 text-sm font-bold text-mk-accent">{p.includes}</p>}
+                <ul className={`${p.includes ? "mt-2" : "mt-6"} flex-1 space-y-2 text-sm text-mk-ink`}>
+                  {p.features.map((f) => (
+                    <li key={f} className="flex gap-2">
+                      <span className="font-bold text-mk-coral">✓</span>
+                      {f}
+                    </li>
+                  ))}
+                </ul>
+                <a
+                  href="#contacto"
+                  className={`mt-8 rounded-xl px-4 py-3 text-center text-sm font-bold ${
+                    p.featured ? "bg-mk-accent text-white" : "border border-mk-line text-mk-ink"
+                  }`}
+                >
+                  {p.cta}
+                </a>
+              </div>
+            ))}
           </div>
         </div>
       </section>

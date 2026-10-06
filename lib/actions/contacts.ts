@@ -1,11 +1,13 @@
 "use server";
 
 import { createClient } from "@/lib/supabase/server";
-import { getCurrentCompanyId } from "@/lib/company";
+import { assertWithinLimit } from "@/lib/plans";
+import { getCurrentCompanyId, getCurrentCompanyProfile } from "@/lib/company";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
 export async function createContact(formData: FormData) {
+  await assertWithinLimit((await getCurrentCompanyProfile()).plan, "contacts");
   const companyId = await getCurrentCompanyId();
   const supabase = createClient();
 

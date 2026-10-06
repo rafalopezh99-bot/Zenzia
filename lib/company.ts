@@ -1,6 +1,7 @@
 import { cache } from "react";
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
+import { toPlanKey } from "@/lib/plans";
 
 // La empresa de Rafa (RL Digital Studios), dueño de Zenzia. Es la única que
 // puede ver /solicitudes (las peticiones de gente que quiere registrarse) —
@@ -42,7 +43,7 @@ export const getCurrentCompanyProfile = cache(async () => {
   // viaje de red en vez de dos.
   const { data: membership } = await supabase
     .from("company_users")
-    .select("company_id, full_name, companies(name, onboarded, vertical, logo_path, dashboard_widgets)")
+    .select("company_id, full_name, companies(name, onboarded, vertical, logo_path, dashboard_widgets, plan)")
     .eq("user_id", user.id)
     .limit(1)
     .single();
@@ -66,6 +67,7 @@ export const getCurrentCompanyProfile = cache(async () => {
     vertical: (company?.vertical as string | null) ?? null,
     logoUrl,
     dashboardWidgets: (company?.dashboard_widgets as unknown) ?? null,
+    plan: toPlanKey(company?.plan),
   };
 });
 
