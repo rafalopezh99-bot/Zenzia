@@ -2,6 +2,7 @@ import Link from "next/link";
 import { createSignupRequest } from "@/lib/actions/signupRequests";
 import { Card, Input, Select, Textarea, PrimaryButton } from "@/components/ui";
 import { VERTICAL_CATALOG, VERTICAL_CATEGORIES } from "@/lib/verticals";
+import ZenziaLogo from "@/components/ZenziaLogo";
 
 // Formulario público de solicitud de acceso a Zenzia. A propósito NO crea
 // ninguna cuenta: solo guarda la solicitud (signup_requests) como
@@ -14,8 +15,7 @@ export default function RegistroPage() {
     <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-paper px-4 py-10">
       <Card className="w-full max-w-lg">
         <div className="mb-1 flex items-center justify-center">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/zenzia-wordmark.png" alt="Zenzia" width={286} height={56} className="h-14 w-auto" />
+          <ZenziaLogo className="h-14 w-auto" />
         </div>
         <p className="mb-6 text-center text-sm text-slate">
           Cuéntanos sobre tu negocio y te contactamos para darte acceso.

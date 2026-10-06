@@ -5,6 +5,7 @@ import Link from "next/link";
 import type { ModuleDef } from "@/lib/modules";
 import { getTerminology, showsAcademiaFields } from "@/lib/terminology";
 import ThemeToggle from "@/components/ThemeToggle";
+import ZenziaLogo from "@/components/ZenziaLogo";
 
 // El sidebar no sabe nada de "fisio" ni "taller": solo pinta los módulos
 // que llegan activados. Añadir o quitar una ventana para un cliente es
@@ -38,8 +39,7 @@ export default function Sidebar({
       {/* Barra superior: solo en móvil */}
       <div className="flex items-center justify-between border-b border-line bg-surface px-4 py-3 sm:hidden">
         <Link href="/dashboard" className="flex items-center" onClick={close}>
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/zenzia-wordmark.png" alt="Zenzia" width={122} height={24} className="h-6 w-auto" />
+          <ZenziaLogo className="h-6 w-auto" />
         </Link>
         <button
           type="button"
@@ -70,15 +70,13 @@ export default function Sidebar({
       >
         <div className="mb-6 hidden px-1 sm:block">
           <div className="flex items-center">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/zenzia-wordmark.png" alt="Zenzia" width={153} height={30} className="h-[30px] w-auto" />
+            <ZenziaLogo className="h-[30px] w-auto" />
           </div>
         </div>
         <div className="mb-4 flex items-start justify-between px-1 sm:hidden">
           <div>
             <div className="flex items-center">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/zenzia-wordmark.png" alt="Zenzia" width={142} height={28} className="h-7 w-auto" />
+              <ZenziaLogo className="h-7 w-auto" />
             </div>
           </div>
           <button

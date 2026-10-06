@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { signIn } from "@/lib/actions/auth";
 import { Input, PrimaryButton } from "@/components/ui";
+import ZenziaLogo from "@/components/ZenziaLogo";
 
 export default function LoginPage() {
   const [error, setError] = useState<string | null>(null);
@@ -32,8 +33,7 @@ export default function LoginPage() {
         className="w-80 space-y-4 rounded-2xl border border-line bg-surface p-6 shadow-sm"
       >
         <div className="flex items-center justify-center pb-1">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/zenzia-wordmark.png" alt="Zenzia" width={245} height={48} className="h-12 w-auto" />
+          <ZenziaLogo className="h-12 w-auto" />
         </div>
         <Input name="email" type="email" placeholder="Email" required className="w-full" />
         <Input name="password" type="password" placeholder="Contraseña" required className="w-full" />

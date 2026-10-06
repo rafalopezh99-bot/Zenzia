@@ -13,8 +13,8 @@ export default function manifest(): MetadataRoute.Manifest {
     description: "CRM para negocios locales — contactos, agenda, facturación y presupuestos en un solo sitio.",
     start_url: "/dashboard",
     display: "standalone",
-    background_color: "#f7f8f6",
-    theme_color: "#2c6c82",
+    background_color: "#f4f8fb",
+    theme_color: "#163e6e",
     icons: [
       { src: "/icon-192.png", sizes: "192x192", type: "image/png", purpose: "any" },
       { src: "/icon-512.png", sizes: "512x512", type: "image/png", purpose: "any" },
