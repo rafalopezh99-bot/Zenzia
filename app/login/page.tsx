@@ -26,10 +26,10 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-paper px-4">
+    <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-paper px-4">
       <form
         onSubmit={handleSubmit}
-        className="w-80 space-y-4 rounded-2xl border border-line bg-white p-6 shadow-sm"
+        className="w-80 space-y-4 rounded-2xl border border-line bg-surface p-6 shadow-sm"
       >
         <div className="flex items-center justify-center pb-1">
           {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -48,6 +48,9 @@ export default function LoginPage() {
           </Link>
         </p>
       </form>
+      <Link href="/" className="text-xs text-slate transition hover:text-ink">
+        ‹ Volver a zenzia.es
+      </Link>
     </div>
   );
 }

@@ -121,25 +121,31 @@ export default async function NuevoContactoPage() {
                   ))}
                 </div>
               </div>
+
+              <Input name="pueblo" placeholder="Pueblo" className="w-full" />
             </>
           )}
 
-          <div className="pt-1 text-xs font-semibold uppercase tracking-wide text-slate">Datos de facturación</div>
-          <Input name="tax_id" placeholder="DNI / CIF" className="w-full" />
-          <Input name="billing_address" placeholder="Dirección" className="w-full" />
-          <div className="flex gap-2">
-            <Input name="postal_code" placeholder="Código postal" className="w-24" />
-            <Input name="province" placeholder="Provincia" className="flex-1" />
-          </div>
-          <Input name="country" placeholder="País" defaultValue="España" className="w-full" />
-          <Select name="billing_frequency" defaultValue="" className="w-full">
-            <option value="">Facturación (opcional)</option>
-            {BILLING_FREQUENCIES.map((f) => (
-              <option key={f} value={f}>
-                {BILLING_FREQUENCY_LABEL[f]}
-              </option>
-            ))}
-          </Select>
+          {!showAcademia && (
+            <>
+              <div className="pt-1 text-xs font-semibold uppercase tracking-wide text-slate">Datos de facturación</div>
+              <Input name="tax_id" placeholder="DNI / CIF" className="w-full" />
+              <Input name="billing_address" placeholder="Dirección" className="w-full" />
+              <div className="flex gap-2">
+                <Input name="postal_code" placeholder="Código postal" className="w-24" />
+                <Input name="province" placeholder="Provincia" className="flex-1" />
+              </div>
+              <Input name="country" placeholder="País" defaultValue="España" className="w-full" />
+              <Select name="billing_frequency" defaultValue="" className="w-full">
+                <option value="">Facturación (opcional)</option>
+                {BILLING_FREQUENCIES.map((f) => (
+                  <option key={f} value={f}>
+                    {BILLING_FREQUENCY_LABEL[f]}
+                  </option>
+                ))}
+              </Select>
+            </>
+          )}
 
           <PrimaryButton>Guardar</PrimaryButton>
         </form>

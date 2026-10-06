@@ -1,78 +1,63 @@
 import Link from "next/link";
-import { FONT_SANS, FONT_SERIF, FONT_MONO, PAPER, INK, SLATE, LINE, BLUE } from "@/lib/marketing-theme";
 
-// Piezas compartidas entre la landing pública (app/page.tsx) y las páginas
-// legales (aviso-legal, privacidad, cookies) — para que compartan cabecera,
-// pie y tipografía sin duplicar el marcado en cada archivo.
+// Piezas compartidas de la web pública (app/page.tsx + páginas legales).
+// Tercera identidad: blanco limpio + violeta de marca, inspirada en
+// estructura/tono de monday.com a petición de Rafa — tipografía de palo
+// (Inter) en vez de la mono técnica de la versión anterior, formas más
+// redondeadas y amables, botones en píldora. Ver ".mk" en
+// app/globals.css para los tokens. El logo es el PNG real de marca.
 
-export function Mono({
-  children,
-  className = "",
-  style = {},
-}: {
-  children: React.ReactNode;
-  className?: string;
-  style?: React.CSSProperties;
-}) {
+function ZenziaWordmark({ heightClass = "h-[5.5rem]" }: { heightClass?: string }) {
   return (
-    <span style={{ fontFamily: FONT_MONO, ...style }} className={className}>
-      {children}
-    </span>
+    // eslint-disable-next-line @next/next/no-img-element
+    <img src="/zenzia-wordmark.png" alt="Zenzia" className={`${heightClass} w-auto`} />
   );
 }
 
-// Wordmark en texto (Georgia, minúscula) en vez de la imagen anterior —
-// aquella traía un degradado turquesa pensado para la estética antigua y
-// desentonaría con la paleta índigo/crema nueva. Si más adelante se quiere
-// un logo gráfico propio para esta identidad, sustituir esto por un <img>.
-function ZenziaWordmark({ size }: { size: number }) {
-  return (
-    <span style={{ fontFamily: FONT_SERIF, fontSize: size * 0.6, fontWeight: 700, color: "inherit" }}>zenzia</span>
-  );
-}
+const NAV_LINK_CLASS = "text-sm font-medium text-mk-muted transition hover:text-mk-ink";
 
 export function MarketingHeader({ minimal = false }: { minimal?: boolean }) {
   return (
-    <header className="sticky top-0 z-10" style={{ backgroundColor: INK }}>
+    <header className="sticky top-0 z-10 border-b border-mk-line bg-mk-bg/90 backdrop-blur">
       <div
-        className={`mx-auto grid max-w-6xl items-center gap-4 px-6 py-4 ${
-          minimal ? "grid-cols-[1fr_auto]" : "grid-cols-[1fr_auto_1fr]"
+        className={`mx-auto grid max-w-6xl items-center gap-4 px-6 py-2.5 ${
+          minimal ? "grid-cols-[1fr_auto]" : "grid-cols-[auto_1fr_auto]"
         }`}
       >
-        <Link href="/" className="justify-self-start" style={{ color: PAPER }}>
-          <ZenziaWordmark size={36} />
+        <Link href="/" className="justify-self-start">
+          <ZenziaWordmark />
         </Link>
         {minimal ? (
-          <Link
-            href="/"
-            className="justify-self-end text-sm transition hover:opacity-80"
-            style={{ fontFamily: FONT_SANS, color: "#C9D2E0" }}
-          >
+          <Link href="/" className="justify-self-end text-sm font-medium text-mk-muted transition hover:text-mk-ink">
             ‹ Volver a Zenzia
           </Link>
         ) : (
           <>
-            <nav className="hidden items-center gap-6 sm:flex">
-              <a href="#servicios" className="text-sm transition hover:opacity-80" style={{ fontFamily: FONT_SANS, color: "#C9D2E0" }}>
-                Servicios
-              </a>
-              <a href="#funcionalidades" className="text-sm transition hover:opacity-80" style={{ fontFamily: FONT_SANS, color: "#C9D2E0" }}>
+            <nav className="hidden items-center justify-center gap-7 sm:flex">
+              <a href="#funcionalidades" className={NAV_LINK_CLASS}>
                 Funcionalidades
               </a>
-              <a href="#automatizaciones" className="text-sm transition hover:opacity-80" style={{ fontFamily: FONT_SANS, color: "#C9D2E0" }}>
+              <a href="#automatizaciones" className={NAV_LINK_CLASS}>
                 Automatizaciones
               </a>
-              <a href="#sectores" className="text-sm transition hover:opacity-80" style={{ fontFamily: FONT_SANS, color: "#C9D2E0" }}>
-                Para tu negocio
+              <a href="#desarrollo-web" className={NAV_LINK_CLASS}>
+                Desarrollo web
+              </a>
+              <a href="#sectores" className={NAV_LINK_CLASS}>
+                Sectores
               </a>
             </nav>
-            <Link
-              href="/login"
-              className="justify-self-end rounded-full px-5 py-2 text-sm font-semibold text-white transition-transform duration-200 hover:scale-105"
-              style={{ backgroundColor: BLUE, fontFamily: FONT_SANS }}
-            >
-              Acceder
-            </Link>
+            <div className="flex items-center justify-self-end gap-4">
+              <a href="#contacto" className="hidden text-sm font-semibold text-mk-ink transition hover:text-mk-accent sm:block">
+                Pedir una demo
+              </a>
+              <Link
+                href="/login"
+                className="rounded-full bg-mk-accent px-5 py-2.5 text-sm font-semibold text-white transition hover:brightness-110"
+              >
+                Acceder
+              </Link>
+            </div>
           </>
         )}
       </div>
@@ -82,38 +67,35 @@ export function MarketingHeader({ minimal = false }: { minimal?: boolean }) {
 
 export function MarketingFooter() {
   return (
-    <footer className="border-t" style={{ borderColor: LINE }}>
-      <div className="mx-auto max-w-6xl px-6 py-8">
-        <div className="flex flex-wrap items-center justify-between gap-4">
-          <div className="flex items-baseline gap-2">
-            <span style={{ fontFamily: FONT_SERIF, fontSize: 15, fontWeight: 700, color: INK }}>zenzia</span>
-            <span className="text-[11px]" style={{ fontFamily: FONT_SANS, color: SLATE }}>
-              un producto de RL Digital Studios
-            </span>
+    <footer className="border-t border-mk-line bg-mk-raised">
+      <div className="mx-auto max-w-6xl px-6 py-12">
+        <div className="flex flex-wrap items-start justify-between gap-8">
+          <div>
+            <ZenziaWordmark heightClass="h-14 sm:h-16" />
+            <p className="mt-4 max-w-xs text-sm leading-relaxed text-mk-muted">
+              CRM y desarrollo web, hechos a mano por una sola persona para que dejes de perder el tiempo.
+            </p>
           </div>
-          <nav className="flex flex-wrap items-center gap-x-5 gap-y-2">
-            <Link href="/privacidad" className="text-xs hover:underline" style={{ color: SLATE }}>
+          <nav className="flex flex-wrap items-center gap-x-6 gap-y-2">
+            <Link href="/privacidad" className="text-xs text-mk-muted hover:text-mk-ink hover:underline">
               Política de privacidad
             </Link>
-            <Link href="/aviso-legal" className="text-xs hover:underline" style={{ color: SLATE }}>
+            <Link href="/aviso-legal" className="text-xs text-mk-muted hover:text-mk-ink hover:underline">
               Aviso legal
             </Link>
-            <Link href="/cookies" className="text-xs hover:underline" style={{ color: SLATE }}>
+            <Link href="/cookies" className="text-xs text-mk-muted hover:text-mk-ink hover:underline">
               Política de cookies
             </Link>
           </nav>
         </div>
-        <span className="mt-4 block text-[11px]" style={{ fontFamily: FONT_SANS, color: SLATE }}>
-          © 2026 Zenzia. Todos los derechos reservados.
-        </span>
+        <span className="mt-8 block text-[11px] text-mk-muted">© 2026 Zenzia. Todos los derechos reservados.</span>
       </div>
     </footer>
   );
 }
 
-// Envoltorio para las páginas legales: mismo fondo/tipografía que la
-// landing, cabecera minimalista (solo "volver"), y una columna de lectura
-// cómoda para texto largo.
+// Envoltorio para las páginas legales: misma identidad clara que el resto
+// de la web pública, cabecera minimalista y columna de lectura cómoda.
 export function LegalLayout({
   title,
   updated,
@@ -124,18 +106,14 @@ export function LegalLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="min-h-screen" style={{ backgroundColor: PAPER, color: INK, fontFamily: FONT_SANS }}>
+    <div className="mk min-h-screen">
       <MarketingHeader minimal />
       <main className="mx-auto max-w-3xl px-6 py-14 sm:py-20">
-        <Mono className="text-xs uppercase tracking-widest" style={{ color: SLATE }}>
+        <span className="text-xs font-semibold uppercase tracking-widest text-mk-accent">
           Última actualización: {updated}
-        </Mono>
-        <h1 style={{ fontFamily: FONT_SERIF }} className="mt-2 text-3xl font-bold leading-tight sm:text-4xl">
-          {title}
-        </h1>
-        <div className="legal-prose mt-10 space-y-6 text-sm leading-relaxed" style={{ color: SLATE }}>
-          {children}
-        </div>
+        </span>
+        <h1 className="mt-3 text-3xl font-black leading-tight text-mk-ink sm:text-4xl">{title}</h1>
+        <div className="legal-prose mt-10 space-y-6 text-sm leading-relaxed text-mk-muted">{children}</div>
       </main>
       <MarketingFooter />
     </div>
@@ -144,9 +122,5 @@ export function LegalLayout({
 
 // Subtítulo de sección dentro de una página legal (p. ej. "1. Objeto").
 export function LegalHeading({ children }: { children: React.ReactNode }) {
-  return (
-    <h2 className="!mt-10 text-base font-bold uppercase tracking-tight" style={{ color: INK }}>
-      {children}
-    </h2>
-  );
+  return <h2 className="!mt-10 text-base font-bold uppercase tracking-tight text-mk-ink">{children}</h2>;
 }

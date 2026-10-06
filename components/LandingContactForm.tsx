@@ -2,12 +2,11 @@
 
 import { useState } from "react";
 import { submitLandingContact } from "@/lib/actions/landingContact";
-import { FONT_MONO, INK, SLATE, LINE, BLUE } from "@/lib/marketing-theme";
 
-// Único componente cliente de la landing (todo lo demás es Server
-// Component, igual que el resto del panel) — necesita estado local para
+// Único componente cliente de la landing — necesita estado local para
 // mostrar "enviando" / "gracias" / error sin recargar la página. Llama a
 // la Server Action directamente, mismo patrón que app/login/page.tsx.
+// Estilos propios con los tokens .mk actuales (claro + violeta).
 export default function LandingContactForm() {
   const [status, setStatus] = useState<"idle" | "loading" | "ok" | "error">("idle");
   const [error, setError] = useState<string | null>(null);
@@ -28,60 +27,50 @@ export default function LandingContactForm() {
     }
   }
 
-  const fieldClass = "w-full rounded-lg border bg-white px-3 py-2 text-sm focus:outline-none";
-  const labelClass = "mb-1 block text-xs uppercase tracking-widest";
+  const fieldClass =
+    "w-full rounded-xl border border-mk-line bg-mk-bg px-4 py-2.5 text-sm text-mk-ink placeholder:text-mk-muted/60 focus:border-mk-accent focus:outline-none focus:ring-2 focus:ring-mk-accent/20";
+  const labelClass = "mb-1.5 block text-xs font-semibold uppercase tracking-wide text-mk-muted";
 
   if (status === "ok") {
     return (
-      <div className="rounded-2xl border p-6 text-sm" style={{ borderColor: LINE, color: INK }}>
+      <div className="rounded-2xl border border-mk-line bg-mk-raised p-6 text-sm text-mk-ink">
         Gracias — hemos recibido tu mensaje. Te contestamos en breve a tu email.
       </div>
     );
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4" noValidate={false}>
+    <form onSubmit={handleSubmit} className="space-y-4 rounded-2xl border border-mk-line bg-mk-raised p-6">
       {/* Honeypot anti-spam: oculto para personas, visible para bots */}
-      <input
-        type="text"
-        name="website"
-        tabIndex={-1}
-        autoComplete="off"
-        className="hidden"
-        aria-hidden="true"
-      />
+      <input type="text" name="website" tabIndex={-1} autoComplete="off" className="hidden" aria-hidden="true" />
 
       <div className="grid gap-4 sm:grid-cols-2">
         <div>
-          <label className={labelClass} style={{ fontFamily: FONT_MONO, color: SLATE }}>
-            Nombre
-          </label>
-          <input name="full_name" required className={fieldClass} style={{ borderColor: LINE, color: INK }} />
+          <label className={labelClass}>Nombre</label>
+          <input name="full_name" required className={fieldClass} />
         </div>
         <div>
-          <label className={labelClass} style={{ fontFamily: FONT_MONO, color: SLATE }}>
-            Email
-          </label>
-          <input
-            type="email"
-            name="email"
-            required
-            className={fieldClass}
-            style={{ borderColor: LINE, color: INK }}
-          />
+          <label className={labelClass}>Email</label>
+          <input type="email" name="email" required className={fieldClass} />
         </div>
       </div>
 
       <div>
-        <label className={labelClass} style={{ fontFamily: FONT_MONO, color: SLATE }}>
-          Cuéntanos tu negocio
-        </label>
+        <label className={labelClass}>¿Qué necesitas?</label>
+        <select name="interest" defaultValue="ambos" className={fieldClass}>
+          <option value="crm">CRM de gestión</option>
+          <option value="web">Desarrollo web</option>
+          <option value="ambos">Las dos cosas / no estoy seguro</option>
+        </select>
+      </div>
+
+      <div>
+        <label className={labelClass}>Cuéntanos tu negocio</label>
         <textarea
           name="message"
           rows={4}
           placeholder="A qué te dedicas y qué te gustaría gestionar con Zenzia"
           className={fieldClass}
-          style={{ borderColor: LINE, color: INK }}
         />
       </div>
 
@@ -90,8 +79,7 @@ export default function LandingContactForm() {
       <button
         type="submit"
         disabled={status === "loading"}
-        className="rounded-full px-6 py-3 text-sm font-semibold text-white transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50"
-        style={{ backgroundColor: BLUE, fontFamily: FONT_MONO }}
+        className="w-full rounded-full bg-mk-accent px-6 py-3 text-sm font-semibold text-white transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto"
       >
         {status === "loading" ? "Enviando…" : "Enviar mensaje →"}
       </button>

@@ -24,9 +24,16 @@ export const ZENZIA_ADMIN_COMPANY_ID = "5a279e59-d107-4341-80a2-f33bb5f71b24";
 // dashboard (saludo) y en la pantalla de onboarding.
 export const getCurrentCompanyProfile = cache(async () => {
   const supabase = createClient();
+  // getSession() lee la cookie tal cual (sin red); no hace falta volver a
+  // verificarla contra el servidor de Supabase porque el middleware ya lo
+  // ha hecho justo antes, en esta misma petición (ver
+  // lib/supabase/middleware.ts). Antes esto llamaba a getUser(), que repite
+  // esa verificación por red en cada página — el doble viaje era buena
+  // parte de la lentitud al cambiar de página.
   const {
-    data: { user },
-  } = await supabase.auth.getUser();
+    data: { session },
+  } = await supabase.auth.getSession();
+  const user = session?.user ?? null;
 
   if (!user) redirect("/login");
 
@@ -35,7 +42,7 @@ export const getCurrentCompanyProfile = cache(async () => {
   // viaje de red en vez de dos.
   const { data: membership } = await supabase
     .from("company_users")
-    .select("company_id, full_name, companies(name, onboarded, vertical, logo_path)")
+    .select("company_id, full_name, companies(name, onboarded, vertical, logo_path, dashboard_widgets)")
     .eq("user_id", user.id)
     .limit(1)
     .single();
@@ -58,6 +65,7 @@ export const getCurrentCompanyProfile = cache(async () => {
     onboarded: company?.onboarded ?? false,
     vertical: (company?.vertical as string | null) ?? null,
     logoUrl,
+    dashboardWidgets: (company?.dashboard_widgets as unknown) ?? null,
   };
 });
 

@@ -34,6 +34,7 @@ export default async function ContactoDetailPage({ params }: { params: { id: str
   const contactedVia: string = contact.custom_fields?.contacted_via ?? "";
   const curso: string = contact.custom_fields?.curso ?? "";
   const subjectList: string[] = contact.custom_fields?.subjects ?? [];
+  const pueblo: string = contact.custom_fields?.pueblo ?? "";
   const taxId: string = contact.custom_fields?.tax_id ?? "";
   const billingAddress: string = contact.custom_fields?.billing_address ?? "";
   const postalCode: string = contact.custom_fields?.postal_code ?? "";
@@ -96,11 +97,13 @@ export default async function ContactoDetailPage({ params }: { params: { id: str
             </>
           )}
         </p>
-        {showAcademia && (curso || subjectList.length > 0) && (
+        {showAcademia && (curso || subjectList.length > 0 || pueblo) && (
           <p>
             {curso && <span className="text-ink">{curso}</span>}
             {curso && subjectList.length > 0 && " · "}
             {subjectList.join(", ")}
+            {(curso || subjectList.length > 0) && pueblo && " · "}
+            {pueblo && <span className="text-slate/70">{pueblo}</span>}
           </p>
         )}
       </div>
@@ -169,28 +172,35 @@ export default async function ContactoDetailPage({ params }: { params: { id: str
           </Card>
         )}
 
-        <Card className="mb-6">
-          <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-slate">Datos de facturación</h2>
-          <div className="space-y-2">
-            <div className="flex flex-wrap gap-2">
-              <Input name="tax_id" placeholder="DNI / CIF" defaultValue={taxId} className="flex-1" />
-              <Input name="billing_address" placeholder="Dirección" defaultValue={billingAddress} className="flex-[2]" />
+        {showAcademia ? (
+          <Card className="mb-6">
+            <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-slate">Pueblo</h2>
+            <Input name="pueblo" placeholder="Pueblo" defaultValue={pueblo} className="w-full" />
+          </Card>
+        ) : (
+          <Card className="mb-6">
+            <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-slate">Datos de facturación</h2>
+            <div className="space-y-2">
+              <div className="flex flex-wrap gap-2">
+                <Input name="tax_id" placeholder="DNI / CIF" defaultValue={taxId} className="flex-1" />
+                <Input name="billing_address" placeholder="Dirección" defaultValue={billingAddress} className="flex-[2]" />
+              </div>
+              <div className="flex flex-wrap gap-2">
+                <Input name="postal_code" placeholder="Código postal" defaultValue={postalCode} className="w-28" />
+                <Input name="province" placeholder="Provincia" defaultValue={province} className="flex-1" />
+                <Input name="country" placeholder="País" defaultValue={country} className="flex-1" />
+              </div>
+              <Select name="billing_frequency" defaultValue={billingFrequency} className="w-full">
+                <option value="">Facturación (opcional)</option>
+                {BILLING_FREQUENCIES.map((f) => (
+                  <option key={f} value={f}>
+                    {BILLING_FREQUENCY_LABEL[f]}
+                  </option>
+                ))}
+              </Select>
             </div>
-            <div className="flex flex-wrap gap-2">
-              <Input name="postal_code" placeholder="Código postal" defaultValue={postalCode} className="w-28" />
-              <Input name="province" placeholder="Provincia" defaultValue={province} className="flex-1" />
-              <Input name="country" placeholder="País" defaultValue={country} className="flex-1" />
-            </div>
-            <Select name="billing_frequency" defaultValue={billingFrequency} className="w-full">
-              <option value="">Facturación (opcional)</option>
-              {BILLING_FREQUENCIES.map((f) => (
-                <option key={f} value={f}>
-                  {BILLING_FREQUENCY_LABEL[f]}
-                </option>
-              ))}
-            </Select>
-          </div>
-        </Card>
+          </Card>
+        )}
 
         <PrimaryButton className="w-full">Guardar</PrimaryButton>
       </form>

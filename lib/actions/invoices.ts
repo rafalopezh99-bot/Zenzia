@@ -34,3 +34,17 @@ export async function markInvoicePaid(invoiceId: string, formData: FormData) {
   revalidatePath("/pagos");
   revalidatePath("/dashboard");
 }
+
+// Borra la factura de verdad (a diferencia de "eliminar contacto" no hay
+// nada que archivar aquí). Las notificaciones de cobro pendiente ligadas a
+// ella se borran solas (invoice_id on delete cascade, ver migración de
+// facturación recurrente).
+export async function deleteInvoice(invoiceId: string) {
+  const supabase = createClient();
+  const { error } = await supabase.from("invoices").delete().eq("id", invoiceId);
+  if (error) throw new Error(error.message);
+
+  revalidatePath("/facturacion");
+  revalidatePath("/pagos");
+  revalidatePath("/dashboard");
+}

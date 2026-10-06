@@ -14,10 +14,22 @@ const RL_DIGITAL_STUDIOS_COMPANY_ID = "5a279e59-d107-4341-80a2-f33bb5f71b24";
 
 export type LeadOrigin = "landing_zenzia" | "rldigitalstudios";
 
+// Qué busca el lead al escribir: se antepone al mensaje como una etiqueta
+// más, sin tocar el esquema de `notifications` (no hace falta migración
+// para algo que solo es informativo para quien lee la bandeja).
+export type LeadInterest = "crm" | "web" | "ambos";
+
+const INTEREST_LABEL: Record<LeadInterest, string> = {
+  crm: "CRM",
+  web: "Desarrollo web",
+  ambos: "CRM + Desarrollo web",
+};
+
 export async function insertLead(input: {
   full_name: string;
   email: string;
   message?: string;
+  interest?: LeadInterest;
   origen: LeadOrigin;
 }): Promise<{ ok: boolean; error: string | null }> {
   const full_name = input.full_name.trim().slice(0, 200);
@@ -36,6 +48,7 @@ export async function insertLead(input: {
   }
 
   const origenLabel = input.origen === "rldigitalstudios" ? "rldigitalstudios.com" : "zenzia.es";
+  const interesLabel = input.interest ? INTEREST_LABEL[input.interest] : null;
 
   const supabase = createClient();
   const { error } = await supabase.from("notifications").insert({
@@ -43,7 +56,9 @@ export async function insertLead(input: {
     source: "formulario_web",
     full_name,
     email,
-    message: [message, `Origen: ${origenLabel}`].filter(Boolean).join(" · "),
+    message: [interesLabel ? `Interés: ${interesLabel}` : null, message, `Origen: ${origenLabel}`]
+      .filter(Boolean)
+      .join(" · "),
   });
 
   if (error) {

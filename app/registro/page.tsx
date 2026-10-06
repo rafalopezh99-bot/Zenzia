@@ -11,7 +11,7 @@ import { VERTICAL_CATALOG, VERTICAL_CATEGORIES } from "@/lib/verticals";
 // él a mano en Supabase, como con cada cliente hasta ahora.
 export default function RegistroPage() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-paper px-4 py-10">
+    <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-paper px-4 py-10">
       <Card className="w-full max-w-lg">
         <div className="mb-1 flex items-center justify-center">
           {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -126,6 +126,9 @@ export default function RegistroPage() {
           </Link>
         </p>
       </Card>
+      <Link href="/" className="text-xs text-slate transition hover:text-ink">
+        ‹ Volver a zenzia.es
+      </Link>
     </div>
   );
 }

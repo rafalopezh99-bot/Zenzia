@@ -22,7 +22,7 @@ export function buildContactEmail(input: {
 
   const body = `Hola${contactName ? ` ${contactName}` : ""},
 
-Soy Rafa, de RL Digital Studios. Escribo porque he visto ${businessRef} y creo que os podría venir muy bien ${
+Soy Rafa, de Zenzia. Escribo porque he visto ${businessRef} y creo que os podría venir muy bien ${
     serviceOffer || "lo que os puedo ofrecer"
   }.
 
@@ -30,7 +30,7 @@ Si os viene bien, me encantaría contaros más en una llamada breve o por aquí 
 
 Un saludo,
 Rafa
-RL Digital Studios`;
+Zenzia`;
 
   return { subject, body };
 }

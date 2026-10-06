@@ -5,7 +5,7 @@ import { LegalLayout, LegalHeading } from "@/components/marketing-ui";
 // gestor o abogado antes de publicarlo de cara al público.
 export default function AvisoLegalPage() {
   return (
-    <LegalLayout title="Aviso legal" updated="agosto de 2026">
+    <LegalLayout title="Aviso legal" updated="octubre de 2026">
       <p>
         En cumplimiento del artículo 10 de la Ley 34/2002, de 11 de julio, de Servicios de la Sociedad de la
         Información y de Comercio Electrónico (LSSI-CE), se facilitan a continuación los siguientes datos:
@@ -15,10 +15,10 @@ export default function AvisoLegalPage() {
       <ul className="list-disc space-y-1 pl-5">
         <li>Titular: Rafael López Hidalgo</li>
         <li>NIF: 28831419-E</li>
-        <li>Nombre comercial: RL Digital Studios / Zenzia</li>
+        <li>Nombre comercial: Zenzia</li>
         <li>Domicilio: Sevilla, España</li>
-        <li>Email de contacto: rldigitalstudios1@gmail.com</li>
-        <li>Actividad: diseño web, marketing digital y desarrollo de software (Zenzia, CRM para negocios de cita previa)</li>
+        <li>Email de contacto: zenzia.co@gmail.com</li>
+        <li>Actividad: desarrollo de software y páginas web (Zenzia, CRM de gestión para pymes y autónomos)</li>
       </ul>
 
       <LegalHeading>2. Objeto</LegalHeading>
@@ -39,9 +39,9 @@ export default function AvisoLegalPage() {
       <LegalHeading>4. Propiedad intelectual e industrial</LegalHeading>
       <p>
         El contenido de este sitio (textos, diseño, código, marca "Zenzia" y logotipos) es propiedad de Rafael
-        López Hidalgo, salvo que se indique expresamente lo contrario, y está protegido por la normativa vigente en
-        materia de propiedad intelectual e industrial. Queda prohibida su reproducción, distribución o
-        transformación sin autorización previa.
+        López Hidalgo, titular de la marca comercial Zenzia, salvo que se indique expresamente lo contrario, y está
+        protegido por la normativa vigente en materia de propiedad intelectual e industrial. Queda prohibida su
+        reproducción, distribución o transformación sin autorización previa.
       </p>
 
       <LegalHeading>5. Responsabilidad</LegalHeading>

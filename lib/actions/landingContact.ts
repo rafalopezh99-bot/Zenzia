@@ -1,6 +1,6 @@
 "use server";
 
-import { insertLead } from "@/lib/leads";
+import { insertLead, type LeadInterest } from "@/lib/leads";
 
 // Formulario de contacto de la landing de Zenzia (zenzia.es). La lógica de
 // inserción real vive en lib/leads.ts, compartida con app/api/leads/route.ts
@@ -15,10 +15,15 @@ export async function submitLandingContact(
     return { ok: true, error: null };
   }
 
+  const interestRaw = String(formData.get("interest") ?? "");
+  const interest: LeadInterest | undefined =
+    interestRaw === "crm" || interestRaw === "web" || interestRaw === "ambos" ? interestRaw : undefined;
+
   return insertLead({
     full_name: String(formData.get("full_name") ?? ""),
     email: String(formData.get("email") ?? ""),
     message: String(formData.get("message") ?? ""),
+    interest,
     origen: "landing_zenzia",
   });
 }

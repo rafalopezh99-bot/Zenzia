@@ -3,7 +3,7 @@ import { Card, secondaryLinkClass } from "@/components/ui";
 
 export default function RegistroEnviadoPage() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-paper px-4 py-10">
+    <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-paper px-4 py-10">
       <Card className="w-full max-w-sm text-center">
         <div className="mb-2 flex items-center justify-center">
           {/* eslint-disable-next-line @next/next/no-img-element */}

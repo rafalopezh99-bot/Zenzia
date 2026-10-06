@@ -1,9 +1,10 @@
 import { createClient } from "@/lib/supabase/server";
-import { createInvoice, markInvoicePaid } from "@/lib/actions/invoices";
+import { createInvoice, markInvoicePaid, deleteInvoice } from "@/lib/actions/invoices";
 import { Card, PageHeader, Input, Select, PrimaryButton, GhostButton, ghostLinkClass, Badge, tableWrap, tableEl, theadEl, thEl, tdEl, trEl } from "@/components/ui";
 import { getCurrentCompanyProfile } from "@/lib/company";
 import { getTerminology } from "@/lib/terminology";
 import { PAYMENT_METHOD_LABEL, PAYMENT_METHODS } from "@/lib/paymentMethod";
+import DeleteInvoiceButton from "@/components/DeleteInvoiceButton";
 import Link from "next/link";
 
 export default async function FacturacionPage() {
@@ -113,6 +114,11 @@ export default async function FacturacionPage() {
                     <a href={`/api/facturas/${i.id}/pdf`} target="_blank" rel="noopener noreferrer" className={ghostLinkClass}>
                       Descargar factura
                     </a>
+                    <DeleteInvoiceButton
+                      invoiceId={i.id}
+                      invoiceLabel={`${i.concept} · ${i.contacts?.full_name ?? ""}`}
+                      deleteInvoice={deleteInvoice}
+                    />
                   </td>
                 </tr>
               );

@@ -13,7 +13,11 @@ import RLDigitalStudios from "./rl-digital-studios";
 export const SITE_TEMPLATES: SiteTemplateDef[] = [
   { key: "generico", label: "Genérica", Component: Generico },
   { key: "moderno_oscuro", label: "Moderna oscura", Component: ModernoOscuro },
-  { key: "rl_digital_studios", label: "RL Digital Studios", Component: RLDigitalStudios },
+  // Nombre visible cambiado de "RL Digital Studios" a "Clásica" (2026): la
+  // marca ya no se usa de cara al cliente. La clave interna y el
+  // componente se mantienen igual a propósito, para no romper los
+  // `template_key` ya asignados en site_content.
+  { key: "rl_digital_studios", label: "Clásica", Component: RLDigitalStudios },
 ];
 
 export function getSiteTemplate(templateKey: string | null | undefined): SiteTemplateDef {

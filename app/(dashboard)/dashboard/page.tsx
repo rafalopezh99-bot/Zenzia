@@ -5,16 +5,21 @@ import { getTerminology, showsAcademiaFields } from "@/lib/terminology";
 import { appLocalParts, fromAppLocalInput, formatAppTime } from "@/lib/timezone";
 import LiveClock from "@/components/LiveClock";
 import { PIPELINE_STAGES, STAGE_LABEL, STAGE_TONE, getStage } from "@/lib/pipeline";
+import { getWidgetCatalog, resolveEnabledWidgets } from "@/lib/widgets";
+import DashboardWidgetsEditor from "@/components/DashboardWidgetsEditor";
 
 export default async function DashboardPage() {
   const supabase = createClient();
   // getCurrentCompanyProfile() está cacheada por petición (ver lib/company.ts):
   // el layout ya la llamó justo antes, así que esto no repite el viaje a
   // Supabase, solo reutiliza el resultado.
-  const { fullName, vertical, logoUrl } = await getCurrentCompanyProfile();
+  const { fullName, vertical, logoUrl, dashboardWidgets } = await getCurrentCompanyProfile();
   const terms = getTerminology(vertical);
   const appointmentsLower = terms.appointments.toLowerCase();
   const isAcademia = showsAcademiaFields(vertical);
+  const widgetCatalog = getWidgetCatalog(isAcademia);
+  const enabledWidgets = resolveEnabledWidgets(dashboardWidgets, isAcademia);
+  const show = (key: (typeof widgetCatalog)[number]["key"]) => enabledWidgets.has(key);
 
   // Procesa las clases de academia ya terminadas (marca completadas y
   // descuenta las horas del bono) antes de leer nada, para que las cifras
@@ -43,7 +48,7 @@ export default async function DashboardPage() {
   // el vertical (academia ve sus clases de hoy/mañana; el resto ve
   // notificaciones, próximas citas y el desglose de leads) se pide aparte
   // para no traer de Supabase datos que luego no se van a pintar.
-  const [{ count: contactCount }, { data: paidThisMonth }] = await Promise.all([
+  const [{ count: contactCount }, { data: paidThisMonth }, { count: supplierCount }] = await Promise.all([
     supabase.from("contacts").select("*", { count: "exact", head: true }).eq("status", "active"),
     supabase
       .from("invoices")
@@ -51,6 +56,7 @@ export default async function DashboardPage() {
       .eq("status", "pagada")
       .gte("paid_at", monthStart.toISOString())
       .lt("paid_at", monthEnd.toISOString()),
+    supabase.from("suppliers").select("*", { count: "exact", head: true }),
   ]);
   const earnedThisMonth = (paidThisMonth ?? []).reduce((sum: number, i: any) => sum + Number(i.amount), 0);
 
@@ -105,90 +111,126 @@ export default async function DashboardPage() {
     }
   }
 
+  const statWidgetsShown = [
+    show("stat_contactos"),
+    show("stat_citas") && !isAcademia,
+    show("stat_notificaciones") && !isAcademia,
+    show("stat_ganado_mes"),
+    show("stat_proveedores"),
+  ].filter(Boolean).length;
+
   return (
     <div>
       <PageHeader
         eyebrow="Dashboard"
         title={fullName ? `¡Hola, ${fullName}!` : "Panel de control"}
-        action={<LiveClock />}
+        action={
+          <div className="flex items-center gap-3">
+            <LiveClock />
+            <DashboardWidgetsEditor catalog={widgetCatalog} enabledKeys={Array.from(enabledWidgets)} />
+          </div>
+        }
         logoUrl={logoUrl}
       />
 
-      <div className={`mb-8 grid grid-cols-1 gap-4 sm:max-w-3xl ${isAcademia ? "sm:grid-cols-2" : "sm:grid-cols-4"}`}>
-        <Card>
-          <div className="text-2xl font-semibold text-ink">{contactCount ?? 0}</div>
-          <div className="text-sm text-slate">{terms.contacts} activos</div>
-        </Card>
-        {!isAcademia && (
-          <>
+      {statWidgetsShown > 0 && (
+        <div
+          className="mb-8 grid grid-cols-1 gap-4 sm:max-w-4xl"
+          style={{ gridTemplateColumns: `repeat(${Math.min(statWidgetsShown, 4)}, minmax(0, 1fr))` }}
+        >
+          {show("stat_contactos") && (
+            <Card>
+              <div className="text-2xl font-semibold text-ink">{contactCount ?? 0}</div>
+              <div className="text-sm text-slate">{terms.contacts} activos</div>
+            </Card>
+          )}
+          {!isAcademia && show("stat_citas") && (
             <Card>
               <div className="text-2xl font-semibold text-ink">{upcoming.length}</div>
               <div className="text-sm text-slate">Próximas {appointmentsLower}</div>
             </Card>
+          )}
+          {!isAcademia && show("stat_notificaciones") && (
             <Card>
               <div className="text-2xl font-semibold text-ink">{newNotifications}</div>
               <div className="text-sm text-slate">Notificaciones nuevas</div>
             </Card>
-          </>
-        )}
-        <Card>
-          <div className="text-2xl font-semibold text-emerald-600">{earnedThisMonth.toFixed(2)} €</div>
-          <div className="text-sm text-slate">Ganado este mes</div>
-        </Card>
-      </div>
+          )}
+          {show("stat_ganado_mes") && (
+            <Card>
+              <div className="text-2xl font-semibold text-emerald-600">{earnedThisMonth.toFixed(2)} €</div>
+              <div className="text-sm text-slate">Ganado este mes</div>
+            </Card>
+          )}
+          {show("stat_proveedores") && (
+            <Card>
+              <div className="text-2xl font-semibold text-ink">{supplierCount ?? 0}</div>
+              <div className="text-sm text-slate">Proveedores dados de alta</div>
+            </Card>
+          )}
+        </div>
+      )}
 
       {isAcademia ? (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <Card>
-            <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-slate">Clases de hoy</h2>
-            <ul className="space-y-2 text-sm text-slate">
-              {classesToday.map((a: any) => (
-                <li key={a.id} className="flex justify-between border-b border-line pb-2 last:border-0 last:pb-0">
-                  <span className="text-ink">{a.contacts?.full_name}</span>
-                  <span className="tabular-nums">{formatAppTime(a.starts_at)}</span>
-                </li>
-              ))}
-              {classesToday.length === 0 && <li className="text-slate/70">Sin clases hoy.</li>}
-            </ul>
-          </Card>
-          <Card>
-            <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-slate">Clases de mañana</h2>
-            <ul className="space-y-2 text-sm text-slate">
-              {classesTomorrow.map((a: any) => (
-                <li key={a.id} className="flex justify-between border-b border-line pb-2 last:border-0 last:pb-0">
-                  <span className="text-ink">{a.contacts?.full_name}</span>
-                  <span className="tabular-nums">{formatAppTime(a.starts_at)}</span>
-                </li>
-              ))}
-              {classesTomorrow.length === 0 && <li className="text-slate/70">Sin clases mañana.</li>}
-            </ul>
-          </Card>
+          {show("clases_hoy") && (
+            <Card>
+              <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-slate">Clases de hoy</h2>
+              <ul className="space-y-2 text-sm text-slate">
+                {classesToday.map((a: any) => (
+                  <li key={a.id} className="flex justify-between border-b border-line pb-2 last:border-0 last:pb-0">
+                    <span className="text-ink">{a.contacts?.full_name}</span>
+                    <span className="tabular-nums">{formatAppTime(a.starts_at)}</span>
+                  </li>
+                ))}
+                {classesToday.length === 0 && <li className="text-slate/70">Sin clases hoy.</li>}
+              </ul>
+            </Card>
+          )}
+          {show("clases_manana") && (
+            <Card>
+              <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-slate">Clases de mañana</h2>
+              <ul className="space-y-2 text-sm text-slate">
+                {classesTomorrow.map((a: any) => (
+                  <li key={a.id} className="flex justify-between border-b border-line pb-2 last:border-0 last:pb-0">
+                    <span className="text-ink">{a.contacts?.full_name}</span>
+                    <span className="tabular-nums">{formatAppTime(a.starts_at)}</span>
+                  </li>
+                ))}
+                {classesTomorrow.length === 0 && <li className="text-slate/70">Sin clases mañana.</li>}
+              </ul>
+            </Card>
+          )}
         </div>
       ) : (
         <>
-          <Card className="mb-8">
-            <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-slate">Leads por etapa</h2>
-            <div className="flex flex-wrap gap-2">
-              {PIPELINE_STAGES.map((s) => (
-                <div key={s} className="flex items-center gap-2 rounded-xl border border-line px-3 py-2">
-                  <span className="text-lg font-semibold text-ink tabular-nums">{stageCounts[s]}</span>
-                  <Badge tone={STAGE_TONE[s]}>{STAGE_LABEL[s]}</Badge>
-                </div>
-              ))}
-            </div>
-          </Card>
+          {show("leads_pipeline") && (
+            <Card className="mb-8">
+              <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-slate">Leads por etapa</h2>
+              <div className="flex flex-wrap gap-2">
+                {PIPELINE_STAGES.map((s) => (
+                  <div key={s} className="flex items-center gap-2 rounded-xl border border-line px-3 py-2">
+                    <span className="text-lg font-semibold text-ink tabular-nums">{stageCounts[s]}</span>
+                    <Badge tone={STAGE_TONE[s]}>{STAGE_LABEL[s]}</Badge>
+                  </div>
+                ))}
+              </div>
+            </Card>
+          )}
 
-          <Card>
-            <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-slate">Próximas {appointmentsLower}</h2>
-            <ul className="space-y-2 text-sm text-slate">
-              {upcoming.map((a: any) => (
-                <li key={a.id} className="border-b border-line pb-2 last:border-0 last:pb-0">
-                  {new Date(a.starts_at).toLocaleString("es-ES")} — {a.contacts?.full_name}
-                </li>
-              ))}
-              {upcoming.length === 0 && <li className="text-slate/70">Sin {appointmentsLower} próximas.</li>}
-            </ul>
-          </Card>
+          {show("proximas_citas") && (
+            <Card>
+              <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-slate">Próximas {appointmentsLower}</h2>
+              <ul className="space-y-2 text-sm text-slate">
+                {upcoming.map((a: any) => (
+                  <li key={a.id} className="border-b border-line pb-2 last:border-0 last:pb-0">
+                    {new Date(a.starts_at).toLocaleString("es-ES")} — {a.contacts?.full_name}
+                  </li>
+                ))}
+                {upcoming.length === 0 && <li className="text-slate/70">Sin {appointmentsLower} próximas.</li>}
+              </ul>
+            </Card>
+          )}
         </>
       )}
     </div>

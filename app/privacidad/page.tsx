@@ -12,13 +12,13 @@ import { LegalLayout, LegalHeading } from "@/components/marketing-ui";
 // formulario propio más adelante.
 export default function PrivacidadPage() {
   return (
-    <LegalLayout title="Política de privacidad" updated="agosto de 2026">
+    <LegalLayout title="Política de privacidad" updated="octubre de 2026">
       <LegalHeading>1. Responsable del tratamiento</LegalHeading>
       <ul className="list-disc space-y-1 pl-5">
-        <li>Titular: Rafael López Hidalgo (RL Digital Studios)</li>
+        <li>Titular: Rafael López Hidalgo (Zenzia)</li>
         <li>NIF: 28831419-E</li>
         <li>Domicilio: Sevilla, España</li>
-        <li>Email de contacto: rldigitalstudios1@gmail.com</li>
+        <li>Email de contacto: zenzia.co@gmail.com</li>
       </ul>
 
       <LegalHeading>2. Qué datos tratamos y con qué finalidad</LegalHeading>
@@ -30,15 +30,15 @@ export default function PrivacidadPage() {
       <p>
         Si tu negocio contrata Zenzia y usas la aplicación como cliente, los datos que introduces en tu cuenta
         (tus contactos, sus citas, notas, presupuestos, etc.) son responsabilidad de tu empresa. En ese caso,
-        Rafael López Hidalgo actúa como encargado del tratamiento: aloja y procesa esos datos únicamente para
-        prestar el servicio, siguiendo tus instrucciones, y no los usa para ningún otro fin.
+        Rafael López Hidalgo (Zenzia) actúa como encargado del tratamiento: aloja y procesa esos datos únicamente
+        para prestar el servicio, siguiendo tus instrucciones, y no los usa para ningún otro fin.
       </p>
 
       <LegalHeading>3. Legitimación</LegalHeading>
       <p>
         El tratamiento de tus datos de contacto se basa en tu consentimiento al escribirnos. El tratamiento de los
         datos dentro de la aplicación Zenzia se basa en la ejecución del contrato de prestación del servicio entre
-        tu empresa y RL Digital Studios.
+        tu empresa y Zenzia.
       </p>
 
       <LegalHeading>4. Conservación</LegalHeading>
@@ -59,7 +59,7 @@ export default function PrivacidadPage() {
       <LegalHeading>6. Tus derechos</LegalHeading>
       <p>
         Puedes ejercer tus derechos de acceso, rectificación, supresión, oposición, limitación del tratamiento y
-        portabilidad escribiendo a rldigitalstudios1@gmail.com. También tienes derecho a presentar una reclamación
+        portabilidad escribiendo a zenzia.co@gmail.com. También tienes derecho a presentar una reclamación
         ante la Agencia Española de Protección de Datos (aepd.es) si consideras que no hemos tratado tus datos
         conforme a la normativa.
       </p>

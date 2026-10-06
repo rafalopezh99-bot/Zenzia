@@ -8,30 +8,63 @@
    de arranque + ThemeToggle, ver app/layout.tsx) los redefine. Ningún
    componente necesita saber que existe el modo oscuro: sigue escribiendo
    bg-paper/text-ink y el tema activo decide qué hex sale. */
+/* Cuarta paleta del panel (2026): misma identidad azul marino + celeste
+   que la web pública (ver ".mk" más abajo), en vez del verde-azulado
+   anterior — "mint" pasa a ser el celeste de acento secundario (estados
+   positivos, deltas) en lugar de un verde menta. */
 :root {
-  --color-paper: #f7f8f6;
-  --color-paper-deep: #edf1ef;
-  --color-ink: #0f1113;
-  --color-slate: #5b6a63;
-  --color-line: #d6deda;
-  --color-brand: #2c6c82;
-  --color-brand-pale: #e1eef0;
-  --color-mint: #bfe3d3;
+  --color-paper: #f4f8fb;
+  --color-paper-deep: #e7eff7;
+  --color-ink: #0b2a4a;
+  --color-slate: #5c7893;
+  --color-line: #dce7f1;
+  --color-brand: #163e6e;
+  --color-brand-pale: #e3ecf6;
+  --color-mint: #2f9ce0;
   --color-surface: #ffffff;
   color-scheme: light;
 }
 
 [data-theme="dark"] {
-  --color-paper: #10161a;
-  --color-paper-deep: #1a2226;
-  --color-ink: #eef2f0;
-  --color-slate: #93a5a0;
-  --color-line: #2a3538;
-  --color-brand: #6bb3ca;
-  --color-brand-pale: #1d343b;
-  --color-mint: #274238;
-  --color-surface: #171f22;
+  --color-paper: #0a1b2e;
+  --color-paper-deep: #122a44;
+  --color-ink: #e8f0f8;
+  --color-slate: #8aa3bd;
+  --color-line: #1f3b57;
+  --color-brand: #4fa8e8;
+  --color-brand-pale: #16314f;
+  --color-mint: #5fc2ef;
+  --color-surface: #0f2440;
   color-scheme: dark;
+}
+
+/* ---------- Web pública (zenzia.es): identidad propia ---------- */
+/* Paleta propia de la web pública, separada de --color-* (esa es la del
+   panel). Tercera iteración, a petición de Rafa ("algo parecido a
+   monday.com" en estructura y color): blanco limpio + violeta de marca +
+   tres acentos secundarios (coral/teal/ámbar) para la energía "SaaS
+   colorido" de las etiquetas por funcionalidad, en vez del negro+ámbar de
+   la versión anterior. Sigue sin alternar claro/oscuro: es la identidad
+   de marca, no una preferencia del visitante. Se aplica con la clase .mk
+   en el contenedor raíz de cada página pública (marketing-ui.tsx). */
+.mk {
+  /* Cuarta identidad: blanco + azul marino + celeste, a petición de Rafa.
+     Monocromática en azules — se mantienen los mismos nombres de token
+     (coral/teal/amber) que usan los componentes existentes, solo cambian
+     los valores, para no tocar estructura ni JSX. */
+  --mk-bg: #ffffff;
+  --mk-raised: #f1f6fb;
+  --mk-ink: #0b2a4a;
+  --mk-muted: #5c7893;
+  --mk-line: #dce7f1;
+  --mk-accent: #163e6e;
+  --mk-accent-dim: #e3ecf6;
+  --mk-coral: #2f9ce0;
+  --mk-teal: #0a3f6e;
+  --mk-amber: #6cc1ee;
+  background-color: var(--mk-bg);
+  color: var(--mk-ink);
+  color-scheme: light;
 }
 
 /* Fondo por defecto: el "paper" del tema activo. El panel (login,
@@ -42,6 +75,7 @@ html,
 body {
   background-color: var(--color-paper);
   color: var(--color-ink);
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
 }
 
 /* ---------- Dashboard mockup (landing hero) ---------- */

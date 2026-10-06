@@ -64,11 +64,12 @@ export default async function ContactosPage() {
             <tr>
               <th className={thEl}>ID</th>
               <th className={thEl}>Nombre</th>
-              <th className={`${thEl} hidden sm:table-cell`}>Contacto</th>
+              {!showAcademia && <th className={`${thEl} hidden sm:table-cell`}>Contacto</th>}
               {showAcademia && (
                 <>
                   <th className={`${thEl} hidden sm:table-cell`}>Curso</th>
                   <th className={`${thEl} hidden sm:table-cell`}>Asignaturas</th>
+                  <th className={`${thEl} hidden sm:table-cell`}>Pueblo</th>
                 </>
               )}
               {!showAcademia && <th className={`${thEl} hidden sm:table-cell`}>Alta</th>}
@@ -101,27 +102,29 @@ export default async function ContactosPage() {
                       {c.full_name}
                     </Link>
                   </td>
-                  <td className={`${tdEl} hidden sm:table-cell`}>
-                    <div className="flex items-center gap-1.5">
-                      {c.phone && (
-                        <a
-                          href={`https://wa.me/${whatsappDigits}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          title="WhatsApp"
-                          className={contactIconLinkClass}
-                        >
-                          <WhatsAppIcon />
-                        </a>
-                      )}
-                      {c.email && (
-                        <a href={`mailto:${c.email}`} title="Email" className={contactIconLinkClass}>
-                          <EmailIcon />
-                        </a>
-                      )}
-                      {!c.phone && !c.email && <span className="text-slate/50">—</span>}
-                    </div>
-                  </td>
+                  {!showAcademia && (
+                    <td className={`${tdEl} hidden sm:table-cell`}>
+                      <div className="flex items-center gap-1.5">
+                        {c.phone && (
+                          <a
+                            href={`https://wa.me/${whatsappDigits}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            title="WhatsApp"
+                            className={contactIconLinkClass}
+                          >
+                            <WhatsAppIcon />
+                          </a>
+                        )}
+                        {c.email && (
+                          <a href={`mailto:${c.email}`} title="Email" className={contactIconLinkClass}>
+                            <EmailIcon />
+                          </a>
+                        )}
+                        {!c.phone && !c.email && <span className="text-slate/50">—</span>}
+                      </div>
+                    </td>
+                  )}
                   {showAcademia && (
                     <>
                       <td className={`${tdEl} hidden sm:table-cell`}>
@@ -129,6 +132,9 @@ export default async function ContactosPage() {
                       </td>
                       <td className={`${tdEl} hidden sm:table-cell`}>
                         {subjectList.length ? subjectList.join(", ") : <span className="text-slate/50">—</span>}
+                      </td>
+                      <td className={`${tdEl} hidden sm:table-cell`}>
+                        {c.custom_fields?.pueblo || <span className="text-slate/50">—</span>}
                       </td>
                     </>
                   )}

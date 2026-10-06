@@ -1,350 +1,361 @@
-import { VERTICAL_CATALOG, VERTICAL_CATEGORIES } from "@/lib/verticals";
-import { FONT_SANS, FONT_SERIF, PAPER, PAPER_DEEP, INK, SLATE, LINE, BLUE, BLUE_PALE, MINT } from "@/lib/marketing-theme";
-import { Mono, MarketingHeader, MarketingFooter } from "@/components/marketing-ui";
+import { VERTICAL_CATEGORIES, VERTICAL_CATALOG } from "@/lib/verticals";
+import { MarketingHeader, MarketingFooter } from "@/components/marketing-ui";
 import LandingContactForm from "@/components/LandingContactForm";
 import DashboardMockup from "@/components/DashboardMockup";
+import FeatureTabs, { type TabDef } from "@/components/FeatureTabs";
 
-// Landing pública de Zenzia (dominio raíz, zenzia.es). Identidad "Calma con
-// autoridad": índigo + salvia sobre crema, titulares en Georgia, sin la
-// voz "de código" (acceder(), monoespaciada por todas partes) de la
-// versión anterior con estética RL Digital Studios. Secciones nuevas
-// frente a la versión previa: "Servicios" (resumen de alto nivel) y
-// "Automatizaciones" (problema → solución) — el resto (funcionalidades,
-// pasos, sectores, comparación, contacto) es contenido ya existente,
-// solo re-vestido con la paleta nueva. Vive fuera de (dashboard) y no
+// Landing pública de Zenzia (dominio raíz, zenzia.es). Quinta versión del
+// rediseño 2026. Rafa pidió esta vez calcar la ARQUITECTURA de
+// monday.com/crm sección por sección (no solo "inspirarse" como la v4):
+// cabecera con CTA repetido, hero con selector de sector + captura de
+// producto, panel de capacidades en pestañas, banda de personalización,
+// panel de funcionalidades en pestañas, proceso de principio a fin, banda
+// final con captura de producto + CTA, pie de página.
+//
+// Lo que NO se calca, por una razón concreta en cada caso:
+// - El texto de monday.com es suyo y está protegido por derechos de autor
+//   — aquí todo el copy es original de Zenzia, solo sigue el mismo tipo
+//   de titular/ritmo que el suyo, sección por sección.
+// - La franja de "logos de clientes conocidos" (Uber, Coca-Cola...) no se
+//   reproduce: Zenzia no tiene esos clientes, y poner logos ajenos sería
+//   falso.
+// - La insignia "+1.000 reseñas en G2" tampoco: Zenzia no tiene reseñas
+//   en G2, inventar esa cifra sería engañoso.
+// - El pie de página mega-column (Carreras, Prensa, Partners...) no
+//   aplica a un producto de una sola persona — se queda en el pie simple
+//   y honesto de siempre.
+// Todo el contenido real (módulos, automatizaciones, sectores) es el
+// mismo que en las versiones anteriores. Vive fuera de (dashboard) y no
 // requiere sesión.
 
-const SERVICIOS = [
-  { icon: "◎", title: "CRM de clientes", body: "Ficha completa de cada cliente: contacto, historial y notas en un mismo sitio." },
-  { icon: "€", title: "Gestión de pagos", body: "Presupuestos, facturas y cobros recurrentes, con avisos de impago automáticos." },
-  { icon: "▤", title: "Calendario centralizado", body: "Coordina citas, recordatorios y disponibilidad en un único calendario." },
-  { icon: "⚡", title: "Automatizaciones", body: "Reglas que generan facturas, citas y avisos solos, sin que tengas que acordarte." },
-  { icon: "▦", title: "Fichas y documentación", body: "Fichas de vehículo, fotos de antes y después, y consentimientos firmados." },
-  { icon: "◐", title: "Mi Web", body: "Tu propia web, editable por ti mismo, sin depender de nadie para cambiarla." },
+const HERO_SECTORES = ["fisio", "nutricion", "estetica", "taller", "academia", "peluqueria", "reformas", "asesoria"];
+
+const CAPACIDADES_TABS: TabDef[] = [
+  {
+    key: "bono",
+    label: "Bonos",
+    color: "coral",
+    title: "Los bonos se descuentan solos",
+    body: "Cada sesión que usa un cliente se resta de su bono en el momento, sin que tengas que apuntarlo tú a mano ni llevar la cuenta en un cuaderno.",
+    bullets: ["Consumo automático por sesión", "Aviso cuando queda poco", "Sin hojas de cálculo sueltas"],
+  },
+  {
+    key: "factura",
+    label: "Facturación",
+    color: "accent",
+    title: "Las facturas recurrentes se generan solas",
+    body: "Bonos, suscripciones y sesiones fijas: la factura del mes se crea y se asocia al contacto sin que tengas que acordarte ni montarla tú.",
+    bullets: ["Facturación recurrente mensual", "Siempre ligada al contacto", "Un sitio para todo el historial"],
+  },
+  {
+    key: "impago",
+    label: "Impagos",
+    color: "teal",
+    title: "Te enteras de un impago en el momento",
+    body: "En cuanto una factura no se cobra, te llega el aviso — no un mes después, cuando revisas el banco y ya es tarde para reclamarlo con naturalidad.",
+    bullets: ["Aviso inmediato", "Historial de pagos por cliente", "Nada que revisar a mano"],
+  },
+  {
+    key: "citas",
+    label: "Citas recurrentes",
+    color: "amber",
+    title: "Las citas de cada semana se crean solas",
+    body: "Una clase semanal, una revisión periódica: la defines una vez y Zenzia sigue creando las siguientes citas sin que repitas el proceso cada semana.",
+    bullets: ["Se repiten solas", "Mismo hueco, cada semana", "Editable si cambia algo puntual"],
+  },
 ];
 
-const FEATURES = [
+const MODULOS_TABS: TabDef[] = [
   {
-    n: "01",
-    title: "Agenda y citas",
+    key: "agenda",
+    label: "Agenda",
+    color: "coral",
+    title: "Tu día, de un vistazo",
     body: "Calendario semanal y mensual, con el estado de cada cita a la vista. Nada se te escapa por tener la agenda repartida entre el móvil y la cabeza.",
+    bullets: ["Vista semana y mes", "Estado de cada cita", "Recordatorios automáticos"],
   },
   {
-    n: "02",
-    title: "Contactos y seguimiento",
+    key: "clientes",
+    label: "Clientes",
+    color: "accent",
+    title: "Cada cliente, con su historia",
     body: "Ficha de cada cliente con la etapa por la que va pasando (lead, contactado, propuesta, cliente) y un resumen de cada conversación que has tenido con él.",
+    bullets: ["Ficha completa por contacto", "Etapas de seguimiento", "Historial de conversaciones"],
   },
   {
-    n: "03",
-    title: "Presupuestos y facturación",
-    body: "Presupuestos, órdenes de trabajo y facturas simples, siempre ligados al contacto correspondiente. Todo en el mismo sitio donde vive el resto de su historial.",
+    key: "presupuestos",
+    label: "Presupuestos",
+    color: "teal",
+    title: "Presupuestos que se convierten en factura",
+    body: "Órdenes de trabajo y presupuestos simples, siempre ligados al contacto correspondiente — y cuando se aprueban, a un clic de convertirse en factura.",
+    bullets: ["Ligados al contacto", "De presupuesto a factura", "Sin duplicar datos"],
   },
   {
-    n: "04",
-    title: "Fotos y consentimientos",
-    body: "Galería antes/después y documentos firmados, para los negocios que los necesitan: estética, tatuajes, clínicas dentales, fisioterapia.",
+    key: "fotos",
+    label: "Fotos y consentimientos",
+    color: "amber",
+    title: "Documentación en condiciones",
+    body: "Galería de antes/después y documentos firmados, para los negocios que los necesitan: estética, tatuajes, clínicas dentales, fisioterapia.",
+    bullets: ["Galería antes/después", "Consentimientos firmados", "Todo en la ficha del cliente"],
   },
   {
-    n: "05",
-    title: "Bonos y paquetes",
-    body: "Control de sesiones prepagadas para quien vende packs o bonos: cuántas quedan, cuántas se han usado, sin hojas de cálculo sueltas.",
-  },
-  {
-    n: "06",
-    title: "Configurado para tu sector",
-    body: "Al entrar por primera vez eliges a qué te dedicas y Zenzia activa solo lo que te hace falta. Nada de módulos a medio usar estorbando en el menú.",
+    key: "miweb",
+    label: "Mi Web",
+    color: "coral",
+    title: "Tu web, sin depender de nadie",
+    body: "Una página propia, editable por ti mismo desde el panel. Y si prefieres algo a medida, te la construyo yo — conectada a tu CRM desde el primer día.",
+    bullets: ["Editable desde el panel", "A medida si lo prefieres", "Leads directos a tu CRM"],
   },
 ];
 
-const AUTOMATIZACIONES = [
-  {
-    problem: "Se me olvida pasar la factura del bono cada mes.",
-    solution: "Facturación recurrente",
-    body: "Genera y cobra las facturas de bonos y suscripciones cada mes, sin que muevas un dedo.",
-  },
-  {
-    problem: "Me entero tarde de que un cliente no ha pagado.",
-    solution: "Avisos de impago",
-    body: "Te avisa en cuanto una factura no se cobra, para que actúes a tiempo.",
-  },
-  {
-    problem: "Llevo la cuenta de las sesiones de cada bono a mano.",
-    solution: "Consumo de bonos",
-    body: "Cada sesión que usa un cliente se descuenta sola de su bono, sin apuntarlo a mano.",
-  },
-  {
-    problem: "Creo cada cita de una clase semanal una a una.",
-    solution: "Citas recurrentes",
-    body: "Genera solas las citas de una clase o revisión periódica, sin crearlas una a una.",
-  },
+const PIPELINE = [
+  { stage: "Lead", body: "Alguien escribe desde tu web o te lo recomiendan.", color: "coral" as const },
+  { stage: "Contactado", body: "Le respondes y queda registrado en su ficha.", color: "accent" as const },
+  { stage: "Propuesta", body: "Le mandas presupuesto, ligado a su contacto.", color: "teal" as const },
+  { stage: "Cliente", body: "Agenda, facturas y seguimiento, todo en un sitio.", color: "amber" as const },
 ];
 
-const STEPS = [
-  {
-    n: "01",
-    title: "Cuéntanos tu negocio",
-    body: "Nos dices a qué te dedicas y cómo trabajas ahora mismo: con Excel, WhatsApp, papel, o un poco de todo.",
-  },
-  {
-    n: "02",
-    title: "Lo configuramos a tu medida",
-    body: "Te damos de alta y, al entrar, un asistente rápido activa los módulos de tu sector y deja tu cuenta lista para trabajar.",
-  },
-  {
-    n: "03",
-    title: "Empiezas a gestionar",
-    body: "Entras a tu panel, ya con tu nombre y tu negocio configurados, y a partir de ahí todo queda centralizado en un solo sitio.",
-  },
-];
+const DOT: Record<string, string> = {
+  coral: "bg-mk-coral",
+  accent: "bg-mk-accent",
+  teal: "bg-mk-teal",
+  amber: "bg-mk-amber",
+};
+const BORDER: Record<string, string> = {
+  coral: "border-mk-coral",
+  accent: "border-mk-accent",
+  teal: "border-mk-teal",
+  amber: "border-mk-amber",
+};
+const TEXT: Record<string, string> = {
+  coral: "text-mk-coral",
+  accent: "text-mk-accent",
+  teal: "text-mk-teal",
+  amber: "text-mk-amber",
+};
 
-const CARD_HOVER = "transition-transform duration-200 hover:scale-[1.03]";
+const EYEBROW = "text-xs font-bold uppercase tracking-widest text-mk-accent";
+const H2 = "text-2xl font-black tracking-tight text-mk-ink sm:text-3xl";
 
 export default function LandingPage() {
   return (
-    <div className="min-h-screen" style={{ backgroundColor: PAPER, color: INK, fontFamily: FONT_SANS }}>
+    <div className="mk min-h-screen">
       <MarketingHeader />
 
       {/* ============ HERO ============ */}
-      <section className="mx-auto max-w-6xl px-6 pb-20 pt-10 sm:pt-16">
-        <div className="grid items-center gap-14 lg:grid-cols-[1.1fr_1fr]">
-          <div>
-            <span
-              className="mb-5 inline-block rounded-full px-3 py-1.5 text-[11px] uppercase tracking-wide"
-              style={{ color: MINT, backgroundColor: "#E3EBE5" }}
-            >
-              Un producto de RL Digital Studios
-            </span>
-            <h1 className="max-w-xl text-4xl font-bold leading-[1.15] sm:text-5xl" style={{ fontFamily: FONT_SERIF }}>
-              El CRM que mete <span style={{ color: BLUE }}>orden</span> donde hoy hay caos
-            </h1>
-            <p className="mt-6 max-w-xl text-base leading-relaxed" style={{ color: SLATE }}>
-              Agenda, clientes, facturación y hasta tu propia web, todo en un solo panel hecho a medida para tu tipo
-              de negocio. Sin hojas de cálculo sueltas ni WhatsApps perdidos.
-            </p>
-            <div className="mt-8 flex flex-wrap items-center gap-5">
-              <a
-                href="#contacto"
-                className={`rounded-lg px-6 py-3 text-sm font-semibold text-white ${CARD_HOVER}`}
-                style={{ backgroundColor: INK }}
-              >
-                Pedir una demo
-              </a>
-            </div>
-          </div>
-
-          <DashboardMockup />
-        </div>
-      </section>
-
-      {/* ============ SERVICIOS ============ */}
-      <section id="servicios" className="border-t" style={{ borderColor: LINE, backgroundColor: PAPER_DEEP }}>
-        <div className="mx-auto max-w-6xl px-6 py-20">
-          <div className="mx-auto max-w-xl text-center">
-            <h2 className="text-2xl font-bold sm:text-3xl" style={{ fontFamily: FONT_SERIF }}>
-              Todo lo que necesita tu negocio, en un mismo sitio
-            </h2>
-            <p className="mt-3 text-sm leading-relaxed" style={{ color: SLATE }}>
-              De la ficha del cliente al cobro de la factura, pasando por la agenda y los avisos que antes tenías
-              que recordar tú.
-            </p>
-          </div>
-          <div className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {SERVICIOS.map((s) => (
-              <div
-                key={s.title}
-                className={`flex min-h-[220px] flex-col rounded-2xl border p-7 ${CARD_HOVER}`}
-                style={{ borderColor: LINE, backgroundColor: PAPER }}
-              >
-                <div
-                  className="mb-5 flex h-11 w-11 items-center justify-center rounded-xl text-lg"
-                  style={{ backgroundColor: "#E3EBE5", color: MINT }}
-                >
-                  {s.icon}
-                </div>
-                <h3 className="text-[15px] font-semibold">{s.title}</h3>
-                <p className="mt-2 text-sm leading-relaxed" style={{ color: SLATE }}>
-                  {s.body}
-                </p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ============ FUNCIONALIDADES ============ */}
-      <section id="funcionalidades" className="mx-auto max-w-6xl px-6 py-20">
-        <h2 className="max-w-2xl text-2xl font-bold leading-tight sm:text-3xl" style={{ fontFamily: FONT_SERIF }}>
-          Activa solo lo que tu negocio necesita
-        </h2>
-        <div className="mt-12 grid gap-x-10 gap-y-12 sm:grid-cols-2 lg:grid-cols-3">
-          {FEATURES.map((f) => (
-            <div key={f.n}>
-              <span className="text-xs" style={{ fontFamily: FONT_SERIF, color: BLUE }}>
-                N.º {f.n}
-              </span>
-              <h3 className="mt-2 text-lg font-semibold">{f.title}</h3>
-              <p className="mt-2 text-sm leading-relaxed" style={{ color: SLATE }}>
-                {f.body}
+      <section className="border-b border-mk-line">
+        <div className="mx-auto max-w-6xl px-6 pb-16 pt-14 sm:pt-20">
+          <div className="grid items-center gap-14 lg:grid-cols-[1.05fr_1fr]">
+            <div>
+              <h1 className="max-w-xl text-4xl font-black leading-[1.08] tracking-tight text-mk-ink sm:text-5xl">
+                El CRM que se adapta a tu negocio, no al revés
+              </h1>
+              <p className="mt-6 max-w-lg text-base leading-relaxed text-mk-muted">
+                Vende y gestiona más rápido con el panel más directo para pymes y autónomos, con automatizaciones
+                que trabajan solas y tu propia web incluida.
               </p>
+
+              <div className="mt-7 flex flex-wrap gap-2">
+                {HERO_SECTORES.map((key) => {
+                  const v = VERTICAL_CATALOG.find((x) => x.key === key)!;
+                  return (
+                    <a
+                      key={key}
+                      href="#sectores"
+                      className="rounded-full border border-mk-line bg-mk-bg px-3.5 py-1.5 text-xs font-medium text-mk-muted transition hover:border-mk-accent hover:text-mk-ink"
+                    >
+                      {v.label}
+                    </a>
+                  );
+                })}
+                <a
+                  href="#sectores"
+                  className="rounded-full px-3.5 py-1.5 text-xs font-semibold text-mk-accent hover:underline"
+                >
+                  y más →
+                </a>
+              </div>
+
+              <div className="mt-8">
+                <a
+                  href="#contacto"
+                  className="inline-block rounded-full bg-mk-accent px-7 py-3.5 text-sm font-semibold text-white transition hover:brightness-110"
+                >
+                  Pedir una demo
+                </a>
+                <p className="mt-2.5 text-xs text-mk-muted">✦ Te la preparo yo mismo, sin compromiso</p>
+              </div>
             </div>
-          ))}
+
+            <DashboardMockup />
+          </div>
         </div>
       </section>
 
-      {/* ============ AUTOMATIZACIONES ============ */}
-      <section id="automatizaciones" className="border-t" style={{ borderColor: LINE, backgroundColor: PAPER_DEEP }}>
-        <div className="mx-auto max-w-6xl px-6 py-20">
-          <div className="mx-auto max-w-xl text-center">
-            <h2 className="text-2xl font-bold sm:text-3xl" style={{ fontFamily: FONT_SERIF }}>
-              Cosas que Zenzia hace sola, sin que tengas que acordarte
-            </h2>
-            <p className="mt-3 text-sm leading-relaxed" style={{ color: SLATE }}>
-              No es solo un sitio donde apuntar datos: hay tareas que antes hacías a mano y que ahora pasan solas.
-            </p>
+      {/* ============ CAPACIDADES (pestañas, posición "con IA" de monday) ============ */}
+      <section id="automatizaciones" className="border-b border-mk-line">
+        <div className="mx-auto max-w-5xl px-6 py-20">
+          <span className={EYEBROW}>Lo que hace solo</span>
+          <h2 className={`mt-2 ${H2}`}>Mantén el control, sin esfuerzo</h2>
+          <div className="mt-10">
+            <FeatureTabs tabs={CAPACIDADES_TABS} label="Automatizaciones de Zenzia" />
           </div>
-          <p
-            className="mx-auto mt-8 max-w-lg border-y py-5 text-center text-xl"
-            style={{ borderColor: LINE, fontFamily: FONT_SERIF }}
-          >
-            Cuéntanos tu problema. Te enseñamos la solución.
+        </div>
+      </section>
+
+      {/* ============ PERSONALIZACIÓN ============ */}
+      <section className="border-b border-mk-line bg-mk-raised">
+        <div className="mx-auto max-w-6xl px-6 py-16 text-center">
+          <span className={EYEBROW}>Configuración</span>
+          <h2 className={`mx-auto mt-2 max-w-2xl ${H2}`}>Personaliza en minutos, según tu sector</h2>
+          <p className="mx-auto mt-4 max-w-xl text-sm leading-relaxed text-mk-muted">
+            Nada de empezar desde cero: eliges a qué te dedicas y Zenzia activa los módulos que de verdad vas a
+            usar. Ajustas lo que quieras después, sin tocar código ni pedirle nada a nadie.
           </p>
-          <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-            {AUTOMATIZACIONES.map((a) => (
-              <div
-                key={a.solution}
-                className={`rounded-2xl border p-6 ${CARD_HOVER}`}
-                style={{ borderColor: LINE, backgroundColor: PAPER }}
-              >
-                <span
-                  className="mb-3 inline-block rounded-md px-2 py-0.5 text-[9px] font-semibold uppercase tracking-wide"
-                  style={{ backgroundColor: BLUE_PALE, color: BLUE }}
-                >
-                  Automático
-                </span>
-                <p className="text-[12.5px] italic leading-relaxed" style={{ color: SLATE }}>
-                  &quot;{a.problem}&quot;
-                </p>
-                <p className="mt-3 text-sm font-semibold" style={{ color: BLUE }}>
-                  → {a.solution}
-                </p>
-                <p className="mt-2 text-[13px] leading-relaxed" style={{ color: SLATE }}>
-                  {a.body}
-                </p>
-              </div>
-            ))}
+          <a
+            href="#contacto"
+            className="mt-6 inline-block rounded-full border border-mk-ink px-6 py-2.5 text-sm font-semibold text-mk-ink transition hover:bg-mk-ink hover:text-white"
+          >
+            Pedir una demo
+          </a>
+        </div>
+      </section>
+
+      {/* ============ FUNCIONALIDADES (pestañas) ============ */}
+      <section id="funcionalidades" className="border-b border-mk-line">
+        <div className="mx-auto max-w-5xl px-6 py-20">
+          <span className={EYEBROW}>Funcionalidades</span>
+          <h2 className={`mt-2 ${H2}`}>Todo lo que necesita tu negocio, en un mismo sitio</h2>
+          <div className="mt-10">
+            <FeatureTabs tabs={MODULOS_TABS} label="Funcionalidades de Zenzia" />
           </div>
         </div>
       </section>
 
-      {/* ============ CÓMO FUNCIONA ============ */}
-      <section className="mx-auto max-w-6xl px-6 py-20">
-        <h2 className="max-w-2xl text-2xl font-bold leading-tight sm:text-3xl" style={{ fontFamily: FONT_SERIF }}>
-          De la primera llamada a usarlo, sin fricción
-        </h2>
-        <div className="mt-12 grid gap-10 sm:grid-cols-3">
-          {STEPS.map((s) => (
-            <div key={s.n}>
-              <span className="text-3xl" style={{ fontFamily: FONT_SERIF, color: BLUE }}>
-                {s.n}
-              </span>
-              <h3 className="mt-2 text-base font-semibold">{s.title}</h3>
-              <p className="mt-2 text-sm leading-relaxed" style={{ color: SLATE }}>
-                {s.body}
+      {/* ============ DESARROLLO WEB ============ */}
+      <section id="desarrollo-web" className="border-b border-mk-line bg-mk-raised">
+        <div className="mx-auto max-w-6xl px-6 py-20">
+          <div className="grid gap-12 lg:grid-cols-[1fr_1fr] lg:items-center">
+            <div>
+              <span className={EYEBROW}>Desarrollo web</span>
+              <h2 className={`mt-2 ${H2}`}>Tu negocio, también en la web</h2>
+              <p className="mt-4 text-sm leading-relaxed text-mk-muted">
+                Igual que con el CRM, nada de plantillas genéricas: una web pensada para cómo trabajas, conectada
+                con el resto de tu gestión.
               </p>
             </div>
-          ))}
+            <ul className="flex flex-col gap-3">
+              {[
+                { t: "Tu web incluida", b: "El módulo Mi Web, editable por ti mismo desde el panel.", c: "coral" as const },
+                { t: "A medida, si lo prefieres", b: "Te la diseño y construyo yo, igual que a otros negocios.", c: "teal" as const },
+                { t: "Conectada con tu CRM", b: "Quien te escribe entra directo como lead, sin copiar nada.", c: "amber" as const },
+              ].map((item) => (
+                <li key={item.t} className="flex items-start gap-3 rounded-xl border border-mk-line bg-mk-bg p-4">
+                  <span className={`mt-1 h-2.5 w-2.5 shrink-0 rounded-full ${DOT[item.c]}`} />
+                  <div>
+                    <p className="text-sm font-bold text-mk-ink">{item.t}</p>
+                    <p className="mt-0.5 text-sm text-mk-muted">{item.b}</p>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      {/* ============ PROCESO DE PRINCIPIO A FIN ============ */}
+      <section className="border-b border-mk-line">
+        <div className="mx-auto max-w-5xl px-6 py-20">
+          <span className={EYEBROW}>De principio a fin</span>
+          <h2 className={`mt-2 ${H2}`}>De primer contacto a cliente fijo, sin perder el hilo</h2>
+          <div className="mt-12 grid gap-6 sm:grid-cols-4">
+            {PIPELINE.map((p, i) => (
+              <div key={p.stage} className="relative">
+                <div className="flex items-center gap-3">
+                  <span
+                    className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full border-2 ${BORDER[p.color]} font-black ${TEXT[p.color]}`}
+                  >
+                    {i + 1}
+                  </span>
+                  {i < PIPELINE.length - 1 && <span className="hidden h-0.5 flex-1 bg-mk-line sm:block" />}
+                </div>
+                <h3 className="mt-3 text-base font-bold text-mk-ink">{p.stage}</h3>
+                <p className="mt-1 text-sm leading-relaxed text-mk-muted">{p.body}</p>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 
       {/* ============ SECTORES ============ */}
-      <section id="sectores" className="border-t" style={{ borderColor: LINE, backgroundColor: PAPER_DEEP }}>
+      <section id="sectores" className="border-b border-mk-line bg-mk-raised">
         <div className="mx-auto max-w-6xl px-6 py-20">
-          <h2 className="max-w-2xl text-2xl font-bold leading-tight sm:text-3xl" style={{ fontFamily: FONT_SERIF }}>
-            Pensado para todo tipo de negocios
-          </h2>
-          <p className="mt-4 max-w-xl text-sm" style={{ color: SLATE }}>
+          <span className={EYEBROW}>Sectores</span>
+          <h2 className={`mt-2 ${H2}`}>Pensado para todo tipo de negocios</h2>
+          <p className="mt-4 max-w-xl text-sm text-mk-muted">
             Desde una clínica hasta un taller: eliges tu sector al darte de alta y Zenzia activa lo habitual para
             ese tipo de negocio. Después ajustas lo que quieras.
           </p>
 
-          <div className="mt-12 space-y-10">
-            {VERTICAL_CATEGORIES.map((category) => (
-              <div key={category}>
-                <span className="text-xs uppercase tracking-widest" style={{ color: SLATE }}>
-                  {category}
-                </span>
-                <div className="mt-3 flex flex-wrap gap-2">
-                  {VERTICAL_CATALOG.filter((v) => v.category === category).map((v) => (
-                    <span
-                      key={v.key}
-                      className={`rounded-full border px-3 py-1.5 text-sm ${CARD_HOVER}`}
-                      style={{ borderColor: LINE, backgroundColor: PAPER }}
-                    >
-                      {v.label}
-                    </span>
-                  ))}
+          <div className="mt-12 space-y-8">
+            {VERTICAL_CATEGORIES.map((category, i) => {
+              const color = (["coral", "accent", "teal", "amber"] as const)[i % 4];
+              return (
+                <div key={category}>
+                  <span className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-mk-ink">
+                    <span className={`h-2 w-2 rounded-full ${DOT[color]}`} />
+                    {category}
+                  </span>
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    {VERTICAL_CATALOG.filter((v) => v.category === category).map((v) => (
+                      <span
+                        key={v.key}
+                        className="rounded-full border border-mk-line bg-mk-bg px-3.5 py-1.5 text-sm text-mk-ink transition hover:border-mk-accent"
+                      >
+                        {v.label}
+                      </span>
+                    ))}
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       </section>
 
-      {/* ============ ANTES / CON ZENZIA ============ */}
-      <section className="mx-auto max-w-6xl px-6 py-20">
-        <h2 className="max-w-2xl text-2xl font-bold leading-tight sm:text-3xl" style={{ fontFamily: FONT_SERIF }}>
-          Deja de repartir tu negocio entre cinco sitios
-        </h2>
-        <div className="mt-12 grid gap-6 sm:grid-cols-2">
-          <div className="rounded-2xl border p-6" style={{ borderColor: LINE }}>
-            <span className="text-xs uppercase tracking-widest" style={{ color: SLATE }}>
-              Ahora mismo
-            </span>
-            <ul className="mt-4 space-y-3 text-sm" style={{ color: SLATE }}>
-              <li>Agenda en el móvil, aparte de todo lo demás</li>
-              <li>Conversaciones y acuerdos sueltos en WhatsApp</li>
-              <li>Presupuestos en un Excel que solo entiendes tú</li>
-              <li>Facturas sueltas, cada una en su sitio</li>
-            </ul>
+      {/* ============ ZENZIA EN ACCIÓN (posición "vídeo/demo" de monday) ============ */}
+      <section className="bg-mk-ink">
+        <div className="mx-auto max-w-5xl px-6 py-20 text-center">
+          <span className="text-xs font-bold uppercase tracking-widest text-mk-amber">Zenzia en acción</span>
+          <h2 className="mx-auto mt-2 max-w-xl text-2xl font-black tracking-tight text-white sm:text-3xl">
+            Así se ve un negocio con Zenzia dentro
+          </h2>
+          <div className="mx-auto mt-10 max-w-xl text-left">
+            <DashboardMockup />
           </div>
-          <div className="rounded-2xl border p-6" style={{ borderColor: MINT, backgroundColor: "#E3EBE5" }}>
-            <span className="text-xs uppercase tracking-widest" style={{ color: MINT }}>
-              Con Zenzia
-            </span>
-            <ul className="mt-4 space-y-3 text-sm" style={{ color: INK }}>
-              <li>Agenda, contactos, presupuestos y facturas en un solo panel</li>
-              <li>El historial de cada cliente, siempre a mano</li>
-              <li>Accesible desde cualquier dispositivo con conexión</li>
-              <li>Configurado desde el primer día para tu sector</li>
-            </ul>
-          </div>
+          <a
+            href="#contacto"
+            className="mt-10 inline-block rounded-full bg-mk-accent px-7 py-3.5 text-sm font-semibold text-white transition hover:brightness-110"
+          >
+            Pedir una demo
+          </a>
         </div>
       </section>
 
       {/* ============ CONTACTO ============ */}
-      <section id="contacto" className="border-t" style={{ borderColor: LINE, backgroundColor: PAPER_DEEP }}>
+      <section id="contacto">
         <div className="mx-auto max-w-6xl px-6 py-20">
-          <h2 className="max-w-2xl text-2xl font-bold leading-tight sm:text-3xl" style={{ fontFamily: FONT_SERIF }}>
-            ¿Quieres Zenzia en tu negocio?
-          </h2>
-          <p className="mt-4 max-w-xl text-sm" style={{ color: SLATE }}>
-            Cuéntanos a qué te dedicas y te preparamos una demo con tu propio panel ya configurado.
+          <span className={EYEBROW}>Hablamos</span>
+          <h2 className={`mt-2 ${H2}`}>¿Organizamos tu negocio?</h2>
+          <p className="mt-4 max-w-xl text-sm leading-relaxed text-mk-muted">
+            Cuéntame a qué te dedicas y te preparo una demo con tu panel ya configurado — te contesto yo mismo,
+            normalmente en menos de 24 horas.
           </p>
 
-          <div className="mt-10 grid gap-12 lg:grid-cols-[1fr_1.3fr]">
-            <div className="flex flex-col gap-6">
-              <div>
-                <span className="text-xs uppercase tracking-widest" style={{ color: SLATE }}>
-                  Email
-                </span>
-                <div className="mt-1 text-sm">rldigitalstudios1@gmail.com</div>
-              </div>
-              <div>
-                <span className="text-xs uppercase tracking-widest" style={{ color: SLATE }}>
-                  Instagram
-                </span>
-                <div className="mt-1 text-sm">@rldigitalstudios</div>
-              </div>
+          <div className="mt-10 grid gap-10 lg:grid-cols-[1fr_1.3fr]">
+            <div>
+              <span className="text-xs font-semibold uppercase tracking-widest text-mk-muted">Email</span>
+              <div className="mt-1 text-sm text-mk-ink">zenzia.co@gmail.com</div>
             </div>
 
             <LandingContactForm />

@@ -21,6 +21,9 @@ export async function createContact(formData: FormData) {
   const stage = String(formData.get("stage") ?? "").trim();
   const curso = String(formData.get("curso") ?? "").trim();
   const bono_type_id = String(formData.get("bono_type_id") ?? "").trim();
+  // Pueblo del alumno (vertical academia): no hace falta factura, solo
+  // saber de dónde son.
+  const pueblo = String(formData.get("pueblo") ?? "").trim();
   // Datos de facturación del cliente: para poder emitir factura/presupuesto
   // en PDF con sus datos fiscales sin tener que pedirlos cada vez.
   const tax_id = String(formData.get("tax_id") ?? "").trim();
@@ -46,6 +49,7 @@ export async function createContact(formData: FormData) {
   if (stage) custom_fields.pipeline_stage = stage;
   if (curso) custom_fields.curso = curso;
   if (subjects.length) custom_fields.subjects = subjects;
+  if (pueblo) custom_fields.pueblo = pueblo;
   if (tax_id) custom_fields.tax_id = tax_id;
   if (billing_address) custom_fields.billing_address = billing_address;
   if (postal_code) custom_fields.postal_code = postal_code;
@@ -209,6 +213,7 @@ export async function updateContact(contactId: string, formData: FormData) {
   const contacted_via = String(formData.get("contacted_via") ?? "").trim();
   const stage = String(formData.get("stage") ?? "").trim();
   const demo_url = String(formData.get("demo_url") ?? "").trim();
+  const pueblo = String(formData.get("pueblo") ?? "").trim();
   const tax_id = String(formData.get("tax_id") ?? "").trim();
   const billing_address = String(formData.get("billing_address") ?? "").trim();
   const postal_code = String(formData.get("postal_code") ?? "").trim();
@@ -225,6 +230,7 @@ export async function updateContact(contactId: string, formData: FormData) {
   custom_fields.contacted_via = contacted_via;
   custom_fields.demo_url = demo_url;
   if (stage) custom_fields.pipeline_stage = stage;
+  custom_fields.pueblo = pueblo;
   custom_fields.tax_id = tax_id;
   custom_fields.billing_address = billing_address;
   custom_fields.postal_code = postal_code;
