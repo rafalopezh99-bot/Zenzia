@@ -48,6 +48,7 @@ export function planAllowsNotifications(plan: PlanKey) {
 const START_HIDDEN_WIDGETS: WidgetKey[] = [
   "stat_proveedores",
   "stat_notificaciones",
+  "leads_pipeline",
   "chart_facturacion_anual",
   "top_clientes_potenciales",
   "top_servicios_potenciales",

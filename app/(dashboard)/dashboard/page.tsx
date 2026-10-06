@@ -8,6 +8,7 @@ import LiveClock from "@/components/LiveClock";
 import { PIPELINE_STAGES, STAGE_LABEL, STAGE_TONE, getStage } from "@/lib/pipeline";
 import { getWidgetCatalog, resolveEnabledWidgets } from "@/lib/widgets";
 import { planAllowsWidget } from "@/lib/plans";
+import PlanUsageCard from "@/components/PlanUsageCard";
 import DashboardWidgetsEditor from "@/components/DashboardWidgetsEditor";
 import { StatCard } from "@/components/StatCard";
 import { BillingBarChart } from "@/components/charts/BillingBarChart";
@@ -237,6 +238,8 @@ export default async function DashboardPage() {
         }
         logoUrl={logoUrl}
       />
+
+      <PlanUsageCard plan={plan} monthStart={monthStart} />
 
       {statWidgetsShown > 0 && (
         <div
