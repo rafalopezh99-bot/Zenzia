@@ -59,7 +59,7 @@ export const PLANS: PlanContent[] = [
     key: "pro",
     name: "Pro",
     claim: "Consigue más clientes y fidelízalos.",
-    price: 79,
+    price: 59,
     from: true,
     setup: "Implantación: desde 490 €",
     includes: "Todo lo de Smart, más:",
