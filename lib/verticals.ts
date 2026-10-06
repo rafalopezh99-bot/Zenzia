@@ -10,7 +10,7 @@ export interface VerticalDef {
   category: string;
 }
 
-export const VERTICAL_CATEGORIES = [
+export const ALL_VERTICAL_CATEGORIES = [
   "Salud y bienestar",
   "Estética y belleza",
   "Automoción",
@@ -18,14 +18,17 @@ export const VERTICAL_CATEGORIES = [
   "Negocios y servicios profesionales",
 ] as const;
 
-export const VERTICAL_CATALOG: VerticalDef[] = [
+export const ALL_VERTICALS: VerticalDef[] = [
   // Salud y bienestar
   { key: "fisio", label: "Fisioterapia", category: "Salud y bienestar" },
   { key: "osteopatia", label: "Osteopatía", category: "Salud y bienestar" },
-  { key: "nutricion", label: "Nutrición", category: "Salud y bienestar" },
+  { key: "nutricion", label: "Nutrición / dietética", category: "Salud y bienestar" },
   { key: "psicologia", label: "Psicología / terapia", category: "Salud y bienestar" },
   { key: "podologia", label: "Podología", category: "Salud y bienestar" },
   { key: "entrenador_personal", label: "Entrenador personal", category: "Salud y bienestar" },
+  { key: "logopedia", label: "Logopedia", category: "Salud y bienestar" },
+  { key: "pilates_yoga", label: "Pilates / yoga", category: "Salud y bienestar" },
+  { key: "coaching", label: "Coaching / mentoría", category: "Negocios y servicios profesionales" },
   { key: "dental", label: "Clínica dental", category: "Salud y bienestar" },
   { key: "veterinaria", label: "Veterinaria", category: "Salud y bienestar" },
 
@@ -56,3 +59,25 @@ export const VERTICAL_CATALOG: VerticalDef[] = [
   { key: "fotografia", label: "Fotografía", category: "Negocios y servicios profesionales" },
   { key: "academia", label: "Academia / clases particulares", category: "Negocios y servicios profesionales" },
 ];
+
+// Foco actual de Zenzia: autónomos que trabajan por sesiones (salud,
+// bienestar, coaching, clases particulares, peluquería). Solo estos se
+// ofrecen en el alta, el perfil y la web. El resto sigue en ALL_VERTICALS
+// para no romper empresas ya dadas de alta con esos sectores.
+const FOCUS_KEYS = [
+  "nutricion",
+  "psicologia",
+  "entrenador_personal",
+  "fisio",
+  "osteopatia",
+  "podologia",
+  "logopedia",
+  "pilates_yoga",
+  "coaching",
+  "academia",
+  "peluqueria",
+];
+
+export const VERTICAL_CATALOG: VerticalDef[] = ALL_VERTICALS.filter((v) => FOCUS_KEYS.includes(v.key));
+
+export const VERTICAL_CATEGORIES = ALL_VERTICAL_CATEGORIES.filter((c) => VERTICAL_CATALOG.some((v) => v.category === c));

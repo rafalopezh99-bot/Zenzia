@@ -89,7 +89,7 @@ const PLANS = [
 // mismo que en las versiones anteriores. Vive fuera de (dashboard) y no
 // requiere sesión.
 
-const HERO_SECTORES = ["fisio", "nutricion", "estetica", "taller", "academia", "peluqueria", "reformas", "asesoria"];
+const HERO_SECTORES = ["nutricion", "psicologia", "entrenador_personal", "fisio", "coaching", "academia", "peluqueria", "pilates_yoga"];
 
 const CAPACIDADES_TABS: TabDef[] = [
   {
@@ -212,7 +212,7 @@ export default function LandingPage() {
                 El CRM que se adapta a tu negocio, no al revés
               </h1>
               <p className="mt-6 max-w-lg text-base leading-relaxed text-mk-muted">
-                Vende y gestiona más rápido con el panel más directo para pymes y autónomos, con automatizaciones
+                Vende y gestiona más rápido con el panel más directo para autónomos, con automatizaciones
                 que trabajan solas y tu propia web incluida.
               </p>
 

@@ -86,6 +86,9 @@ export const VERTICAL_PACKS: Record<string, ModuleKey[]> = {
   // para historiales médicos/clínicos, no encaja en clases particulares —
   // el progreso del alumno ya lo cubre "seguimiento".
   academia: ["agenda", "seguimiento", "bonos", "facturacion"],
+  logopedia: ["agenda", "historial_clinico", "seguimiento", "bonos"],
+  pilates_yoga: ["agenda", "seguimiento", "bonos"],
+  coaching: ["agenda", "seguimiento", "bonos", "facturacion"],
 };
 
 import { createClient } from "@/lib/supabase/server";

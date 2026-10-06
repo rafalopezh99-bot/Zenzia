@@ -3,7 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getCurrentCompanyProfile, ZENZIA_ADMIN_COMPANY_ID } from "@/lib/company";
 import { reviewSignupRequest } from "@/lib/actions/signupRequests";
 import { PageHeader, Card, Badge, GhostButton, PrimaryButton } from "@/components/ui";
-import { VERTICAL_CATALOG } from "@/lib/verticals";
+import { ALL_VERTICALS as VERTICAL_CATALOG } from "@/lib/verticals";
 
 const PLAN_LABEL: Record<string, string> = { mensual: "Mensual", anual: "Anual" };
 const USAGE_LABEL: Record<string, string> = { negocio: "Uso de negocio", personal: "Uso personal" };
