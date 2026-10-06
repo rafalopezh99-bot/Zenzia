@@ -50,8 +50,27 @@ export function getTerminology(vertical?: string | null): Terminology {
 // intentando cerrar, así que esos campos no pegan en la pestaña de
 // alumnos (ver showsAcademiaFields, que sí les da sus propios campos:
 // curso, asignaturas...).
+// Sectores de consulta (autónomos que trabajan por sesiones): ficha de
+// cliente simple, sin etapas de venta (lead/ganado/perdido) de agencia.
+const CONSULTA_VERTICALS = [
+  "nutricion",
+  "psicologia",
+  "entrenador_personal",
+  "fisio",
+  "osteopatia",
+  "podologia",
+  "logopedia",
+  "pilates_yoga",
+  "coaching",
+  "peluqueria",
+];
+
+export function isConsultaVertical(vertical?: string | null): boolean {
+  return !!vertical && CONSULTA_VERTICALS.includes(vertical);
+}
+
 export function showsAgencyPipeline(vertical?: string | null): boolean {
-  return vertical !== "academia";
+  return vertical !== "academia" && !isConsultaVertical(vertical);
 }
 
 // Curso, bono (tarifario) y asignaturas solo tienen sentido para clases
