@@ -61,7 +61,7 @@ export const PLANS: PlanContent[] = [
     claim: "Consigue más clientes y fidelízalos.",
     price: 59,
     from: true,
-    setup: "Implantación: desde 490 €",
+    setup: "Implantación: desde 290 €",
     includes: "Todo lo de Smart, más:",
     features: [
       "Web propia con reservas integradas",
