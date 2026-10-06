@@ -3,67 +3,7 @@ import { MarketingHeader, MarketingFooter } from "@/components/marketing-ui";
 import LandingContactForm from "@/components/LandingContactForm";
 import DashboardMockup from "@/components/DashboardMockup";
 import FeatureTabs, { type TabDef } from "@/components/FeatureTabs";
-
-// Contenido de la sección de precios. Los límites reales que aplica el
-// panel están en lib/plans.ts — si cambian allí, actualizar aquí también.
-const PLANS = [
-  {
-    name: "Start",
-    claim: "Organiza tus clientes, tu agenda y tus cobros.",
-    price: 29,
-    from: false,
-    setup: "Sin cuota de implantación",
-    includes: null,
-    features: [
-      "Clientes con ficha y notas · 30 nuevos/mes",
-      "Agenda de citas",
-      "Facturas en PDF · 30/mes",
-      "Dashboard con tus números",
-      "1 usuario",
-    ],
-    cta: "Quiero Start",
-    featured: false,
-  },
-  {
-    name: "Smart",
-    claim: "Recibe reservas online y olvídate de los recordatorios.",
-    price: 59,
-    from: false,
-    setup: "Implantación: 290 €",
-    includes: "Todo lo de Start, más:",
-    features: [
-      "Reservas online 24/7",
-      "Recordatorios de citas por email",
-      "Todos los módulos de tu sector",
-      "Notificaciones de contactos web",
-      "150 clientes y facturas/mes",
-      "Presupuestos · 50/mes",
-      "Gráficas de facturación completas",
-      "Proveedores · 3 usuarios",
-    ],
-    cta: "Quiero Smart",
-    featured: true,
-  },
-  {
-    name: "Pro",
-    claim: "Te digitalizamos el negocio y lo mantenemos.",
-    price: 119,
-    from: true,
-    setup: "Implantación: desde 690 €",
-    includes: "Todo lo de Smart, más:",
-    features: [
-      "Web profesional conectada a Zenzia",
-      "Recordatorios por WhatsApp",
-      "Todo ilimitado",
-      "Usuarios ilimitados",
-      "Auditoría y automatizaciones a medida",
-      "Mantenimiento y soporte prioritario",
-      "Hosting y dominio el primer año",
-    ],
-    cta: "Solicitar auditoría",
-    featured: false,
-  },
-];
+import { PLANS } from "@/lib/planContent";
 
 // Landing pública de Zenzia (dominio raíz, zenzia.es). Quinta versión del
 // rediseño 2026. Rafa pidió esta vez calcar la ARQUITECTURA de

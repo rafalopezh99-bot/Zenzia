@@ -55,6 +55,14 @@ export default async function DashboardLayout({ children }: { children: React.Re
   )
     redirect("/dashboard");
 
+  // Lo que su sector tendría pero su plan no incluye: sale en el menú con
+  // candado y lleva a /planes (el "gusanillo" para mejorar de plan).
+  const locked = [
+    ...allModules.filter((m) => !modules.includes(m)).map((m) => m.label),
+    ...(showNotifications ? [] : ["Notificaciones"]),
+    ...(showSuppliers ? [] : ["Proveedores"]),
+  ];
+
   return (
     <div className="flex min-h-screen flex-col bg-paper text-ink sm:flex-row">
       <Sidebar
@@ -65,6 +73,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
         vertical={profile.vertical}
         showSuppliers={showSuppliers}
         showNotifications={showNotifications}
+        locked={locked}
       />
       <main className="flex-1 overflow-x-hidden p-4 sm:p-8">{children}</main>
     </div>

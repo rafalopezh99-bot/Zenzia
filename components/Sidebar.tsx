@@ -23,6 +23,7 @@ export default function Sidebar({
   vertical = null,
   showSuppliers = true,
   showNotifications = true,
+  locked = [],
 }: {
   modules: ModuleDef[];
   notificationCount?: number;
@@ -31,6 +32,7 @@ export default function Sidebar({
   vertical?: string | null;
   showSuppliers?: boolean;
   showNotifications?: boolean;
+  locked?: string[];
 }) {
   const [open, setOpen] = useState(false);
   const terms = getTerminology(vertical);
@@ -128,6 +130,21 @@ export default function Sidebar({
         {modules.map((m) => (
           <Link key={m.key} href={m.href} className={linkClass} onClick={close}>
             {m.key === "agenda" ? terms.agendaLabel : m.label}
+          </Link>
+        ))}
+        {locked.map((label) => (
+          <Link
+            key={label}
+            href="/planes"
+            className={`${linkClass} flex items-center justify-between opacity-60`}
+            onClick={close}
+            title="Disponible en un plan superior"
+          >
+            <span>{label}</span>
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+              <rect x="4" y="11" width="16" height="10" rx="2" />
+              <path d="M8 11V7a4 4 0 0 1 8 0v4" />
+            </svg>
           </Link>
         ))}
         {isAdmin && (
