@@ -66,6 +66,7 @@ export async function createContact(formData: FormData) {
       full_name,
       phone: String(formData.get("phone") ?? "") || null,
       email: String(formData.get("email") ?? "") || null,
+      birth_date: String(formData.get("birth_date") ?? "") || null,
       status: "active",
       custom_fields,
     })
@@ -208,41 +209,38 @@ export async function updateContact(contactId: string, formData: FormData) {
     .eq("id", contactId)
     .single();
 
-  const business_type = String(formData.get("business_type") ?? "").trim();
-  const instagram_handle = String(formData.get("instagram_handle") ?? "")
-    .trim()
-    .replace(/^@/, "");
-  const contacted_via = String(formData.get("contacted_via") ?? "").trim();
-  const stage = String(formData.get("stage") ?? "").trim();
-  const demo_url = String(formData.get("demo_url") ?? "").trim();
-  const pueblo = String(formData.get("pueblo") ?? "").trim();
-  const tax_id = String(formData.get("tax_id") ?? "").trim();
-  const billing_address = String(formData.get("billing_address") ?? "").trim();
-  const postal_code = String(formData.get("postal_code") ?? "").trim();
-  const province = String(formData.get("province") ?? "").trim();
-  const country = String(formData.get("country") ?? "").trim();
-  const billing_frequency = String(formData.get("billing_frequency") ?? "").trim();
-
-  // Se parte de lo que ya había en custom_fields (para no perder curso /
-  // subjects del vertical academia, que este formulario no toca) y se
-  // sobreescriben solo los campos del pipeline y de facturación.
+  // Se parte de lo que ya había en custom_fields y solo se sobreescriben
+  // los campos que trae este formulario: la ficha cambia según el vertical
+  // (agencia, academia, consulta) y no debe borrar lo que no enseña.
   const custom_fields: Record<string, unknown> = { ...(existing?.custom_fields ?? {}) };
-  custom_fields.business_type = business_type;
-  custom_fields.instagram_handle = instagram_handle;
-  custom_fields.contacted_via = contacted_via;
-  custom_fields.demo_url = demo_url;
+  const FIELDS = [
+    "business_type",
+    "instagram_handle",
+    "contacted_via",
+    "demo_url",
+    "pueblo",
+    "tax_id",
+    "billing_address",
+    "postal_code",
+    "province",
+    "country",
+    "billing_frequency",
+  ];
+  for (const key of FIELDS) {
+    if (formData.has(key)) custom_fields[key] = String(formData.get(key) ?? "").trim();
+  }
+  if (typeof custom_fields.instagram_handle === "string") {
+    custom_fields.instagram_handle = custom_fields.instagram_handle.replace(/^@/, "");
+  }
+  const stage = String(formData.get("stage") ?? "").trim();
   if (stage) custom_fields.pipeline_stage = stage;
-  custom_fields.pueblo = pueblo;
-  custom_fields.tax_id = tax_id;
-  custom_fields.billing_address = billing_address;
-  custom_fields.postal_code = postal_code;
-  custom_fields.province = province;
-  custom_fields.country = country;
-  custom_fields.billing_frequency = billing_frequency;
+
+  const update: Record<string, unknown> = { full_name, phone: phone || null, email: email || null, custom_fields };
+  if (formData.has("birth_date")) update.birth_date = String(formData.get("birth_date") ?? "") || null;
 
   const { error } = await supabase
     .from("contacts")
-    .update({ full_name, phone: phone || null, email: email || null, custom_fields })
+    .update(update)
     .eq("id", contactId);
   if (error) throw new Error(error.message);
 

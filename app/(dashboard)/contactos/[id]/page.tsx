@@ -6,10 +6,11 @@ import { PIPELINE_STAGES, STAGE_LABEL, CONTACT_CHANNELS, CHANNEL_LABEL, getStage
 import { getCurrentCompanyProfile } from "@/lib/company";
 import { showsAgencyPipeline, showsAcademiaFields } from "@/lib/terminology";
 import { BILLING_FREQUENCIES, BILLING_FREQUENCY_LABEL } from "@/lib/billing";
+import Link from "next/link";
 
 export default async function ContactoDetailPage({ params }: { params: { id: string } }) {
   const supabase = createClient();
-  const { vertical } = await getCurrentCompanyProfile();
+  const { vertical, plan } = await getCurrentCompanyProfile();
   const showPipeline = showsAgencyPipeline(vertical);
   const showAcademia = showsAcademiaFields(vertical);
 
@@ -44,6 +45,79 @@ export default async function ContactoDetailPage({ params }: { params: { id: str
   // wa.me solo admite dígitos: se limpian espacios/guiones/+ del teléfono
   // tal cual esté guardado.
   const whatsappDigits = (contact.phone ?? "").replace(/[^\d]/g, "");
+
+  // Sectores de consulta (nutrición, psicología, entrenador...): ficha
+  // simple. Las notas de cada sesión van en la propia cita, no aquí.
+  if (!showPipeline && !showAcademia) {
+    const birth = contact.birth_date ? new Date(contact.birth_date) : null;
+    const age = birth ? Math.floor((Date.now() - birth.getTime()) / (365.25 * 24 * 3600 * 1000)) : null;
+    const actionClass =
+      "inline-flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold transition hover:opacity-90";
+
+    return (
+      <div className="max-w-2xl">
+        <PageHeader title={contact.full_name} />
+        <div className="-mt-6 mb-6 flex flex-wrap items-center gap-3">
+          {age !== null && <span className="text-sm text-slate">{age} años</span>}
+          {whatsappDigits && (
+            <a
+              href={`https://wa.me/${whatsappDigits}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={`${actionClass} bg-[#25D366] text-white`}
+            >
+              WhatsApp
+            </a>
+          )}
+          {contact.phone && (
+            <a href={`tel:${contact.phone}`} className={`${actionClass} bg-brand text-white`}>
+              Llamar
+            </a>
+          )}
+        </div>
+
+        <form action={updateContactForContact}>
+          <Card className="mb-6">
+            <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-slate">Contacto</h2>
+            <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+              <Input name="full_name" placeholder="Nombre y apellidos" required defaultValue={contact.full_name} className="sm:col-span-2" />
+              <Input name="phone" type="tel" placeholder="Teléfono" defaultValue={contact.phone ?? ""} />
+              <Input name="email" type="email" placeholder="Email" defaultValue={contact.email ?? ""} />
+              <Input name="billing_address" placeholder="Dirección" defaultValue={billingAddress} className="sm:col-span-2" />
+              <label className="text-xs text-slate">
+                Fecha de nacimiento
+                <Input name="birth_date" type="date" defaultValue={contact.birth_date ?? ""} className="mt-1 w-full" />
+              </label>
+              <label className="text-xs text-slate">
+                DNI / NIF
+                <Input name="tax_id" placeholder="Opcional" defaultValue={taxId} className="mt-1 w-full" />
+              </label>
+            </div>
+            <PrimaryButton className="mt-4">Guardar</PrimaryButton>
+          </Card>
+        </form>
+
+        <Card>
+          <div className="flex items-center justify-between gap-2">
+            <h2 className="text-sm font-semibold uppercase tracking-wide text-slate">Evolución y pautas</h2>
+            {plan === "start" && <span className="text-xs font-semibold text-slate">🔒 Smart</span>}
+          </div>
+          {plan === "start" ? (
+            <p className="mt-3 text-sm text-slate">
+              Registra medidas, pautas y objetivos de cada cliente y mira su evolución en una gráfica.{" "}
+              <Link href="/planes" className="font-semibold text-brand hover:underline">
+                Disponible en Smart →
+              </Link>
+            </p>
+          ) : (
+            <Link href="/seguimiento" className="mt-3 inline-block text-sm font-semibold text-brand hover:underline">
+              Ver evolución y pautas →
+            </Link>
+          )}
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-2xl">

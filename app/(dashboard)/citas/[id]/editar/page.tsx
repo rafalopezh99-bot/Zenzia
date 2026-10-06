@@ -69,7 +69,13 @@ export default async function EditarCitaPage({ params }: { params: { id: string 
               </option>
             ))}
           </Select>
-          <Textarea name="notes" placeholder="Notas" defaultValue={appointment.notes ?? ""} className="w-full" />
+          <Textarea
+            name="notes"
+            rows={6}
+            placeholder="Notas de la sesión: cómo ha ido, qué se ha trabajado, próximos pasos..."
+            defaultValue={appointment.notes ?? ""}
+            className="w-full"
+          />
           <PrimaryButton>Guardar cambios</PrimaryButton>
         </form>
         <form action={deleteThisAppointment} className="mt-3 border-t border-line pt-3">

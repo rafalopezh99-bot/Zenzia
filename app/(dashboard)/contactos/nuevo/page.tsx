@@ -41,14 +41,14 @@ export default async function NuevoContactoPage() {
       <PageHeader title={terms.newContact} />
       <Card className="max-w-sm">
         <form action={createContact} className="space-y-3">
-          <Input name="full_name" placeholder="Nombre completo" required className="w-full" />
+          <Input name="full_name" placeholder="Nombre y apellidos" required className="w-full" />
           {showPipeline && (
             <Input name="business_type" placeholder="Tipo de negocio (ej. centro de estética)" className="w-full" />
           )}
           {showPipeline && (
             <Input name="instagram_handle" placeholder="Instagram (usuario, sin @)" className="w-full" />
           )}
-          <Input name="phone" placeholder="Teléfono (opcional)" className="w-full" />
+          <Input name="phone" type="tel" placeholder="Teléfono" className="w-full" />
           <Input name="email" type="email" placeholder="Email (opcional)" className="w-full" />
           {showPipeline && (
             <Input name="demo_url" type="url" placeholder="Enlace de la demo (opcional)" className="w-full" />
@@ -126,7 +126,7 @@ export default async function NuevoContactoPage() {
             </>
           )}
 
-          {!showAcademia && (
+          {showPipeline && (
             <>
               <div className="pt-1 text-xs font-semibold uppercase tracking-wide text-slate">Datos de facturación</div>
               <Input name="tax_id" placeholder="DNI / CIF" className="w-full" />
@@ -144,6 +144,18 @@ export default async function NuevoContactoPage() {
                   </option>
                 ))}
               </Select>
+            </>
+          )}
+
+          {/* Sectores de consulta (nutrición, psicología, entrenador...): alta corta. */}
+          {!showPipeline && !showAcademia && (
+            <>
+              <Input name="billing_address" placeholder="Dirección" className="w-full" />
+              <label className="block text-xs text-slate">
+                Fecha de nacimiento
+                <Input name="birth_date" type="date" className="mt-1 w-full" />
+              </label>
+              <Input name="tax_id" placeholder="DNI / NIF (opcional, para facturas)" className="w-full" />
             </>
           )}
 
