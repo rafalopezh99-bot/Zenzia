@@ -5,7 +5,7 @@ import { getCurrentCompanyProfile, ZENZIA_ADMIN_COMPANY_ID } from "@/lib/company
 import { createClient } from "@/lib/supabase/server";
 import { headers } from "next/headers";
 import { MODULE_CATALOG } from "@/lib/modules";
-import { filterModulesByPlan, planAllowsSuppliers } from "@/lib/plans";
+import { filterModulesByPlan, planAllowsNotifications, planAllowsSuppliers } from "@/lib/plans";
 
 // Todo lo que cuelga de este layout depende de la sesión y de los módulos
 // activados por empresa — nunca se prerenderiza estático.
@@ -42,11 +42,18 @@ export default async function DashboardLayout({ children }: { children: React.Re
   // El plan contratado recorta los módulos activados (ver lib/plans.ts).
   // Además de ocultarlos del menú, se bloquea la ruta: escribir la URL a
   // mano de algo que el plan no incluye lleva al dashboard.
-  const modules = filterModulesByPlan(allModules, profile.plan, profile.vertical);
+  const modules = filterModulesByPlan(allModules, profile.plan);
   const pathname = headers().get("x-pathname") ?? "";
   const inPath = (href: string) => pathname === href || pathname.startsWith(`${href}/`);
   const blockedModule = MODULE_CATALOG.some((m) => inPath(m.href) && !modules.some((x) => x.key === m.key));
-  if (blockedModule || (inPath("/proveedores") && !planAllowsSuppliers(profile.plan))) redirect("/dashboard");
+  const showSuppliers = planAllowsSuppliers(profile.plan);
+  const showNotifications = planAllowsNotifications(profile.plan);
+  if (
+    blockedModule ||
+    (inPath("/proveedores") && !showSuppliers) ||
+    (inPath("/notificaciones") && !showNotifications)
+  )
+    redirect("/dashboard");
 
   return (
     <div className="flex min-h-screen flex-col bg-paper text-ink sm:flex-row">
@@ -56,7 +63,8 @@ export default async function DashboardLayout({ children }: { children: React.Re
         isAdmin={isAdmin}
         signupRequestCount={signupRequestCount}
         vertical={profile.vertical}
-        showSuppliers={planAllowsSuppliers(profile.plan)}
+        showSuppliers={showSuppliers}
+        showNotifications={showNotifications}
       />
       <main className="flex-1 overflow-x-hidden p-4 sm:p-8">{children}</main>
     </div>

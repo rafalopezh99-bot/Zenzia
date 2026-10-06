@@ -4,7 +4,7 @@
 // El plan marca el MÁXIMO permitido y el vertical decide qué tiene sentido
 // para ese negocio: un módulo se ve solo si cumple las dos cosas.
 import { createClient } from "@/lib/supabase/server";
-import { VERTICAL_PACKS, type ModuleDef, type ModuleKey } from "@/lib/modules";
+import type { ModuleDef, ModuleKey } from "@/lib/modules";
 import type { WidgetKey } from "@/lib/widgets";
 
 export type PlanKey = "start" | "smart" | "pro";
@@ -15,31 +15,24 @@ export const PLAN_LABEL: Record<PlanKey, string> = { start: "Start", smart: "Sma
 export type LimitKey = "contacts" | "invoices" | "quotes";
 
 export const PLAN_LIMITS: Record<PlanKey, Record<LimitKey, number | null>> = {
-  start: { contacts: 30, invoices: 30, quotes: 10 },
+  start: { contacts: 30, invoices: 30, quotes: 0 },
   smart: { contacts: 150, invoices: 150, quotes: 50 },
   pro: { contacts: null, invoices: null, quotes: null },
 };
 
 export const PLAN_USERS: Record<PlanKey, number | null> = { start: 1, smart: 3, pro: null };
 
-// Núcleo común que todo plan tiene (si el vertical lo activa).
-const CORE_MODULES: ModuleKey[] = ["agenda", "presupuestos", "facturacion"];
+// Start: solo dashboard, clientes, agenda, facturación y perfil. Smart y
+// Pro tienen todos los módulos que active su vertical (Mi Web, solo Pro).
+const START_MODULES: ModuleKey[] = ["agenda", "facturacion"];
 
-// Módulo principal del sector = el primero de su pack que no sea del núcleo
-// (taller → vehículos, fisio → historial...). Es el único de sector en Start.
-export function primarySectorModule(vertical: string | null): ModuleKey | null {
-  const pack = (vertical && VERTICAL_PACKS[vertical]) || [];
-  return pack.find((k) => !CORE_MODULES.includes(k)) ?? null;
-}
-
-export function planAllowsModule(plan: PlanKey, key: ModuleKey, vertical: string | null): boolean {
+export function planAllowsModule(plan: PlanKey, key: ModuleKey): boolean {
   if (key === "sitio_web") return plan === "pro";
-  if (plan !== "start" || CORE_MODULES.includes(key)) return true;
-  return key === primarySectorModule(vertical);
+  return plan !== "start" || START_MODULES.includes(key);
 }
 
-export function filterModulesByPlan(modules: ModuleDef[], plan: PlanKey, vertical: string | null) {
-  return modules.filter((m) => planAllowsModule(plan, m.key, vertical));
+export function filterModulesByPlan(modules: ModuleDef[], plan: PlanKey) {
+  return modules.filter((m) => planAllowsModule(plan, m.key));
 }
 
 // Funciones sueltas que no son módulos.
@@ -47,9 +40,14 @@ export function planAllowsSuppliers(plan: PlanKey) {
   return plan !== "start";
 }
 
+export function planAllowsNotifications(plan: PlanKey) {
+  return plan !== "start";
+}
+
 // Start: dashboard básico, sin gráficas avanzadas.
 const START_HIDDEN_WIDGETS: WidgetKey[] = [
   "stat_proveedores",
+  "stat_notificaciones",
   "chart_facturacion_anual",
   "top_clientes_potenciales",
   "top_servicios_potenciales",

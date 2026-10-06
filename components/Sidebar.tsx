@@ -22,6 +22,7 @@ export default function Sidebar({
   signupRequestCount = 0,
   vertical = null,
   showSuppliers = true,
+  showNotifications = true,
 }: {
   modules: ModuleDef[];
   notificationCount?: number;
@@ -29,6 +30,7 @@ export default function Sidebar({
   signupRequestCount?: number;
   vertical?: string | null;
   showSuppliers?: boolean;
+  showNotifications?: boolean;
 }) {
   const [open, setOpen] = useState(false);
   const terms = getTerminology(vertical);
@@ -113,14 +115,16 @@ export default function Sidebar({
             Clientes
           </Link>
         )}
-        <Link href="/notificaciones" className={`${linkClass} flex items-center justify-between`} onClick={close}>
-          <span>Notificaciones</span>
-          {notificationCount > 0 && (
-            <span className="rounded-full bg-brand px-2 py-0.5 text-xs font-semibold text-white">
-              {notificationCount}
-            </span>
-          )}
-        </Link>
+        {showNotifications && (
+          <Link href="/notificaciones" className={`${linkClass} flex items-center justify-between`} onClick={close}>
+            <span>Notificaciones</span>
+            {notificationCount > 0 && (
+              <span className="rounded-full bg-brand px-2 py-0.5 text-xs font-semibold text-white">
+                {notificationCount}
+              </span>
+            )}
+          </Link>
+        )}
         {modules.map((m) => (
           <Link key={m.key} href={m.href} className={linkClass} onClick={close}>
             {m.key === "agenda" ? terms.agendaLabel : m.label}
