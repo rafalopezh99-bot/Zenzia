@@ -5,6 +5,7 @@ import { Card, PageHeader, Select, GhostButton, ghostLinkClass, primaryButtonCla
 import { PAYMENT_METHOD_LABEL, PAYMENT_METHODS } from "@/lib/paymentMethod";
 import { refreshPendingVerifactu } from "@/lib/verifactu";
 import DeleteInvoiceButton from "@/components/DeleteInvoiceButton";
+import AnnulInvoiceButton from "@/components/AnnulInvoiceButton";
 import Link from "next/link";
 
 const TABS = [
@@ -186,9 +187,11 @@ export default async function FacturacionPage(props: { searchParams: Promise<{ t
                     {isInvoices && i.verifactu_status !== "no_enviada" ? (
                       i.status !== "anulada" &&
                       !i.rectifies_id && (
-                        <form action={annulInvoice.bind(null, i.id)}>
-                          <GhostButton>Anular</GhostButton>
-                        </form>
+                        <AnnulInvoiceButton
+                          invoiceId={i.id}
+                          invoiceLabel={`${i.doc_number} · ${i.contacts?.full_name ?? ""}`}
+                          annulInvoice={annulInvoice}
+                        />
                       )
                     ) : isInvoices ? (
                       <DeleteInvoiceButton
