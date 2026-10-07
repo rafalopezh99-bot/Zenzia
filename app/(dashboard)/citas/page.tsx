@@ -1,5 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
+import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
 import { Card, PageHeader } from "@/components/ui";
 import AgendaViewSwitch from "@/components/AgendaViewSwitch";
 import { getCurrentCompanyProfile } from "@/lib/company";
@@ -8,8 +10,8 @@ import { appLocalParts, formatAppTime } from "@/lib/timezone";
 import NowLine from "@/components/NowLine";
 
 const WEEKDAY_NAMES = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"];
-// Semana de lunes a sábado: muchos autónomos (entrenadores, peluquerías...) trabajan el sábado.
-const WEEK_DAYS = 6;
+// Semana completa de lunes a domingo: muchos autónomos trabajan también el fin de semana.
+const WEEK_DAYS = 7;
 
 // Un color distinto por alumno (no por estado): antes, dos clases a la
 // misma hora ocupaban el mismo hueco y solo se veía el nombre de una. Ahora
@@ -137,7 +139,12 @@ export default async function CitasPage({
 }) {
   const { vertical } = await getCurrentCompanyProfile();
   const terms = getTerminology(vertical);
-  const isDay = searchParams.view === "day";
+  // Sin vista en la URL (entrar desde el menú), se abre la predeterminada
+  // que haya fijado el usuario (ver AgendaViewSwitch).
+  const preferred = cookies().get("agenda_view")?.value;
+  const noParams = !searchParams.view && !searchParams.week && !searchParams.day;
+  if (noParams && preferred === "month") redirect("/citas/calendario");
+  const isDay = searchParams.view === "day" || (noParams && preferred === "day");
   const monday = parseWeekParam(searchParams.week);
   const dayStart = (() => {
     const d = searchParams.day && /^\d{4}-\d{2}-\d{2}$/.test(searchParams.day) ? new Date(`${searchParams.day}T00:00:00`) : new Date();
@@ -205,7 +212,7 @@ export default async function CitasPage({
   prev.setDate(prev.getDate() - step);
   const next = new Date(firstDay);
   next.setDate(next.getDate() + step);
-  const hrefFor = (d: Date) => (isDay ? `/citas?view=day&day=${formatWeekParam(d)}` : `/citas?week=${formatWeekParam(d)}`);
+  const hrefFor = (d: Date) => (isDay ? `/citas?view=day&day=${formatWeekParam(d)}` : `/citas?view=week&week=${formatWeekParam(d)}`);
 
   const navLinkClass =
     "rounded-full border border-line px-3 py-1.5 text-sm text-slate transition hover:border-brand hover:text-brand";
@@ -231,7 +238,7 @@ export default async function CitasPage({
           </Link>
           <div className="flex items-center gap-3">
             <div className="text-sm font-semibold text-ink">{rangeLabel}</div>
-            <Link href={isDay ? "/citas?view=day" : "/citas"} className="text-xs text-brand hover:underline">
+            <Link href={isDay ? "/citas?view=day" : "/citas?view=week"} className="text-xs text-brand hover:underline">
               Hoy
             </Link>
           </div>
