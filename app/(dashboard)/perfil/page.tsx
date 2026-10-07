@@ -8,12 +8,14 @@ import { VAT_OPTIONS, IRPF_OPTIONS } from "@/lib/documents";
 import { PLAN_LABEL, planHas } from "@/lib/plans";
 import { parseBooking } from "@/lib/booking";
 import Link from "next/link";
+import { createService, archiveService } from "@/lib/actions/services";
 
 export const dynamic = "force-dynamic";
 
 const WEEK_LETTERS = ["L", "M", "X", "J", "V", "S", "D"];
 const TABS = [
   { key: "negocio", label: "Negocio" },
+  { key: "servicios", label: "Servicios" },
   { key: "facturacion", label: "Facturación" },
   { key: "reservas", label: "Reservas y reseñas" },
   { key: "plan", label: "Plan" },
@@ -37,6 +39,10 @@ export default async function PerfilPage(props: { searchParams: Promise<{ tab?: 
     .eq("id", companyId)
     .single();
 
+  const { data: services } =
+    tab === "servicios"
+      ? await supabase.from("services").select("id, name, duration_min, price, vat").eq("active", true).order("name")
+      : { data: [] as any[] };
   const booking = parseBooking(company?.booking);
   const vf = company?.verifactu_state as any;
   const logoUrl = company?.logo_path
@@ -119,6 +125,49 @@ export default async function PerfilPage(props: { searchParams: Promise<{ tab?: 
           </Card>
           <PrimaryButton>Guardar</PrimaryButton>
         </form>
+      )}
+
+      {tab === "servicios" && (
+        <>
+          <Card className="mb-4">
+            <h2 className={h2}>Tus servicios</h2>
+            <ul className="divide-y divide-line text-sm">
+              {(services ?? []).map((s: any) => (
+                <li key={s.id} className="flex items-center justify-between gap-2 py-2">
+                  <span className="text-ink">{s.name}</span>
+                  <span className="flex items-center gap-3 text-slate">
+                    {s.duration_min} min · {Number(s.price).toFixed(2)} € · {s.vat === -1 ? "Exento" : `IVA ${s.vat} %`}
+                    <form action={archiveService.bind(null, s.id)}>
+                      <button className="text-xs text-slate hover:text-red-600" title="Quitar">
+                        ✕
+                      </button>
+                    </form>
+                  </span>
+                </li>
+              ))}
+              {(services ?? []).length === 0 && <li className="py-2 text-slate">Todavía no tienes servicios.</li>}
+            </ul>
+          </Card>
+          <Card>
+            <h2 className={h2}>Añadir servicio</h2>
+            <form action={createService} className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+              <Input name="name" placeholder="Ej. Sesión de fisioterapia" required className="col-span-2" />
+              <Input name="duration_min" type="number" min="5" step="5" placeholder="Minutos" defaultValue={45} />
+              <Input name="price" type="number" min="0" step="0.01" placeholder="Precio €" />
+              <Select name="vat" defaultValue={String(company?.default_vat ?? 21)} className="col-span-2">
+                {VAT_OPTIONS.map((o) => (
+                  <option key={o.value} value={o.value}>
+                    {o.label}
+                  </option>
+                ))}
+              </Select>
+              <PrimaryButton className="col-span-2">Añadir</PrimaryButton>
+            </form>
+            <p className="mt-2 text-xs text-slate/70">
+              Al crear una cita eliges el servicio y se rellenan la duración y el precio; después la facturas con un clic.
+            </p>
+          </Card>
+        </>
       )}
 
       {tab === "facturacion" && (

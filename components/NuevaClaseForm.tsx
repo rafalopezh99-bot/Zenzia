@@ -26,13 +26,17 @@ export default function NuevaClaseForm({
   contacts,
   contactLabel,
   defaultStartsAt,
+  services = [],
 }: {
   contacts: { id: string; full_name: string; curso: string | null }[];
   contactLabel: string;
   // Fecha/hora ya rellena al venir de pulsar un hueco libre de la agenda.
   defaultStartsAt?: string;
+  // Catálogo de servicios: al elegir uno se rellena la duración.
+  services?: { id: string; name: string; duration_min: number; price: number }[];
 }) {
   const [mode, setMode] = useState<"puntual" | "recurrente">("puntual");
+  const [duration, setDuration] = useState<number>(services?.[0]?.duration_min ?? 60);
 
   const contactSelect = (
     <Select name="contact_id" required className="w-full">
@@ -56,7 +60,7 @@ export default function NuevaClaseForm({
             mode === "puntual" ? TAB_ACTIVE : TAB_INACTIVE
           }`}
         >
-          Clase puntual
+          Puntual
         </button>
         <button
           type="button"
@@ -65,7 +69,7 @@ export default function NuevaClaseForm({
             mode === "recurrente" ? TAB_ACTIVE : TAB_INACTIVE
           }`}
         >
-          Horario recurrente
+          Recurrente
         </button>
       </div>
 
@@ -73,14 +77,33 @@ export default function NuevaClaseForm({
         <form action={createAppointment} className="space-y-3">
           {contactSelect}
           <Input name="starts_at" type="datetime-local" required defaultValue={defaultStartsAt} className="w-full" />
-          <Input
-            name="duration_hours"
-            type="number"
-            step="0.5"
-            min="0.5"
-            placeholder="Duración de la clase (horas)"
-            className="w-full"
-          />
+          {services.length > 0 && (
+            <Select
+              name="service_id"
+              defaultValue={services[0].id}
+              onChange={(e) => setDuration(services.find((s) => s.id === e.target.value)?.duration_min ?? duration)}
+              className="w-full"
+            >
+              {services.map((s) => (
+                <option key={s.id} value={s.id}>
+                  {s.name} · {s.duration_min} min · {Number(s.price).toFixed(2)} €
+                </option>
+              ))}
+              <option value="">Sin servicio</option>
+            </Select>
+          )}
+          <label className="block text-xs text-slate">
+            Duración (minutos)
+            <Input
+              name="duration_min"
+              type="number"
+              step="5"
+              min="5"
+              value={duration}
+              onChange={(e) => setDuration(Number(e.target.value))}
+              className="mt-1 w-full"
+            />
+          </label>
           <Textarea name="notes" placeholder="Notas" className="w-full" />
           <PrimaryButton>Guardar</PrimaryButton>
         </form>

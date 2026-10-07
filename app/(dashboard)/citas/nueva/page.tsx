@@ -9,6 +9,11 @@ export default async function NuevaCitaPage(props: { searchParams: Promise<{ at?
   const supabase = await createClient();
   const { vertical } = await getCurrentCompanyProfile();
   const terms = getTerminology(vertical);
+  const { data: services } = await supabase
+    .from("services")
+    .select("id, name, duration_min, price")
+    .eq("active", true)
+    .order("name");
   const { data: contacts } = await supabase
     .from("contacts")
     .select("id, full_name, custom_fields")
@@ -26,6 +31,7 @@ export default async function NuevaCitaPage(props: { searchParams: Promise<{ at?
       <NuevaClaseForm
         contacts={contactOptions}
         contactLabel={terms.contact}
+        services={services ?? []}
         defaultStartsAt={/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(searchParams.at ?? "") ? searchParams.at : undefined}
       />
     </div>

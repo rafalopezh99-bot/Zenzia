@@ -13,9 +13,14 @@ export async function createAppointment(formData: FormData) {
   const contact_id = String(formData.get("contact_id") ?? "");
   const starts_at = String(formData.get("starts_at") ?? "");
   const duration_hours = Number(formData.get("duration_hours") ?? 0);
-  const duration_minutes = duration_hours > 0 ? Math.round(duration_hours * 60) : 30;
+  const duration_minutes =
+    Number(formData.get("duration_min")) || (duration_hours > 0 ? Math.round(duration_hours * 60) : 30);
+  const service_id = String(formData.get("service_id") ?? "") || null;
 
   if (!contact_id || !starts_at) throw new Error("Contacto y fecha son obligatorios");
+  const { data: service } = service_id
+    ? await supabase.from("services").select("price").eq("id", service_id).single()
+    : { data: null };
 
   // El input datetime-local no lleva zona horaria: el valor tecleado se
   // interpreta como hora de Sevilla/Madrid (fromAppLocalInput), no como
@@ -29,6 +34,8 @@ export async function createAppointment(formData: FormData) {
     starts_at: start.toISOString(),
     ends_at: end.toISOString(),
     notes: String(formData.get("notes") ?? "") || null,
+    service_id,
+    price: service?.price ?? null,
   });
   if (error) throw new Error(error.message);
 
