@@ -25,7 +25,21 @@ const DEFAULT_TERMS: Terminology = {
   agendaLabel: "Agenda",
 };
 
+// Sectores sanitarios: "Pacientes"; resto de consulta: "Clientes".
+const PATIENTS: Partial<Terminology> = { contact: "Paciente", contacts: "Pacientes", newContact: "Nuevo paciente", agendaLabel: "Calendario" };
+const CLIENTS: Partial<Terminology> = { contact: "Cliente", contacts: "Clientes", newContact: "Nuevo cliente", agendaLabel: "Calendario" };
+
 const VERTICAL_TERMS: Record<string, Partial<Terminology>> = {
+  fisio: PATIENTS,
+  osteopatia: PATIENTS,
+  nutricion: PATIENTS,
+  psicologia: PATIENTS,
+  podologia: PATIENTS,
+  logopedia: PATIENTS,
+  entrenador_personal: CLIENTS,
+  pilates_yoga: CLIENTS,
+  coaching: CLIENTS,
+  peluqueria: CLIENTS,
   academia: {
     contact: "Alumno",
     contacts: "Alumnos",

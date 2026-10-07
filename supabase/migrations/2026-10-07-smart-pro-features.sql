@@ -151,3 +151,9 @@ grant execute on function public.winback_candidates(int) to service_role;
 --     headers := jsonb_build_object('Authorization', 'Bearer <CRON_SECRET>')
 --   );
 -- $$);
+
+-- Notificaciones de reservas online.
+alter table public.notifications drop constraint notifications_kind_check,
+  add constraint notifications_kind_check check (kind = any (array['lead','cobro_pendiente','horas_excedidas','reserva']));
+alter table public.notifications drop constraint notifications_source_check,
+  add constraint notifications_source_check check (source = any (array['formulario_web','instagram_dm','tiktok_dm','facturacion','academia','reserva_online']));

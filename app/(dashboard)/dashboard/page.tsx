@@ -2,7 +2,7 @@ import { UsersIcon, CalendarClockIcon, BellIcon, WalletIcon, TruckIcon } from "@
 import { createClient } from "@/lib/supabase/server";
 import { Card, PageHeader, Badge } from "@/components/ui";
 import { getCurrentCompanyProfile } from "@/lib/company";
-import { getTerminology, showsAcademiaFields } from "@/lib/terminology";
+import { getTerminology, showsAcademiaFields, isConsultaVertical } from "@/lib/terminology";
 import { appLocalParts, fromAppLocalInput, formatAppTime } from "@/lib/timezone";
 import LiveClock from "@/components/LiveClock";
 import { PIPELINE_STAGES, STAGE_LABEL, STAGE_TONE, getStage } from "@/lib/pipeline";
@@ -26,9 +26,13 @@ export default async function DashboardPage() {
   const terms = getTerminology(vertical);
   const appointmentsLower = terms.appointments.toLowerCase();
   const isAcademia = showsAcademiaFields(vertical);
-  const widgetCatalog = getWidgetCatalog(isAcademia).filter((w) => planAllowsWidget(plan, w.key));
+  // Sectores de consulta: sin widgets de ventas de agencia (leads, clientes potenciales).
+  const consulta = isConsultaVertical(vertical);
+  const AGENCY_WIDGETS = ["leads_pipeline", "top_clientes_potenciales"];
+  const widgetOk = (k: string) => planAllowsWidget(plan, k as any) && !(consulta && AGENCY_WIDGETS.includes(k));
+  const widgetCatalog = getWidgetCatalog(isAcademia).filter((w) => widgetOk(w.key));
   const enabledWidgets = new Set(
-    Array.from(resolveEnabledWidgets(dashboardWidgets, isAcademia)).filter((k) => planAllowsWidget(plan, k))
+    Array.from(resolveEnabledWidgets(dashboardWidgets, isAcademia)).filter((k) => widgetOk(k))
   );
   const show = (key: (typeof widgetCatalog)[number]["key"]) => enabledWidgets.has(key);
 
