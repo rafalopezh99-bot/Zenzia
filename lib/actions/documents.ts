@@ -52,7 +52,7 @@ async function insertDocument(
   lines: DocLine[],
   irpfRate: number,
   extra: { issue_date?: string; notes?: string | null; from_quote_id?: string | null; rectifies_id?: string }
-) {
+): Promise<string | null> {
   const { plan } = await getCurrentCompanyProfile();
   // Las rectificativas (anulaciones) no cuentan para el límite del plan.
   if (!extra.rectifies_id) {
@@ -74,7 +74,7 @@ async function insertDocument(
   if (kind !== "factura") {
     const { error } = await supabase.from("quotes").insert({ ...base, kind, title: summary });
     if (error) throw new Error(error.message);
-    return;
+    return null;
   }
 
   const { data: inv, error } = await supabase
@@ -85,6 +85,7 @@ async function insertDocument(
   if (error) throw new Error(error.message);
   // Las facturas se envían a VeriFactu al emitirse (si está configurado).
   await sendInvoiceToVerifactu(inv.id);
+  return inv.id;
 }
 
 export async function createDocument(formData: FormData) {
@@ -170,4 +171,52 @@ export async function annulInvoice(invoiceId: string) {
 export async function retryVerifactu(invoiceId: string) {
   await sendInvoiceToVerifactu(invoiceId);
   revalidatePath("/facturacion");
+}
+
+// Cobrar una cita con un clic: factura con el servicio de la cita, marcada
+// como pagada con el método elegido, y enlazada a la cita.
+export async function chargeAppointment(appointmentId: string, formData: FormData) {
+  const method = String(formData.get("payment_method") ?? "");
+  if (!method) throw new Error("Elige cómo ha pagado");
+  const supabase = await createClient();
+  const { data: a } = await supabase
+    .from("appointments")
+    .select("contact_id, price, invoice_id, services(name, price, vat)")
+    .eq("id", appointmentId)
+    .single();
+  if (!a) throw new Error("Cita no encontrada");
+  if (a.invoice_id) throw new Error("Esta cita ya está facturada");
+  const service: any = Array.isArray(a.services) ? a.services[0] : a.services;
+  const price = Number(formData.get("price") ?? a.price ?? service?.price ?? 0);
+  if (!(price > 0)) throw new Error("Indica el precio de la sesión");
+  const { defaultVat, defaultIrpf } = await getCurrentCompanyBillingInfo();
+
+  const invoiceId = await insertDocument(
+    "factura",
+    a.contact_id,
+    [{ concept: service?.name ?? "Sesión", qty: 1, price, vat: service ? Number(service.vat) : defaultVat }],
+    defaultIrpf,
+    {}
+  );
+  await supabase
+    .from("invoices")
+    .update({ status: "pagada", payment_method: method, paid_at: new Date().toISOString() })
+    .eq("id", invoiceId);
+  await supabase.from("appointments").update({ invoice_id: invoiceId, paid_method: method, price }).eq("id", appointmentId);
+
+  revalidatePath(`/citas/${appointmentId}/editar`);
+  revalidatePath("/facturacion");
+  revalidatePath("/dashboard");
+}
+
+// Descontar la sesión del bono activo del cliente (sin factura: el bono ya
+// se cobró al venderlo).
+export async function applyBonoToAppointment(appointmentId: string, packageId: string) {
+  const supabase = await createClient();
+  const { data: pkg } = await supabase.from("packages").select("used_sessions, total_sessions").eq("id", packageId).single();
+  if (!pkg || Number(pkg.used_sessions) >= Number(pkg.total_sessions)) throw new Error("El bono no tiene sesiones disponibles");
+  await supabase.from("packages").update({ used_sessions: Number(pkg.used_sessions) + 1 }).eq("id", packageId);
+  await supabase.from("appointments").update({ package_id: packageId, paid_method: "bono" }).eq("id", appointmentId);
+  revalidatePath(`/citas/${appointmentId}/editar`);
+  revalidatePath("/bonos");
 }

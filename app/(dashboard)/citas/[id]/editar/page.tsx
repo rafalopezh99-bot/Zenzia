@@ -2,6 +2,10 @@ import { createClient } from "@/lib/supabase/server";
 import { notFound } from "next/navigation";
 import { updateAppointment, deleteAppointment, setAppointmentStatus } from "@/lib/actions/appointments";
 import Link from "next/link";
+import { chargeAppointment, applyBonoToAppointment } from "@/lib/actions/documents";
+import { PAYMENT_METHOD_LABEL, PAYMENT_METHODS } from "@/lib/paymentMethod";
+import NoteTemplatePicker from "@/components/NoteTemplatePicker";
+import { noteTemplatesFor } from "@/lib/noteTemplates";
 import { Card, PageHeader, Input, Select, Textarea, PrimaryButton, GhostButton } from "@/components/ui";
 import { APPOINTMENT_STATUS_LABEL } from "@/lib/appointmentStatus";
 import { getCurrentCompanyProfile } from "@/lib/company";
@@ -19,12 +23,20 @@ export default async function EditarCitaPage(props: { params: Promise<{ id: stri
   const [{ data: appointment }, { data: contacts }] = await Promise.all([
     supabase
       .from("appointments")
-      .select("id, contact_id, starts_at, ends_at, status, notes, reminder_sent")
+      .select("id, contact_id, starts_at, ends_at, status, notes, reminder_sent, price, invoice_id, package_id, paid_method, services(name, price)")
       .eq("id", params.id)
       .single(),
     supabase.from("contacts").select("id, full_name, custom_fields").order("full_name"),
   ]);
   if (!appointment) notFound();
+  const service: any = Array.isArray(appointment.services) ? appointment.services[0] : appointment.services;
+  // Bono activo con sesiones libres del cliente, para "descontar del bono".
+  const { data: bonos } = await supabase
+    .from("packages")
+    .select("id, name, used_sessions, total_sessions")
+    .eq("contact_id", appointment.contact_id)
+    .eq("active", true);
+  const bono = (bonos ?? []).find((b: any) => Number(b.used_sessions) < Number(b.total_sessions));
   const contactOptions = (contacts ?? []).map((c: any) => ({
     id: c.id,
     full_name: c.full_name,
@@ -75,6 +87,51 @@ export default async function EditarCitaPage(props: { params: Promise<{ id: stri
           </Link>
         )}
       </Card>
+      <Card className="mb-4 max-w-sm">
+        <div className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate">Cobro</div>
+        {appointment.invoice_id ? (
+          <p className="text-sm text-ink">
+            ✓ Cobrada ({PAYMENT_METHOD_LABEL[appointment.paid_method as keyof typeof PAYMENT_METHOD_LABEL] ?? appointment.paid_method}) ·{" "}
+            <a href={`/api/facturas/${appointment.invoice_id}/pdf`} target="_blank" className="font-semibold text-brand hover:underline">
+              Ver factura
+            </a>
+          </p>
+        ) : appointment.package_id ? (
+          <p className="text-sm text-ink">✓ Descontada del bono</p>
+        ) : (
+          <div className="space-y-2">
+            <form action={chargeAppointment.bind(null, appointment.id)} className="flex flex-wrap items-center gap-2">
+              <Input
+                name="price"
+                type="number"
+                step="0.01"
+                min="0"
+                defaultValue={appointment.price ?? service?.price ?? ""}
+                placeholder="Precio €"
+                className="w-24"
+              />
+              <Select name="payment_method" required defaultValue="" className="flex-1">
+                <option value="" disabled>
+                  Método de pago
+                </option>
+                {PAYMENT_METHODS.map((m) => (
+                  <option key={m} value={m}>
+                    {PAYMENT_METHOD_LABEL[m]}
+                  </option>
+                ))}
+              </Select>
+              <PrimaryButton className="w-full">Cobrar y facturar</PrimaryButton>
+            </form>
+            {bono && (
+              <form action={applyBonoToAppointment.bind(null, appointment.id, bono.id)}>
+                <GhostButton className="w-full">
+                  Descontar del bono ({Number(bono.total_sessions) - Number(bono.used_sessions)} restantes)
+                </GhostButton>
+              </form>
+            )}
+          </div>
+        )}
+      </Card>
       <Card className="max-w-sm">
         <form action={updateThisAppointment} className="space-y-3">
           <Select name="contact_id" required defaultValue={appointment.contact_id} className="w-full">
@@ -102,9 +159,11 @@ export default async function EditarCitaPage(props: { params: Promise<{ id: stri
               </option>
             ))}
           </Select>
+          <NoteTemplatePicker templates={noteTemplatesFor(vertical)} />
           <Textarea
+            id="session-notes"
             name="notes"
-            rows={6}
+            rows={8}
             placeholder="Notas de la sesión: cómo ha ido, qué se ha trabajado, próximos pasos..."
             defaultValue={appointment.notes ?? ""}
             className="w-full"
