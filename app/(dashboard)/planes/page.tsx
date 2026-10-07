@@ -1,16 +1,40 @@
 import { PageHeader, Card } from "@/components/ui";
 import { getCurrentCompanyProfile } from "@/lib/company";
 import { PLANS } from "@/lib/planContent";
+import { choosePlan, openBillingPortal } from "@/lib/actions/billingPlan";
+import { stripeEnabled } from "@/lib/stripe";
+import { createClient } from "@/lib/supabase/server";
 
 // Pantalla de "mejorar plan": a donde llevan los apartados con candado del
 // menú. De momento el cambio de plan se pide por email (no hay pasarela).
-export default async function PlanesPage() {
-  const { plan, companyName } = await getCurrentCompanyProfile();
+export default async function PlanesPage({ searchParams }: { searchParams: { ok?: string } }) {
+  const { plan, companyName, companyId } = await getCurrentCompanyProfile();
+  const payments = stripeEnabled();
+  const { data: co } = await createClient()
+    .from("companies")
+    .select("stripe_customer_id, subscription_status")
+    .eq("id", companyId)
+    .single();
   const subject = encodeURIComponent(`Cambio de plan - ${companyName}`);
 
   return (
     <div>
-      <PageHeader eyebrow="Tu plan" title="Mejora tu plan" />
+      <PageHeader
+        eyebrow="Tu plan"
+        title="Mejora tu plan"
+        action={
+          payments && co?.stripe_customer_id ? (
+            <form action={openBillingPortal}>
+              <button className="text-sm font-semibold text-brand hover:underline">Gestionar suscripción y facturas</button>
+            </form>
+          ) : undefined
+        }
+      />
+      {searchParams.ok && (
+        <p className="mb-4 rounded-xl bg-paper-deep px-4 py-3 text-sm text-ink">
+          ¡Pago recibido! Tu plan se actualizará en unos segundos.
+        </p>
+      )}
       <div className="grid gap-4 md:grid-cols-3">
         {PLANS.map((p) => {
           const current = p.key === plan;
@@ -37,7 +61,18 @@ export default async function PlanesPage() {
                   </li>
                 ))}
               </ul>
-              {!current && (
+              {!current && payments && (
+                <form action={choosePlan.bind(null, p.key)} className="mt-6">
+                  <button
+                    className={`w-full rounded-xl px-4 py-2.5 text-center text-sm font-bold ${
+                      p.featured ? "bg-brand text-white" : "border border-line text-ink"
+                    }`}
+                  >
+                    Pasar a {p.name}
+                  </button>
+                </form>
+              )}
+              {!current && !payments && (
                 <a
                   href={`mailto:zenzia.co@gmail.com?subject=${subject}%20a%20${p.name}`}
                   className={`mt-6 rounded-xl px-4 py-2.5 text-center text-sm font-bold ${
