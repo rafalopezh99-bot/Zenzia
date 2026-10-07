@@ -21,6 +21,22 @@ export default async function SitioPublicoPage({ params }: { params: { companyId
   if (!site) notFound();
 
   const { Component: Template } = getSiteTemplate(site.template_key);
+  // Pro: si el negocio tiene reservas online activas, botón flotante para reservar.
+  const { data: booking } = await supabase.rpc("public_booking_info", { p_company: params.companyId });
+  const accent = site.accent_color ?? "#2E6D83";
 
-  return <Template data={(site.data as Record<string, any>) ?? {}} accentColor={site.accent_color ?? "#2E6D83"} />;
+  return (
+    <>
+      <Template data={(site.data as Record<string, any>) ?? {}} accentColor={accent} />
+      {booking && (
+        <a
+          href={`/reservar/${params.companyId}`}
+          className="fixed bottom-5 right-5 z-50 rounded-full px-6 py-3 text-sm font-bold text-white shadow-lg"
+          style={{ background: accent }}
+        >
+          Reservar cita
+        </a>
+      )}
+    </>
+  );
 }

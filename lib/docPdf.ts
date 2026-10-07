@@ -18,6 +18,12 @@ export async function documentPdfResponse(table: "invoices" | "quotes", id: stri
 
   const kind: DocKind = table === "invoices" ? "factura" : doc.kind === "proforma" ? "proforma" : "presupuesto";
   const company = await getCurrentCompanyBillingInfo();
+  return pdfResponse(doc, kind, company, company.logoUrl);
+}
+
+// Construye la respuesta PDF a partir de la fila del documento. También la
+// usa el portal del cliente (sin sesión), por eso recibe emisor y logo.
+export async function pdfResponse(doc: any, kind: DocKind, fallbackIssuer: PartyInfo, logoUrl: string | null) {
 
   // Documentos emitidos con la versión nueva llevan la copia de emisor y
   // cliente; los antiguos se rellenan con los datos actuales.
@@ -32,7 +38,7 @@ export async function documentPdfResponse(table: "invoices" | "quotes", id: stri
     phone: contact?.phone ?? null,
     email: contact?.email ?? null,
   };
-  const issuer: PartyInfo = doc.issuer_snapshot ?? company;
+  const issuer: PartyInfo = doc.issuer_snapshot ?? fallbackIssuer;
 
   let lines = parseLines(doc.lines);
   if (!lines.length) lines = [{ concept: doc.concept ?? doc.title ?? "Servicio", qty: 1, price: Number(doc.amount) || 0, vat: 0 }];
@@ -57,7 +63,7 @@ export async function documentPdfResponse(table: "invoices" | "quotes", id: stri
               ? "Pagada"
               : "Pendiente de pago"
         : null,
-    logoUrl: company.logoUrl,
+    logoUrl,
     verifactuQr: doc.verifactu?.qr ?? null,
   });
 

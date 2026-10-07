@@ -44,6 +44,22 @@ export function planAllowsNotifications(plan: PlanKey) {
   return plan !== "start";
 }
 
+// Funciones de Smart y Pro (ver lib/planContent.ts para el texto comercial).
+export type PlanFeature = "booking" | "email_reminders" | "whatsapp" | "reviews" | "winback" | "portal";
+const FEATURE_MIN_PLAN: Record<PlanFeature, PlanKey> = {
+  booking: "smart",
+  email_reminders: "smart",
+  whatsapp: "pro",
+  reviews: "pro",
+  winback: "pro",
+  portal: "pro",
+};
+const PLAN_RANK: Record<PlanKey, number> = { start: 0, smart: 1, pro: 2 };
+
+export function planHas(plan: PlanKey, feature: PlanFeature) {
+  return PLAN_RANK[plan] >= PLAN_RANK[FEATURE_MIN_PLAN[feature]];
+}
+
 // Start: dashboard básico, sin gráficas avanzadas.
 const START_HIDDEN_WIDGETS: WidgetKey[] = [
   "stat_proveedores",

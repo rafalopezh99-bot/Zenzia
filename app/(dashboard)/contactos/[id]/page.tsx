@@ -8,6 +8,9 @@ import { showsAgencyPipeline, showsAcademiaFields } from "@/lib/terminology";
 import { BILLING_FREQUENCIES, BILLING_FREQUENCY_LABEL } from "@/lib/billing";
 import Link from "next/link";
 
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://app.zenzia.es";
+const PORTAL_MSG = "Aquí tienes tu área personal con tus citas, pautas y facturas: ";
+
 export default async function ContactoDetailPage({ params }: { params: { id: string } }) {
   const supabase = createClient();
   const { vertical, plan } = await getCurrentCompanyProfile();
@@ -96,6 +99,37 @@ export default async function ContactoDetailPage({ params }: { params: { id: str
             <PrimaryButton className="mt-4">Guardar</PrimaryButton>
           </Card>
         </form>
+
+        <Card className="mb-6">
+          <div className="flex items-center justify-between gap-2">
+            <h2 className="text-sm font-semibold uppercase tracking-wide text-slate">Portal del cliente</h2>
+            {plan !== "pro" && <span className="text-xs font-semibold text-slate">🔒 Pro</span>}
+          </div>
+          {plan === "pro" ? (
+            <div className="mt-3 flex flex-wrap items-center gap-3 text-sm">
+              <a href={`/portal/${contact.portal_token}`} target="_blank" className="font-semibold text-brand hover:underline">
+                Abrir portal →
+              </a>
+              {whatsappDigits && (
+                <a
+                  href={`https://wa.me/${whatsappDigits}?text=${encodeURIComponent(PORTAL_MSG + `${SITE_URL}/portal/${contact.portal_token}`)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-slate hover:text-brand"
+                >
+                  Enviar enlace por WhatsApp
+                </a>
+              )}
+            </div>
+          ) : (
+            <p className="mt-3 text-sm text-slate">
+              Tu cliente ve sus citas, pautas y facturas en su propia área personal.{" "}
+              <Link href="/planes" className="font-semibold text-brand hover:underline">
+                Disponible en Pro →
+              </Link>
+            </p>
+          )}
+        </Card>
 
         <Card>
           <div className="flex items-center justify-between gap-2">

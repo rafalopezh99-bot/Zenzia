@@ -39,6 +39,19 @@ export async function updateCompanyProfile(formData: FormData) {
     default_vat: Number(formData.get("default_vat") ?? 21),
     default_irpf: Number(formData.get("default_irpf") ?? 0),
   };
+  // Reservas online y reseñas: solo llegan si el plan las incluye.
+  if (formData.has("booking_duration")) {
+    companyUpdate.booking = {
+      enabled: formData.get("booking_enabled") === "on",
+      duration: Number(formData.get("booking_duration")) || 60,
+      days: formData.getAll("booking_days").map(Number),
+      start: String(formData.get("booking_start") || "09:00"),
+      end: String(formData.get("booking_end") || "19:00"),
+    };
+  }
+  if (formData.has("google_review_url")) {
+    companyUpdate.google_review_url = String(formData.get("google_review_url") ?? "").trim() || null;
+  }
   if (vertical) companyUpdate.vertical = vertical;
   if (business_type) companyUpdate.business_type = business_type;
 

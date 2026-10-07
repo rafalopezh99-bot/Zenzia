@@ -18,7 +18,7 @@ export default async function EditarCitaPage({ params }: { params: { id: string 
   const [{ data: appointment }, { data: contacts }] = await Promise.all([
     supabase
       .from("appointments")
-      .select("id, contact_id, starts_at, ends_at, status, notes")
+      .select("id, contact_id, starts_at, ends_at, status, notes, reminder_sent")
       .eq("id", params.id)
       .single(),
     supabase.from("contacts").select("id, full_name, custom_fields").order("full_name"),
@@ -63,6 +63,11 @@ export default async function EditarCitaPage({ params }: { params: { id: string 
             </form>
           ))}
         </div>
+        {plan !== "start" && (
+          <p className="mt-3 text-xs text-slate">
+            {appointment.reminder_sent ? "✓ Recordatorio enviado" : "🔔 Se enviará un recordatorio 24 h antes"}
+          </p>
+        )}
         {plan === "start" && (
           <Link href="/planes" className="mt-3 block text-xs text-slate hover:text-brand">
             🔒 Enviar recordatorio automático · disponible en Smart

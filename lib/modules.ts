@@ -45,7 +45,7 @@ export const MODULE_CATALOG: ModuleDef[] = [
 // por defecto al elegir un vertical.
 export const VERTICAL_PACKS: Record<string, ModuleKey[]> = {
   fisio: ["agenda", "historial_clinico", "seguimiento", "bonos", "facturacion"],
-  nutricion: ["agenda", "historial_clinico", "seguimiento", "facturacion"],
+  nutricion: ["agenda", "historial_clinico", "seguimiento", "facturacion", "bonos"],
   taller: ["agenda", "ficha_vehiculo", "presupuestos"],
   dental: ["agenda", "historial_clinico", "fotos", "consentimientos", "presupuestos"],
   estetica: ["agenda", "historial_clinico", "fotos", "bonos", "consentimientos"],
@@ -65,7 +65,7 @@ export const VERTICAL_PACKS: Record<string, ModuleKey[]> = {
   // lib/verticals.ts) — mismo criterio: cada pack trae lo común y general
   // para ese tipo de negocio, ajustable después desde el panel.
   osteopatia: ["agenda", "historial_clinico", "seguimiento", "bonos", "facturacion"],
-  psicologia: ["agenda", "historial_clinico", "consentimientos", "facturacion"],
+  psicologia: ["agenda", "historial_clinico", "consentimientos", "facturacion", "bonos"],
   podologia: ["agenda", "historial_clinico", "bonos", "facturacion"],
   entrenador_personal: ["agenda", "seguimiento", "bonos", "facturacion"],
   veterinaria: ["agenda", "historial_clinico", "presupuestos"],

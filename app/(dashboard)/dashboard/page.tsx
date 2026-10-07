@@ -7,7 +7,8 @@ import { appLocalParts, fromAppLocalInput, formatAppTime } from "@/lib/timezone"
 import LiveClock from "@/components/LiveClock";
 import { PIPELINE_STAGES, STAGE_LABEL, STAGE_TONE, getStage } from "@/lib/pipeline";
 import { getWidgetCatalog, resolveEnabledWidgets } from "@/lib/widgets";
-import { planAllowsWidget } from "@/lib/plans";
+import { planAllowsWidget, planHas } from "@/lib/plans";
+import InactiveClientsCard from "@/components/InactiveClientsCard";
 import PlanUsageCard from "@/components/PlanUsageCard";
 import DashboardWidgetsEditor from "@/components/DashboardWidgetsEditor";
 import { StatCard } from "@/components/StatCard";
@@ -240,6 +241,7 @@ export default async function DashboardPage() {
       />
 
       <PlanUsageCard plan={plan} monthStart={monthStart} />
+      {planHas(plan, "winback") && <InactiveClientsCard />}
 
       {statWidgetsShown > 0 && (
         <div

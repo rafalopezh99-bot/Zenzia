@@ -113,7 +113,7 @@ export default async function NotificacionesPage() {
                         ) : (
                           n.contact_id && (
                             <Link href={`/contactos/${n.contact_id}`} className={secondaryLinkClass}>
-                              Ver alumno
+                              {n.kind === "reserva" ? "Ver cliente" : "Ver alumno"}
                             </Link>
                           )
                         )}

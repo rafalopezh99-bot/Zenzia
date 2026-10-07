@@ -5,10 +5,13 @@ import { signOut } from "@/lib/actions/auth";
 import { Card, PageHeader, Input, Select, PrimaryButton, GhostButton } from "@/components/ui";
 import { VERTICAL_CATALOG, VERTICAL_CATEGORIES } from "@/lib/verticals";
 import { VAT_OPTIONS, IRPF_OPTIONS } from "@/lib/documents";
-import { PLAN_LABEL } from "@/lib/plans";
+import { PLAN_LABEL, planHas } from "@/lib/plans";
+import { parseBooking } from "@/lib/booking";
 import Link from "next/link";
 
 export const dynamic = "force-dynamic";
+
+const WEEK_LETTERS = ["L", "M", "X", "J", "V", "S", "D"];
 
 // Perfil del negocio: datos que antes solo se rellenaban una vez en el
 // asistente de configuración inicial (o directamente no existían, como
@@ -21,10 +24,11 @@ export default async function PerfilPage() {
 
   const { data: company } = await supabase
     .from("companies")
-    .select("name, vertical, business_type, phone, email, tax_id, address, postal_code, city, default_vat, default_irpf, logo_path")
+    .select("name, vertical, business_type, phone, email, tax_id, address, postal_code, city, default_vat, default_irpf, logo_path, booking, google_review_url")
     .eq("id", companyId)
     .single();
 
+  const booking = parseBooking(company?.booking);
   const logoUrl = company?.logo_path
     ? `${supabase.storage.from("logos").getPublicUrl(company.logo_path).data.publicUrl}?t=${Date.now()}`
     : null;
@@ -144,6 +148,85 @@ export default async function PerfilPage() {
             Se aplican al crear un documento nuevo (se pueden cambiar en cada uno). Psicología, fisioterapia y otras
             profesiones sanitarias suelen estar exentas de IVA: consúltalo con tu gestor.
           </p>
+        </Card>
+
+        <Card className="mb-6">
+          <div className="mb-3 flex items-center justify-between">
+            <h2 className="text-sm font-semibold uppercase tracking-wide text-slate">Reservas online</h2>
+            {!planHas(plan, "booking") && <span className="text-xs font-semibold text-slate">🔒 Smart</span>}
+          </div>
+          {planHas(plan, "booking") ? (
+            <div className="space-y-3 text-sm">
+              <label className="flex items-center gap-2">
+                <input type="checkbox" name="booking_enabled" defaultChecked={booking.enabled} /> Activar reservas online
+              </label>
+              <div className="flex flex-wrap gap-3">
+                {WEEK_LETTERS.map((d, i) => (
+                  <label key={i} className="flex items-center gap-1">
+                    <input type="checkbox" name="booking_days" value={i + 1} defaultChecked={booking.days.includes(i + 1)} /> {d}
+                  </label>
+                ))}
+              </div>
+              <div className="grid grid-cols-3 gap-2">
+                <label className="text-xs text-slate">
+                  Desde
+                  <Input name="booking_start" type="time" defaultValue={booking.start} className="mt-1 w-full" />
+                </label>
+                <label className="text-xs text-slate">
+                  Hasta
+                  <Input name="booking_end" type="time" defaultValue={booking.end} className="mt-1 w-full" />
+                </label>
+                <label className="text-xs text-slate">
+                  Duración (min)
+                  <Input name="booking_duration" type="number" min="15" step="5" defaultValue={booking.duration} className="mt-1 w-full" />
+                </label>
+              </div>
+              {booking.enabled && (
+                <p className="text-xs text-slate">
+                  Tu enlace de reservas:{" "}
+                  <a href={`/reservar/${companyId}`} target="_blank" className="font-semibold text-brand hover:underline">
+                    /reservar/{companyId}
+                  </a>{" "}
+                  · compártelo en Instagram, WhatsApp o tu web.
+                </p>
+              )}
+            </div>
+          ) : (
+            <p className="text-sm text-slate">
+              Tus clientes reservan solos en tus huecos libres, 24/7.{" "}
+              <Link href="/planes" className="font-semibold text-brand hover:underline">
+                Disponible en Smart →
+              </Link>
+            </p>
+          )}
+        </Card>
+
+        <Card className="mb-6">
+          <div className="mb-3 flex items-center justify-between">
+            <h2 className="text-sm font-semibold uppercase tracking-wide text-slate">Reseñas de Google</h2>
+            {!planHas(plan, "reviews") && <span className="text-xs font-semibold text-slate">🔒 Pro</span>}
+          </div>
+          {planHas(plan, "reviews") ? (
+            <>
+              <Input
+                name="google_review_url"
+                type="url"
+                placeholder="Enlace para dejar reseña (Google Business > Pedir reseñas)"
+                defaultValue={company?.google_review_url ?? ""}
+                className="w-full"
+              />
+              <p className="mt-2 text-xs text-slate/70">
+                Al día siguiente de cada cita completada, el cliente recibe un email pidiéndole una reseña.
+              </p>
+            </>
+          ) : (
+            <p className="text-sm text-slate">
+              Pide reseñas automáticamente después de cada sesión.{" "}
+              <Link href="/planes" className="font-semibold text-brand hover:underline">
+                Disponible en Pro →
+              </Link>
+            </p>
+          )}
         </Card>
 
         <PrimaryButton className="w-full">Guardar</PrimaryButton>
