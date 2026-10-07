@@ -9,6 +9,9 @@ import { PLAN_LABEL, planHas } from "@/lib/plans";
 import { parseBooking } from "@/lib/booking";
 import Link from "next/link";
 import { createService, archiveService } from "@/lib/actions/services";
+import { addTeamMember, removeTeamMember } from "@/lib/actions/team";
+import { PLAN_USERS } from "@/lib/plans";
+import MfaSetup from "@/components/MfaSetup";
 
 export const dynamic = "force-dynamic";
 
@@ -18,6 +21,8 @@ const TABS = [
   { key: "servicios", label: "Servicios" },
   { key: "facturacion", label: "Facturación" },
   { key: "reservas", label: "Reservas y reseñas" },
+  { key: "equipo", label: "Equipo" },
+  { key: "seguridad", label: "Seguridad" },
   { key: "plan", label: "Plan" },
 ] as const;
 const h2 = "mb-3 text-sm font-semibold uppercase tracking-wide text-slate";
@@ -25,7 +30,7 @@ const lockLink = "font-semibold text-brand hover:underline";
 
 // Perfil del negocio en pestañas (?tab=...): cada pestaña es corta, tiene su
 // propio botón Guardar y solo envía sus campos (ver updateCompanyProfile).
-export default async function PerfilPage(props: { searchParams: Promise<{ tab?: string; ok?: string }> }) {
+export default async function PerfilPage(props: { searchParams: Promise<{ tab?: string; ok?: string; error?: string }> }) {
   const searchParams = await props.searchParams;
   const tab = TABS.find((t) => t.key === searchParams.tab)?.key ?? "negocio";
   const supabase = await createClient();
@@ -43,6 +48,11 @@ export default async function PerfilPage(props: { searchParams: Promise<{ tab?: 
     tab === "servicios"
       ? await supabase.from("services").select("id, name, duration_min, price, vat").eq("active", true).order("name")
       : { data: [] as any[] };
+  const { data: team } =
+    tab === "equipo"
+      ? await supabase.from("company_users").select("id, full_name, role, user_id").eq("company_id", companyId)
+      : { data: [] as any[] };
+  const maxUsers = PLAN_USERS[plan];
   const booking = parseBooking(company?.booking);
   const vf = company?.verifactu_state as any;
   const logoUrl = company?.logo_path
@@ -77,6 +87,63 @@ export default async function PerfilPage(props: { searchParams: Promise<{ tab?: 
       </div>
 
       {searchParams.ok && <p className="mb-4 text-sm font-medium text-green-700">✓ Cambios guardados</p>}
+      {searchParams.error && <p className="mb-4 text-sm font-medium text-red-600">{searchParams.error}</p>}
+
+      {tab === "equipo" && (
+        <>
+          <Card className="mb-4">
+            <h2 className={h2}>
+              Equipo ({(team ?? []).length}
+              {maxUsers !== null ? ` de ${maxUsers}` : ""})
+            </h2>
+            <ul className="divide-y divide-line text-sm">
+              {(team ?? []).map((m: any) => (
+                <li key={m.id} className="flex items-center justify-between py-2">
+                  <span className="text-ink">
+                    {m.full_name ?? "Sin nombre"}{" "}
+                    <span className="text-xs text-slate">· {m.role === "member" ? "Profesional" : "Titular"}</span>
+                  </span>
+                  {m.role === "member" && (
+                    <form action={removeTeamMember.bind(null, m.id)}>
+                      <button className="text-xs text-slate hover:text-red-600">Quitar</button>
+                    </form>
+                  )}
+                </li>
+              ))}
+            </ul>
+          </Card>
+          {maxUsers === null || (team ?? []).length < maxUsers ? (
+            <Card>
+              <h2 className={h2}>Añadir profesional</h2>
+              <form action={addTeamMember} className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                <Input name="full_name" placeholder="Nombre" required />
+                <Input name="email" type="email" placeholder="Email" required />
+                <Input name="password" type="text" placeholder="Contraseña temporal (mín. 8)" minLength={8} required />
+                <PrimaryButton>Añadir</PrimaryButton>
+              </form>
+              <p className="mt-2 text-xs text-slate/70">
+                Pásale su email y la contraseña temporal; podrá cambiarla desde &quot;¿Olvidaste tu contraseña?&quot;.
+              </p>
+            </Card>
+          ) : (
+            <Card>
+              <p className="text-sm text-slate">
+                Has llegado al máximo de usuarios de tu plan.{" "}
+                <Link href="/planes" className={lockLink}>
+                  Mejorar plan →
+                </Link>
+              </p>
+            </Card>
+          )}
+        </>
+      )}
+
+      {tab === "seguridad" && (
+        <Card>
+          <h2 className={h2}>Verificación en dos pasos</h2>
+          <MfaSetup />
+        </Card>
+      )}
 
       {tab === "negocio" && (
         <form action={updateCompanyProfile}>

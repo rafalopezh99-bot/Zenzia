@@ -102,6 +102,9 @@ export default function Sidebar({
         <Link href="/contactos" className={linkClass} onClick={close}>
           {terms.contacts}
         </Link>
+        <Link href="/estadisticas" className={linkClass} onClick={close}>
+          Estadísticas
+        </Link>
         {showSuppliers && (
           <Link href="/proveedores" className={linkClass} onClick={close}>
             Proveedores

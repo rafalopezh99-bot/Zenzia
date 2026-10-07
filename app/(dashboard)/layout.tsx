@@ -22,6 +22,11 @@ export default async function DashboardLayout({ children }: { children: React.Re
 
   const isAdmin = profile.companyId === ZENZIA_ADMIN_COMPANY_ID;
 
+  // Verificación en dos pasos: si la cuenta la tiene activada y esta sesión
+  // aún no ha metido el código, al segundo paso del login.
+  const { data: aal } = await (await createClient()).auth.mfa.getAuthenticatorAssuranceLevel();
+  if (aal?.nextLevel === "aal2" && aal.currentLevel !== "aal2") redirect("/login/mfa");
+
   // Sin suscripción activa (Stripe configurado), solo se puede entrar a
   // /planes para pagar y a /perfil. La cuenta de Zenzia (admin) no paga.
   const currentPath = (await headers()).get("x-pathname") ?? "";
