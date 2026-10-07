@@ -13,7 +13,8 @@ export type ModuleKey =
   | "fotos"
   | "consentimientos"
   | "facturacion"
-  | "sitio_web";
+  | "sitio_web"
+  | "proveedores";
 
 export interface ModuleDef {
   key: ModuleKey;
@@ -32,6 +33,7 @@ export const MODULE_CATALOG: ModuleDef[] = [
   { key: "consentimientos", label: "Consentimientos", href: "/consentimientos" },
   { key: "facturacion", label: "Facturación", href: "/facturacion" },
   { key: "sitio_web", label: "Mi Web", href: "/mi-web" },
+  { key: "proveedores", label: "Proveedores", href: "/proveedores" },
 ];
 
 // Packs por vertical: qué módulos se activan por defecto al dar de alta

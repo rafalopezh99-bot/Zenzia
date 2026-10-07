@@ -36,9 +36,6 @@ export function filterModulesByPlan(modules: ModuleDef[], plan: PlanKey) {
 }
 
 // Funciones sueltas que no son módulos.
-export function planAllowsSuppliers(plan: PlanKey) {
-  return plan !== "start";
-}
 
 export function planAllowsNotifications(plan: PlanKey) {
   return plan !== "start";
@@ -60,15 +57,8 @@ export function planHas(plan: PlanKey, feature: PlanFeature) {
   return PLAN_RANK[plan] >= PLAN_RANK[FEATURE_MIN_PLAN[feature]];
 }
 
-// Start: dashboard básico, sin gráficas avanzadas.
-const START_HIDDEN_WIDGETS: WidgetKey[] = [
-  "stat_proveedores",
-  "stat_notificaciones",
-  "leads_pipeline",
-  "chart_facturacion_anual",
-  "top_clientes_potenciales",
-  "top_servicios_potenciales",
-];
+// Start: dashboard completo salvo lo de funciones que no incluye.
+const START_HIDDEN_WIDGETS: WidgetKey[] = ["stat_proveedores", "stat_notificaciones", "leads_pipeline"];
 
 export function planAllowsWidget(plan: PlanKey, key: WidgetKey) {
   return plan !== "start" || !START_HIDDEN_WIDGETS.includes(key);

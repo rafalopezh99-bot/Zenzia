@@ -12,6 +12,9 @@ import { createService, archiveService } from "@/lib/actions/services";
 import { addTeamMember, removeTeamMember } from "@/lib/actions/team";
 import { PLAN_USERS } from "@/lib/plans";
 import MfaSetup from "@/components/MfaSetup";
+import { MODULE_CATALOG } from "@/lib/modules";
+import { planAllowsModule } from "@/lib/plans";
+import { setCompanyModules } from "@/lib/actions/company";
 
 export const dynamic = "force-dynamic";
 
@@ -53,6 +56,14 @@ export default async function PerfilPage(props: { searchParams: Promise<{ tab?: 
       ? await supabase.from("company_users").select("id, full_name, role, user_id").eq("company_id", companyId)
       : { data: [] as any[] };
   const maxUsers = PLAN_USERS[plan];
+  // Módulos opcionales que el plan permite activar o desactivar.
+  const CORE = ["agenda", "facturacion", "presupuestos"];
+  const optional = MODULE_CATALOG.filter((m) => !CORE.includes(m.key) && planAllowsModule(plan, m.key));
+  const { data: enabledRows } =
+    tab === "negocio" && optional.length
+      ? await supabase.from("company_modules").select("module_key").eq("company_id", companyId).eq("enabled", true)
+      : { data: [] as any[] };
+  const enabledKeys = new Set((enabledRows ?? []).map((r: any) => r.module_key));
   const booking = parseBooking(company?.booking);
   const vf = company?.verifactu_state as any;
   const logoUrl = company?.logo_path
@@ -73,7 +84,7 @@ export default async function PerfilPage(props: { searchParams: Promise<{ tab?: 
       />
 
       <div className="mb-6 flex flex-wrap gap-1 rounded-2xl border border-line p-1 sm:inline-flex sm:rounded-full">
-        {TABS.map((t) => (
+        {TABS.filter((t) => plan !== "start" || (t.key !== "reservas" && t.key !== "equipo")).map((t) => (
           <Link
             key={t.key}
             href={`/perfil?tab=${t.key}`}
@@ -191,6 +202,23 @@ export default async function PerfilPage(props: { searchParams: Promise<{ tab?: 
             <p className="mt-2 text-xs text-slate/70">PNG o JPG, máximo 4 MB. Sale en tus facturas y en tu página de reservas.</p>
           </Card>
           <PrimaryButton>Guardar</PrimaryButton>
+        </form>
+      )}
+
+      {tab === "negocio" && optional.length > 0 && (
+        <form action={setCompanyModules} className="mt-6">
+          <Card className="mb-4">
+            <h2 className={h2}>Módulos</h2>
+            <div className="grid grid-cols-2 gap-2 text-sm">
+              {optional.map((m) => (
+                <label key={m.key} className="flex items-center gap-2">
+                  <input type="checkbox" name="modules" value={m.key} defaultChecked={enabledKeys.has(m.key)} /> {m.label}
+                </label>
+              ))}
+            </div>
+            <p className="mt-2 text-xs text-slate/70">Activa solo lo que uses; lo demás no aparece en el menú.</p>
+          </Card>
+          <PrimaryButton>Guardar módulos</PrimaryButton>
         </form>
       )}
 

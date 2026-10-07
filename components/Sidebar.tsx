@@ -21,7 +21,7 @@ export default function Sidebar({
   isAdmin = false,
   signupRequestCount = 0,
   vertical = null,
-  showSuppliers = true,
+  showStats = true,
   showNotifications = true,
   locked = [],
 }: {
@@ -30,7 +30,7 @@ export default function Sidebar({
   isAdmin?: boolean;
   signupRequestCount?: number;
   vertical?: string | null;
-  showSuppliers?: boolean;
+  showStats?: boolean;
   showNotifications?: boolean;
   locked?: string[];
 }) {
@@ -102,14 +102,12 @@ export default function Sidebar({
         <Link href="/contactos" className={linkClass} onClick={close}>
           {terms.contacts}
         </Link>
-        <Link href="/estadisticas" className={linkClass} onClick={close}>
-          Estadísticas
-        </Link>
-        {showSuppliers && (
-          <Link href="/proveedores" className={linkClass} onClick={close}>
-            Proveedores
+        {showStats && (
+          <Link href="/estadisticas" className={linkClass} onClick={close}>
+            Estadísticas
           </Link>
         )}
+
         {showAcademia && (
           <Link href="/grupos" className={linkClass} onClick={close}>
             Grupos

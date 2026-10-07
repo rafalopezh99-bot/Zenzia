@@ -114,6 +114,8 @@ export default async function ContactoDetailPage(props: { params: Promise<{ id: 
           </Card>
         </form>
 
+        {plan !== "start" && (
+          <>
         <Card className="mb-6">
           <div className="flex items-center justify-between gap-2">
             <h2 className="text-sm font-semibold uppercase tracking-wide text-slate">Portal del cliente</h2>
@@ -148,21 +150,15 @@ export default async function ContactoDetailPage(props: { params: Promise<{ id: 
         <Card>
           <div className="flex items-center justify-between gap-2">
             <h2 className="text-sm font-semibold uppercase tracking-wide text-slate">Evolución y pautas</h2>
-            {plan === "start" && <span className="text-xs font-semibold text-slate">🔒 Smart</span>}
           </div>
-          {plan === "start" ? (
-            <p className="mt-3 text-sm text-slate">
-              Registra medidas, pautas y objetivos de cada cliente y mira su evolución en una gráfica.{" "}
-              <Link href="/planes" className="font-semibold text-brand hover:underline">
-                Disponible en Smart →
-              </Link>
-            </p>
-          ) : (
+          {(
             <Link href="/seguimiento" className="mt-3 inline-block text-sm font-semibold text-brand hover:underline">
               Ver evolución y pautas →
             </Link>
           )}
         </Card>
+          </>
+        )}
 
         <div className="mt-6 flex flex-wrap items-center justify-between gap-2 text-xs text-slate">
           <span>

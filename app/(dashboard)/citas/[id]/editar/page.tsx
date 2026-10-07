@@ -81,11 +81,7 @@ export default async function EditarCitaPage(props: { params: Promise<{ id: stri
             {appointment.reminder_sent ? "✓ Recordatorio enviado" : "🔔 Se enviará un recordatorio 24 h antes"}
           </p>
         )}
-        {plan === "start" && (
-          <Link href="/planes" className="mt-3 block text-xs text-slate hover:text-brand">
-            🔒 Enviar recordatorio automático · disponible en Smart
-          </Link>
-        )}
+
       </Card>
       <Card className="mb-4 max-w-sm">
         <div className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate">Cobro</div>

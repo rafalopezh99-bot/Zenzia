@@ -2,7 +2,9 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { ensureVerifactuNif, startRepresentation } from "@/lib/verifactu/nifs";
-import { getCurrentCompanyId } from "@/lib/company";
+import { getCurrentCompanyId, getCurrentCompanyProfile } from "@/lib/company";
+import { MODULE_CATALOG } from "@/lib/modules";
+import { planAllowsModule } from "@/lib/plans";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
@@ -105,4 +107,26 @@ export async function signVerifactuRepresentation() {
     .eq("id", companyId);
   if (url) redirect(url);
   revalidatePath("/perfil");
+}
+
+// Perfil > Negocio > Módulos: activa o desactiva los módulos opcionales.
+export async function setCompanyModules(formData: FormData) {
+  const supabase = await createClient();
+  const companyId = await getCurrentCompanyId();
+  const { plan } = await getCurrentCompanyProfile();
+  const wanted = new Set(formData.getAll("modules").map(String));
+  const CORE = ["agenda", "facturacion", "presupuestos"];
+  const optional = MODULE_CATALOG.filter((m) => !CORE.includes(m.key) && planAllowsModule(plan, m.key));
+  const { data: rows } = await supabase.from("company_modules").select("module_key").eq("company_id", companyId);
+  const existing = new Set((rows ?? []).map((r) => r.module_key));
+  for (const m of optional) {
+    const enabled = wanted.has(m.key);
+    if (existing.has(m.key)) {
+      await supabase.from("company_modules").update({ enabled }).eq("company_id", companyId).eq("module_key", m.key);
+    } else if (enabled) {
+      await supabase.from("company_modules").insert({ company_id: companyId, module_key: m.key, enabled: true });
+    }
+  }
+  revalidatePath("/", "layout");
+  redirect("/perfil?tab=negocio&ok=1");
 }

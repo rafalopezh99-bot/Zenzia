@@ -6,7 +6,7 @@ import { createClient } from "@/lib/supabase/server";
 import { headers } from "next/headers";
 import { stripeEnabled } from "@/lib/stripe";
 import { MODULE_CATALOG } from "@/lib/modules";
-import { filterModulesByPlan, planAllowsNotifications, planAllowsSuppliers } from "@/lib/plans";
+import { filterModulesByPlan, planAllowsNotifications } from "@/lib/plans";
 
 // Todo lo que cuelga de este layout depende de la sesión y de los módulos
 // activados por empresa — nunca se prerenderiza estático.
@@ -66,21 +66,20 @@ export default async function DashboardLayout({ children }: { children: React.Re
   const pathname = (await headers()).get("x-pathname") ?? "";
   const inPath = (href: string) => pathname === href || pathname.startsWith(`${href}/`);
   const blockedModule = MODULE_CATALOG.some((m) => inPath(m.href) && !modules.some((x) => x.key === m.key));
-  const showSuppliers = planAllowsSuppliers(profile.plan);
   const showNotifications = planAllowsNotifications(profile.plan);
   if (
     blockedModule ||
-    (inPath("/proveedores") && !showSuppliers) ||
     (inPath("/notificaciones") && !showNotifications)
   )
     redirect("/dashboard");
 
   // Lo que su sector tendría pero su plan no incluye: sale en el menú con
   // candado y lleva a /planes (el "gusanillo" para mejorar de plan).
-  const locked = [
+  // Start: menú limpio (Dashboard, Clientes, Calendario, Facturación, Perfil),
+  // sin apartados con candado. En Smart solo se enseña lo que es de Pro.
+  const locked = profile.plan === "start" ? [] : [
     ...allModules.filter((m) => !modules.includes(m) && m.key !== "presupuestos").map((m) => m.label),
     ...(showNotifications ? [] : ["Notificaciones"]),
-    ...(showSuppliers ? [] : ["Proveedores"]),
   ];
 
   return (
@@ -91,7 +90,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
         isAdmin={isAdmin}
         signupRequestCount={signupRequestCount}
         vertical={profile.vertical}
-        showSuppliers={showSuppliers}
+        showStats={profile.plan !== "start"}
         showNotifications={showNotifications}
         locked={locked}
       />
