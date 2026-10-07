@@ -1,105 +1,130 @@
 import { createClient } from "@/lib/supabase/server";
-import { createInvoice, markInvoicePaid, deleteInvoice } from "@/lib/actions/invoices";
-import { Card, PageHeader, Input, Select, PrimaryButton, GhostButton, ghostLinkClass, Badge, tableWrap, tableEl, theadEl, thEl, tdEl, trEl } from "@/components/ui";
-import { getCurrentCompanyProfile } from "@/lib/company";
-import { getTerminology } from "@/lib/terminology";
+import { markInvoicePaid, deleteInvoice } from "@/lib/actions/invoices";
+import { convertQuote, deleteQuote } from "@/lib/actions/documents";
+import { Card, PageHeader, Select, GhostButton, ghostLinkClass, primaryButtonClass, Badge, tableWrap, tableEl, theadEl, thEl, tdEl, trEl } from "@/components/ui";
 import { PAYMENT_METHOD_LABEL, PAYMENT_METHODS } from "@/lib/paymentMethod";
 import DeleteInvoiceButton from "@/components/DeleteInvoiceButton";
 import Link from "next/link";
 
-export default async function FacturacionPage() {
-  const supabase = createClient();
-  const { vertical } = await getCurrentCompanyProfile();
-  const terms = getTerminology(vertical);
-  // Independientes entre sí: se piden a la vez en vez de una detrás de otra.
-  const [{ data: contacts }, { data: invoices }] = await Promise.all([
-    supabase.from("contacts").select("id, full_name").order("full_name"),
-    supabase
-      .from("invoices")
-      .select("id, concept, amount, status, due_date, contacts(full_name)")
-      .order("created_at", { ascending: false }),
-  ]);
+const TABS = [
+  { key: "facturas", label: "Facturas", kind: "factura" },
+  { key: "presupuestos", label: "Presupuestos", kind: "presupuesto" },
+  { key: "proformas", label: "Proformas", kind: "proforma" },
+] as const;
 
-  const total = (invoices ?? []).reduce((sum: number, i: any) => sum + Number(i.amount), 0);
-  const pendiente = (invoices ?? [])
-    .filter((i: any) => i.status === "pendiente")
-    .reduce((sum: number, i: any) => sum + Number(i.amount), 0);
+const euro = (n: number) => `${Number(n).toLocaleString("es-ES", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €`;
+const fecha = (d: string | null) => (d ? new Date(d).toLocaleDateString("es-ES") : "—");
+
+// Facturación: facturas, presupuestos y proformas en pestañas (?tab=...).
+// Crear lleva a /facturacion/nuevo?tipo=...; cada documento se descarga en
+// PDF con los datos fiscales y el logo del negocio.
+export default async function FacturacionPage({ searchParams }: { searchParams: { tab?: string } }) {
+  const tab = TABS.find((t) => t.key === searchParams.tab) ?? TABS[0];
+  const supabase = createClient();
+
+  const isInvoices = tab.key === "facturas";
+  const { data: rows } = isInvoices
+    ? await supabase
+        .from("invoices")
+        .select("id, doc_number, issue_date, concept, amount, status, due_date, contacts(full_name)")
+        .order("created_at", { ascending: false })
+    : await supabase
+        .from("quotes")
+        .select("id, doc_number, issue_date, title, amount, status, contacts(full_name)")
+        .eq("kind", tab.kind)
+        .order("created_at", { ascending: false });
+
+  const list = (rows ?? []) as any[];
+  const total = list.reduce((s, i) => s + Number(i.amount), 0);
+  const pendiente = list.filter((i) => i.status === "pendiente").reduce((s, i) => s + Number(i.amount), 0);
 
   return (
     <div>
       <PageHeader
         title="Facturación"
         action={
-          <Link
-            href="/pagos"
-            className="inline-block rounded-full border border-line px-5 py-2.5 text-sm font-medium text-ink transition hover:border-brand hover:text-brand"
-          >
-            Historial de pagos
-          </Link>
+          <div className="flex flex-wrap gap-2">
+            {isInvoices && (
+              <Link
+                href="/pagos"
+                className="inline-block rounded-full border border-line px-5 py-2.5 text-sm font-medium text-ink transition hover:border-brand hover:text-brand"
+              >
+                Historial de pagos
+              </Link>
+            )}
+            <Link href={`/facturacion/nuevo?tipo=${tab.kind}`} className={primaryButtonClass}>
+              {tab.kind === "presupuesto" ? "+ Nuevo presupuesto" : `+ Nueva ${tab.kind}`}
+            </Link>
+          </div>
         }
       />
 
-      <div className="mb-6 grid max-w-md grid-cols-2 gap-4">
-        <Card>
-          <div className="text-2xl font-semibold text-ink">{total.toFixed(2)} €</div>
-          <div className="text-sm text-slate">Total facturado</div>
-        </Card>
-        <Card>
-          <div className="text-2xl font-semibold text-amber-600">{pendiente.toFixed(2)} €</div>
-          <div className="text-sm text-slate">Pendiente de cobro</div>
-        </Card>
+      <div className="mb-6 inline-flex rounded-full border border-line p-1">
+        {TABS.map((t) => (
+          <Link
+            key={t.key}
+            href={`/facturacion?tab=${t.key}`}
+            className={`rounded-full px-4 py-1.5 text-sm font-medium transition ${
+              t.key === tab.key ? "bg-brand text-white" : "text-slate hover:text-ink"
+            }`}
+          >
+            {t.label}
+          </Link>
+        ))}
       </div>
 
-      <Card className="mb-6">
-        <form action={createInvoice} className="flex flex-wrap items-end gap-2 text-sm">
-          <Select name="contact_id" required>
-            <option value="">{terms.contact}</option>
-            {(contacts ?? []).map((c) => (
-              <option key={c.id} value={c.id}>
-                {c.full_name}
-              </option>
-            ))}
-          </Select>
-          <Input name="concept" placeholder="Concepto" required />
-          <Input name="amount" type="number" step="0.01" placeholder="Importe €" required className="w-32" />
-          <PrimaryButton>Crear factura</PrimaryButton>
-        </form>
-      </Card>
+      <div className="mb-6 grid max-w-md grid-cols-2 gap-4">
+        <Card>
+          <div className="text-2xl font-semibold text-ink">{euro(total)}</div>
+          <div className="text-sm text-slate">{isInvoices ? "Total facturado" : "Total presupuestado"}</div>
+        </Card>
+        <Card>
+          <div className="text-2xl font-semibold text-amber-600">{euro(pendiente)}</div>
+          <div className="text-sm text-slate">{isInvoices ? "Pendiente de cobro" : "Pendiente de aceptar"}</div>
+        </Card>
+      </div>
 
       <div className={tableWrap}>
         <table className={tableEl}>
           <thead className={theadEl}>
             <tr>
-              <th className={thEl}>{terms.contact}</th>
-              <th className={thEl}>Concepto</th>
-              <th className={thEl}>Importe</th>
-              <th className={thEl}>Vence</th>
+              <th className={thEl}>Nº</th>
+              <th className={thEl}>Fecha</th>
+              <th className={thEl}>Cliente</th>
+              <th className={`${thEl} hidden sm:table-cell`}>Concepto</th>
+              <th className={thEl}>Total</th>
               <th className={thEl}>Estado</th>
               <th className={thEl}></th>
             </tr>
           </thead>
           <tbody>
-            {(invoices ?? []).map((i: any) => {
-              const pay = markInvoicePaid.bind(null, i.id);
+            {list.map((i) => {
               const vencida = i.status === "pendiente" && i.due_date && new Date(i.due_date) < new Date();
+              const pdfHref = isInvoices ? `/api/facturas/${i.id}/pdf` : `/api/presupuestos/${i.id}/pdf`;
               return (
                 <tr key={i.id} className={trEl}>
+                  <td className={`${tdEl} whitespace-nowrap font-medium`}>{i.doc_number ?? "—"}</td>
+                  <td className={tdEl}>{fecha(i.issue_date)}</td>
                   <td className={tdEl}>{i.contacts?.full_name}</td>
-                  <td className={tdEl}>{i.concept}</td>
-                  <td className={tdEl}>{Number(i.amount).toFixed(2)} €</td>
-                  <td className={tdEl}>
-                    {i.due_date ? new Date(i.due_date).toLocaleDateString("es-ES") : <span className="text-slate/50">—</span>}
-                  </td>
+                  <td className={`${tdEl} hidden sm:table-cell`}>{i.concept ?? i.title}</td>
+                  <td className={`${tdEl} whitespace-nowrap`}>{euro(i.amount)}</td>
                   <td className={tdEl}>
                     {i.status === "pagada" ? (
                       <Badge tone="green">Pagada</Badge>
+                    ) : i.status === "aceptado" ? (
+                      <Badge tone="green">Aceptado</Badge>
+                    ) : i.status === "rechazado" ? (
+                      <Badge tone="red">Rechazado</Badge>
                     ) : (
                       <Badge tone={vencida ? "red" : "amber"}>{vencida ? "Vencida" : "Pendiente"}</Badge>
                     )}
                   </td>
                   <td className={`${tdEl} flex flex-wrap items-center gap-2`}>
-                    {i.status === "pendiente" && (
-                      <form action={pay} className="flex items-center gap-1">
+                    <a href={pdfHref} target="_blank" rel="noopener noreferrer" className={ghostLinkClass}>
+                      PDF
+                    </a>
+                    {isInvoices && i.status === "pendiente" && (
+                      <form action={markInvoicePaid.bind(null, i.id)} className="flex items-center gap-1">
                         <Select name="payment_method" required className="!py-1 !text-xs">
                           <option value="">Método</option>
                           {PAYMENT_METHODS.map((m) => (
@@ -108,21 +133,41 @@ export default async function FacturacionPage() {
                             </option>
                           ))}
                         </Select>
-                        <GhostButton>Marcar pagada</GhostButton>
+                        <GhostButton>Cobrada</GhostButton>
                       </form>
                     )}
-                    <a href={`/api/facturas/${i.id}/pdf`} target="_blank" rel="noopener noreferrer" className={ghostLinkClass}>
-                      Descargar factura
-                    </a>
-                    <DeleteInvoiceButton
-                      invoiceId={i.id}
-                      invoiceLabel={`${i.concept} · ${i.contacts?.full_name ?? ""}`}
-                      deleteInvoice={deleteInvoice}
-                    />
+                    {tab.key === "presupuestos" && i.status === "pendiente" && (
+                      <form action={convertQuote.bind(null, i.id, "proforma")}>
+                        <GhostButton>→ Proforma</GhostButton>
+                      </form>
+                    )}
+                    {!isInvoices && i.status !== "rechazado" && (
+                      <form action={convertQuote.bind(null, i.id, "factura")}>
+                        <GhostButton>→ Factura</GhostButton>
+                      </form>
+                    )}
+                    {isInvoices ? (
+                      <DeleteInvoiceButton
+                        invoiceId={i.id}
+                        invoiceLabel={`${i.doc_number ?? i.concept} · ${i.contacts?.full_name ?? ""}`}
+                        deleteInvoice={deleteInvoice}
+                      />
+                    ) : (
+                      <form action={deleteQuote.bind(null, i.id)}>
+                        <GhostButton>Borrar</GhostButton>
+                      </form>
+                    )}
                   </td>
                 </tr>
               );
             })}
+            {list.length === 0 && (
+              <tr>
+                <td colSpan={7} className={`${tdEl} text-center text-slate`}>
+                  Todavía no hay {tab.label.toLowerCase()}.
+                </td>
+              </tr>
+            )}
           </tbody>
         </table>
       </div>

@@ -12,19 +12,19 @@ export type PlanKey = "start" | "smart" | "pro";
 export const PLAN_LABEL: Record<PlanKey, string> = { start: "Start", smart: "Smart", pro: "Pro" };
 
 // Límites mensuales (null = ilimitado). Se cuenta lo creado en el mes en curso.
-export type LimitKey = "contacts" | "invoices" | "quotes";
+export type LimitKey = "contacts" | "invoices" | "quotes" | "proformas";
 
 export const PLAN_LIMITS: Record<PlanKey, Record<LimitKey, number | null>> = {
-  start: { contacts: 30, invoices: 30, quotes: 0 },
-  smart: { contacts: 150, invoices: 150, quotes: 50 },
-  pro: { contacts: null, invoices: null, quotes: null },
+  start: { contacts: 30, invoices: 30, quotes: 10, proformas: 10 },
+  smart: { contacts: 150, invoices: 150, quotes: 50, proformas: 50 },
+  pro: { contacts: null, invoices: null, quotes: null, proformas: null },
 };
 
 export const PLAN_USERS: Record<PlanKey, number | null> = { start: 1, smart: 3, pro: null };
 
 // Start: solo dashboard, clientes, agenda, facturación y perfil. Smart y
 // Pro tienen todos los módulos que active su vertical (Mi Web, solo Pro).
-const START_MODULES: ModuleKey[] = ["agenda", "facturacion"];
+const START_MODULES: ModuleKey[] = ["agenda", "facturacion", "presupuestos"];
 
 export function planAllowsModule(plan: PlanKey, key: ModuleKey): boolean {
   if (key === "sitio_web") return plan === "pro";
@@ -62,8 +62,20 @@ export function toPlanKey(raw: unknown): PlanKey {
   return raw === "smart" || raw === "pro" ? raw : "start";
 }
 
-const LIMIT_TABLE: Record<LimitKey, string> = { contacts: "contacts", invoices: "invoices", quotes: "quotes" };
-const LIMIT_NOUN: Record<LimitKey, string> = { contacts: "clientes", invoices: "facturas", quotes: "presupuestos" };
+const LIMIT_TABLE: Record<LimitKey, string> = {
+  contacts: "contacts",
+  invoices: "invoices",
+  quotes: "quotes",
+  proformas: "quotes",
+};
+// Presupuestos y proformas comparten tabla (quotes), se distinguen por kind.
+const LIMIT_KIND: Partial<Record<LimitKey, string>> = { quotes: "presupuesto", proformas: "proforma" };
+const LIMIT_NOUN: Record<LimitKey, string> = {
+  contacts: "clientes",
+  invoices: "facturas",
+  quotes: "presupuestos",
+  proformas: "proformas",
+};
 
 // Lanza un error legible si la empresa ya ha llegado al límite mensual de su
 // plan. RLS ya limita el conteo a la empresa del usuario.
@@ -74,10 +86,10 @@ export async function assertWithinLimit(plan: PlanKey, key: LimitKey) {
   const now = new Date();
   const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
   const supabase = createClient();
-  const { count } = await supabase
-    .from(LIMIT_TABLE[key])
-    .select("id", { count: "exact", head: true })
-    .gte("created_at", monthStart);
+  let query = supabase.from(LIMIT_TABLE[key]).select("id", { count: "exact", head: true }).gte("created_at", monthStart);
+  const kind = LIMIT_KIND[key];
+  if (kind) query = query.eq("kind", kind);
+  const { count } = await query;
 
   if ((count ?? 0) >= limit) {
     throw new Error(

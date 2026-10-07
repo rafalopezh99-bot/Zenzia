@@ -89,7 +89,7 @@ export async function getCurrentCompanyBillingInfo() {
 
   const { data: company } = await supabase
     .from("companies")
-    .select("name, tax_id, address, phone, email")
+    .select("name, tax_id, address, phone, email, logo_path")
     .eq("id", companyId)
     .single();
 
@@ -99,5 +99,8 @@ export async function getCurrentCompanyBillingInfo() {
     address: (company?.address as string | null) ?? null,
     phone: (company?.phone as string | null) ?? null,
     email: (company?.email as string | null) ?? null,
+    logoUrl: company?.logo_path
+      ? supabase.storage.from("logos").getPublicUrl(company.logo_path as string).data.publicUrl
+      : null,
   };
 }

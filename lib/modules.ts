@@ -44,8 +44,8 @@ export const MODULE_CATALOG: ModuleDef[] = [
 // contratar el CRM. Se activa a mano por empresa cuando lo compran, nunca
 // por defecto al elegir un vertical.
 export const VERTICAL_PACKS: Record<string, ModuleKey[]> = {
-  fisio: ["agenda", "historial_clinico", "seguimiento", "bonos"],
-  nutricion: ["agenda", "historial_clinico", "seguimiento"],
+  fisio: ["agenda", "historial_clinico", "seguimiento", "bonos", "facturacion"],
+  nutricion: ["agenda", "historial_clinico", "seguimiento", "facturacion"],
   taller: ["agenda", "ficha_vehiculo", "presupuestos"],
   dental: ["agenda", "historial_clinico", "fotos", "consentimientos", "presupuestos"],
   estetica: ["agenda", "historial_clinico", "fotos", "bonos", "consentimientos"],
@@ -56,7 +56,7 @@ export const VERTICAL_PACKS: Record<string, ModuleKey[]> = {
   agencia: ["agenda", "presupuestos", "facturacion"],
   // Ampliación de verticales (inspirado en la matriz de Kollabox): negocios
   // basados en citas que encajan directamente en el mismo modelo.
-  peluqueria: ["agenda", "historial_clinico", "fotos", "bonos"],
+  peluqueria: ["agenda", "historial_clinico", "fotos", "bonos", "facturacion"],
   tatuajes: ["agenda", "fotos", "consentimientos", "presupuestos"],
   manicura: ["agenda", "historial_clinico", "fotos", "bonos"],
   reformas: ["agenda", "presupuestos", "fotos", "facturacion"],
@@ -64,10 +64,10 @@ export const VERTICAL_PACKS: Record<string, ModuleKey[]> = {
   // Catálogo ampliado para el asistente de configuración inicial (ver
   // lib/verticals.ts) — mismo criterio: cada pack trae lo común y general
   // para ese tipo de negocio, ajustable después desde el panel.
-  osteopatia: ["agenda", "historial_clinico", "seguimiento", "bonos"],
-  psicologia: ["agenda", "historial_clinico", "consentimientos"],
-  podologia: ["agenda", "historial_clinico", "bonos"],
-  entrenador_personal: ["agenda", "seguimiento", "bonos"],
+  osteopatia: ["agenda", "historial_clinico", "seguimiento", "bonos", "facturacion"],
+  psicologia: ["agenda", "historial_clinico", "consentimientos", "facturacion"],
+  podologia: ["agenda", "historial_clinico", "bonos", "facturacion"],
+  entrenador_personal: ["agenda", "seguimiento", "bonos", "facturacion"],
   veterinaria: ["agenda", "historial_clinico", "presupuestos"],
   spa: ["agenda", "bonos", "fotos", "consentimientos"],
   barberia: ["agenda", "fotos", "bonos"],
@@ -86,8 +86,8 @@ export const VERTICAL_PACKS: Record<string, ModuleKey[]> = {
   // para historiales médicos/clínicos, no encaja en clases particulares —
   // el progreso del alumno ya lo cubre "seguimiento".
   academia: ["agenda", "seguimiento", "bonos", "facturacion"],
-  logopedia: ["agenda", "historial_clinico", "seguimiento", "bonos"],
-  pilates_yoga: ["agenda", "seguimiento", "bonos"],
+  logopedia: ["agenda", "historial_clinico", "seguimiento", "bonos", "facturacion"],
+  pilates_yoga: ["agenda", "seguimiento", "bonos", "facturacion"],
   coaching: ["agenda", "seguimiento", "bonos", "facturacion"],
 };
 

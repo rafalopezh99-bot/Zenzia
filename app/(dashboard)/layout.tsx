@@ -42,7 +42,9 @@ export default async function DashboardLayout({ children }: { children: React.Re
   // El plan contratado recorta los módulos activados (ver lib/plans.ts).
   // Además de ocultarlos del menú, se bloquea la ruta: escribir la URL a
   // mano de algo que el plan no incluye lleva al dashboard.
+  // Presupuestos (y proformas) están dentro de Facturación: sin enlace propio en el menú.
   const modules = filterModulesByPlan(allModules, profile.plan);
+  const menuModules = modules.filter((m) => m.key !== "presupuestos");
   const pathname = headers().get("x-pathname") ?? "";
   const inPath = (href: string) => pathname === href || pathname.startsWith(`${href}/`);
   const blockedModule = MODULE_CATALOG.some((m) => inPath(m.href) && !modules.some((x) => x.key === m.key));
@@ -58,7 +60,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
   // Lo que su sector tendría pero su plan no incluye: sale en el menú con
   // candado y lleva a /planes (el "gusanillo" para mejorar de plan).
   const locked = [
-    ...allModules.filter((m) => !modules.includes(m)).map((m) => m.label),
+    ...allModules.filter((m) => !modules.includes(m) && m.key !== "presupuestos").map((m) => m.label),
     ...(showNotifications ? [] : ["Notificaciones"]),
     ...(showSuppliers ? [] : ["Proveedores"]),
   ];
@@ -66,7 +68,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
   return (
     <div className="flex min-h-screen flex-col bg-paper text-ink sm:flex-row">
       <Sidebar
-        modules={modules}
+        modules={menuModules}
         notificationCount={notificationCount ?? 0}
         isAdmin={isAdmin}
         signupRequestCount={signupRequestCount}
