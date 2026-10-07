@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Planes Zenzia</title>
+<style>
+:root{--navy:#163e6e;--cel:#2f9ce0;--ink:#0f1f33;--slate:#5b6b80;--line:#e3e8ef;--soft:#f2f7fc}
+*{box-sizing:border-box}body{margin:0;font-family:system-ui,Segoe UI,sans-serif;background:#f7f9fc;color:var(--ink);padding:40px 16px}
+h1{text-align:center;color:var(--navy);margin:0 0 6px}p.sub{text-align:center;color:var(--slate);margin:0 0 32px}
+.grid{max-width:1100px;margin:auto;display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));border:1px solid var(--line);border-radius:24px;background:#fff;overflow:hidden}
+.p{padding:32px 28px;display:flex;flex-direction:column;border-right:1px solid var(--line)}.p:last-child{border:0}
+.p.rec{background:var(--soft);position:relative}
+.tag{position:absolute;top:16px;left:28px;background:var(--cel);color:#fff;font-size:11px;font-weight:700;padding:4px 10px;border-radius:99px;letter-spacing:.05em}
+.name{color:var(--cel);font-weight:700;font-size:14px;margin-top:18px}.claim{font-size:20px;font-weight:700;margin:8px 0 22px;min-height:56px}
+.price{font-size:40px;font-weight:800;color:var(--navy)}.price small{font-size:14px;color:var(--slate);font-weight:400}.desde{font-size:14px;color:var(--cel);font-weight:700}
+.impl{font-size:12px;color:var(--slate);margin:4px 0 22px}
+.inc{font-size:13px;font-weight:700;color:var(--navy);margin:0 0 8px}
+ul{list-style:none;padding:0;margin:0 0 24px;flex:1}li{font-size:14px;padding:6px 0 6px 24px;position:relative;color:#2b3a4e}
+li:before{content:"✓";position:absolute;left:0;color:var(--cel);font-weight:700}li b{color:var(--navy)}
+.btn{display:block;text-align:center;padding:12px;border-radius:12px;border:1px solid var(--line);font-weight:700;color:var(--ink);text-decoration:none}
+.rec .btn{background:var(--navy);color:#fff;border:0}
+</style></head><body>
+<h1>Planes Zenzia</h1><p class="sub">Un único precio por negocio. Sin pagar por usuario.</p>
+<div class="grid">
+ <div class="p">
+  <div class="name">Zenzia Start</div><div class="claim">Organiza tus clientes, tu agenda y tus cobros.</div>
+  <div class="price">29 € <small>/mes</small></div><div class="impl">Sin cuota de implantación</div>
+  <ul>
+   <li>Clientes con ficha y notas · <b>30 nuevos/mes</b></li>
+   <li>Agenda de citas</li>
+   <li>Facturas en PDF · <b>30/mes</b></li>
+   <li>Presupuestos y proformas · <b>10/mes</b></li>
+   <li>Módulo principal de tu sector</li>
+   <li>Dashboard y notificaciones</li>
+   <li>1 usuario</li>
+  </ul><a class="btn" href="#">Quiero Start</a>
+ </div>
+ <div class="p rec"><span class="tag">RECOMENDADO</span>
+  <div class="name">Zenzia Smart</div><div class="claim">Recibe reservas online y olvídate de los recordatorios.</div>
+  <div class="price">59 € <small>/mes</small></div><div class="impl">Implantación: 290 €</div>
+  <p class="inc">Todo lo de Start, más:</p>
+  <ul>
+   <li>Reservas online 24/7</li>
+   <li>Recordatorios de citas por email</li>
+   <li>Todos los módulos de tu sector</li>
+   <li><b>150</b> clientes y facturas/mes</li>
+   <li>Presupuestos y proformas · <b>50/mes</b></li>
+   <li>Gráficas de facturación completas</li>
+   <li>Proveedores · 3 usuarios</li>
+  </ul><a class="btn" href="#">Quiero Smart</a>
+ </div>
+ <div class="p">
+  <div class="name">Zenzia Pro</div><div class="claim">Te digitalizamos el negocio y lo mantenemos.</div>
+  <div class="price"><span class="desde">Desde</span> 119 € <small>/mes</small></div><div class="impl">Implantación: desde 690 €</div>
+  <p class="inc">Todo lo de Smart, más:</p>
+  <ul>
+   <li>Web profesional conectada a Zenzia</li>
+   <li>Recordatorios por WhatsApp</li>
+   <li>Todo ilimitado</li>
+   <li>Usuarios ilimitados</li>
+   <li>Auditoría y automatizaciones a medida</li>
+   <li>Mantenimiento y soporte prioritario</li>
+   <li>Hosting y dominio el primer año</li>
+  </ul><a class="btn" href="#">Solicitar auditoría</a>
+ </div>
+</div></body></html>

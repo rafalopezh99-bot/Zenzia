@@ -6,6 +6,7 @@ import { PAYMENT_METHOD_LABEL, PAYMENT_METHODS } from "@/lib/paymentMethod";
 import { refreshPendingVerifactu } from "@/lib/verifactu";
 import DeleteInvoiceButton from "@/components/DeleteInvoiceButton";
 import AnnulInvoiceButton from "@/components/AnnulInvoiceButton";
+import AutoRefresh from "@/components/AutoRefresh";
 import Link from "next/link";
 
 const TABS = [
@@ -63,6 +64,8 @@ export default async function FacturacionPage(props: { searchParams: Promise<{ t
         }
       />
 
+      {/* Facturas esperando respuesta de Hacienda: se actualizan solas. */}
+      <AutoRefresh active={isInvoices && list.some((i) => i.verifactu_status === "pendiente")} />
       <div className="mb-6 inline-flex rounded-full border border-line p-1">
         {TABS.map((t) => (
           <Link
