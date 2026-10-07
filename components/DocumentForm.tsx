@@ -13,13 +13,18 @@ export default function DocumentForm({
   kind,
   contacts,
   action,
+  defaultVat = 21,
+  defaultIrpf = 0,
 }: {
   kind: DocKind;
   contacts: { id: string; full_name: string }[];
   action: (formData: FormData) => void;
+  // IVA / IRPF por defecto del negocio (Perfil).
+  defaultVat?: number;
+  defaultIrpf?: number;
 }) {
-  const [lines, setLines] = useState<DocLine[]>([{ concept: "", qty: 1, price: 0, vat: 21 }]);
-  const [irpf, setIrpf] = useState(0);
+  const [lines, setLines] = useState<DocLine[]>([{ concept: "", qty: 1, price: 0, vat: defaultVat }]);
+  const [irpf, setIrpf] = useState(defaultIrpf);
   const t = computeTotals(lines, irpf);
 
   const update = (i: number, patch: Partial<DocLine>) =>

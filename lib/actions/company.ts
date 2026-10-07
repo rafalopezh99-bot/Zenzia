@@ -34,6 +34,10 @@ export async function updateCompanyProfile(formData: FormData) {
     email: email || null,
     tax_id: tax_id || null,
     address: address || null,
+    postal_code: String(formData.get("postal_code") ?? "").trim() || null,
+    city: String(formData.get("city") ?? "").trim() || null,
+    default_vat: Number(formData.get("default_vat") ?? 21),
+    default_irpf: Number(formData.get("default_irpf") ?? 0),
   };
   if (vertical) companyUpdate.vertical = vertical;
   if (business_type) companyUpdate.business_type = business_type;

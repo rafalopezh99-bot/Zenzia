@@ -4,6 +4,9 @@ import { updateCompanyProfile } from "@/lib/actions/company";
 import { signOut } from "@/lib/actions/auth";
 import { Card, PageHeader, Input, Select, PrimaryButton, GhostButton } from "@/components/ui";
 import { VERTICAL_CATALOG, VERTICAL_CATEGORIES } from "@/lib/verticals";
+import { VAT_OPTIONS, IRPF_OPTIONS } from "@/lib/documents";
+import { PLAN_LABEL } from "@/lib/plans";
+import Link from "next/link";
 
 export const dynamic = "force-dynamic";
 
@@ -14,11 +17,11 @@ export const dynamic = "force-dynamic";
 // ficha de contacto.
 export default async function PerfilPage() {
   const supabase = createClient();
-  const { companyId, fullName } = await getCurrentCompanyProfile();
+  const { companyId, fullName, plan } = await getCurrentCompanyProfile();
 
   const { data: company } = await supabase
     .from("companies")
-    .select("name, vertical, business_type, phone, email, tax_id, address, logo_path")
+    .select("name, vertical, business_type, phone, email, tax_id, address, postal_code, city, default_vat, default_irpf, logo_path")
     .eq("id", companyId)
     .single();
 
@@ -38,6 +41,16 @@ export default async function PerfilPage() {
           </form>
         }
       />
+
+      <Card className="mb-6 flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <div className="text-xs font-semibold uppercase tracking-wide text-slate">Tu plan</div>
+          <div className="text-lg font-bold text-ink">Zenzia {PLAN_LABEL[plan]}</div>
+        </div>
+        <Link href="/planes" className="text-sm font-semibold text-brand hover:underline">
+          {plan === "pro" ? "Ver planes" : "Mejorar plan →"}
+        </Link>
+      </Card>
 
       <form action={updateCompanyProfile}>
         <Card className="mb-6">
@@ -84,32 +97,53 @@ export default async function PerfilPage() {
             <input
               type="file"
               name="logo"
-              accept="image/*"
+              accept="image/png,image/jpeg"
               className="flex-1 text-sm text-slate file:mr-3 file:rounded-full file:border-0 file:bg-paper-deep file:px-3 file:py-1.5 file:text-xs file:font-medium file:text-ink hover:file:bg-line/60"
             />
           </div>
         </Card>
 
         <Card className="mb-6">
-          <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-slate">Contacto y facturación</h2>
-          <div className="space-y-3">
-            <div className="flex flex-wrap gap-2">
-              <Input name="phone" placeholder="Teléfono" defaultValue={company?.phone ?? ""} className="flex-1" />
-              <Input name="email" type="email" placeholder="Email" defaultValue={company?.email ?? ""} className="flex-1" />
-            </div>
-            <div className="flex flex-wrap gap-2">
-              <Input name="tax_id" placeholder="NIF / CIF" defaultValue={company?.tax_id ?? ""} className="flex-1" />
-              <Input
-                name="address"
-                placeholder="Dirección fiscal"
-                defaultValue={company?.address ?? ""}
-                className="flex-[2]"
-              />
-            </div>
-            <p className="text-xs text-slate/70">
-              Estos datos son los que saldrán como emisor en las facturas y presupuestos que descargues.
-            </p>
+          <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-slate">Datos fiscales</h2>
+          <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+            <Input name="tax_id" placeholder="NIF / CIF" defaultValue={company?.tax_id ?? ""} />
+            <Input name="phone" placeholder="Teléfono" defaultValue={company?.phone ?? ""} />
+            <Input name="email" type="email" placeholder="Email" defaultValue={company?.email ?? ""} className="sm:col-span-2" />
+            <Input name="address" placeholder="Dirección fiscal" defaultValue={company?.address ?? ""} className="sm:col-span-2" />
+            <Input name="postal_code" placeholder="Código postal" defaultValue={company?.postal_code ?? ""} />
+            <Input name="city" placeholder="Ciudad / provincia" defaultValue={company?.city ?? ""} />
           </div>
+          <p className="mt-2 text-xs text-slate/70">Salen como emisor en tus facturas, presupuestos y proformas.</p>
+        </Card>
+
+        <Card className="mb-6">
+          <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-slate">Impuestos por defecto</h2>
+          <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+            <label className="text-xs text-slate">
+              IVA de tus servicios
+              <Select name="default_vat" defaultValue={String(company?.default_vat ?? 21)} className="mt-1 w-full">
+                {VAT_OPTIONS.map((o) => (
+                  <option key={o.value} value={o.value}>
+                    {o.label}
+                  </option>
+                ))}
+              </Select>
+            </label>
+            <label className="text-xs text-slate">
+              Retención IRPF
+              <Select name="default_irpf" defaultValue={String(company?.default_irpf ?? 0)} className="mt-1 w-full">
+                {IRPF_OPTIONS.map((r) => (
+                  <option key={r} value={r}>
+                    {r === 0 ? "Sin retención" : `${r} %`}
+                  </option>
+                ))}
+              </Select>
+            </label>
+          </div>
+          <p className="mt-2 text-xs text-slate/70">
+            Se aplican al crear un documento nuevo (se pueden cambiar en cada uno). Psicología, fisioterapia y otras
+            profesiones sanitarias suelen estar exentas de IVA: consúltalo con tu gestor.
+          </p>
         </Card>
 
         <PrimaryButton className="w-full">Guardar</PrimaryButton>
