@@ -1,3 +1,4 @@
+import ZenziaLogo from "@/components/ZenziaLogo";
 import Link from "next/link";
 
 // Piezas compartidas de la web pública (app/page.tsx + páginas legales).
@@ -9,8 +10,7 @@ import Link from "next/link";
 
 function ZenziaWordmark({ heightClass = "h-[5.5rem]" }: { heightClass?: string }) {
   return (
-    // eslint-disable-next-line @next/next/no-img-element
-    <img src="/zenzia-wordmark.png" alt="Zenzia" className={`${heightClass} w-auto`} />
+    <ZenziaLogo light className={heightClass} />
   );
 }
 
