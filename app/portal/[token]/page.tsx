@@ -48,7 +48,14 @@ export default async function PortalPage(props: { params: Promise<{ token: strin
           {upcoming.length ? (
             <ul className="space-y-1 text-sm">
               {upcoming.map((a: any) => (
-                <li key={a.starts_at} className="capitalize">{fecha(a.starts_at, true)}</li>
+                <li key={a.starts_at} className="flex items-center justify-between capitalize">
+                  {fecha(a.starts_at, true)}
+                  {a.status === "scheduled" && a.cancel_token && (
+                    <a href={`/cita/${a.cancel_token}`} className="text-xs normal-case text-red-600 hover:underline">
+                      Cancelar
+                    </a>
+                  )}
+                </li>
               ))}
             </ul>
           ) : (

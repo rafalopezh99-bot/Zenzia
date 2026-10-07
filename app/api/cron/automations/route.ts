@@ -33,7 +33,7 @@ export async function GET(req: Request) {
   // 1. Recordatorios
   const { data: upcoming } = await db
     .from("appointments")
-    .select("id, starts_at, contacts(full_name, email, phone), companies(name, plan, email)")
+    .select("id, starts_at, cancel_token, contacts(full_name, email, phone), companies(name, plan, email)")
     .eq("status", "scheduled")
     .eq("reminder_sent", false)
     .gte("starts_at", new Date(now).toISOString())
@@ -49,7 +49,7 @@ export async function GET(req: Request) {
       await sendEmail(
         c.email,
         `Recordatorio de tu cita en ${business}`,
-        `<p>Hola ${escapeHtml(c.full_name)},</p><p>Te recordamos tu cita en <b>${escapeHtml(business)}</b> el <b>${when(a.starts_at)}</b>.</p><p>Si no puedes venir, avísanos respondiendo a este email.</p>`,
+        `<p>Hola ${escapeHtml(c.full_name)},</p><p>Te recordamos tu cita en <b>${escapeHtml(business)}</b> el <b>${when(a.starts_at)}</b>.</p><p>¿No puedes venir? <a href="${SITE_URL}/cita/${a.cancel_token}">Cancela tu cita aquí</a> para que otra persona pueda aprovechar el hueco.</p>`,
         a.companies?.email
       );
     }

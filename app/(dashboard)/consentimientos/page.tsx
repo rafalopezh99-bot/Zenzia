@@ -9,7 +9,7 @@ export default async function ConsentimientosPage() {
     supabase.from("contacts").select("id, full_name").order("full_name"),
     supabase
       .from("consents")
-      .select("id, title, signed, signed_at, contacts(full_name)")
+      .select("id, title, signed, signed_at, sign_token, contacts(full_name, phone)")
       .order("created_at", { ascending: false }),
   ]);
 
@@ -28,6 +28,12 @@ export default async function ConsentimientosPage() {
             ))}
           </Select>
           <Input name="title" placeholder="Documento (ej. Consentimiento tratamiento)" required />
+          <textarea
+            name="body"
+            rows={3}
+            placeholder="Texto que firmará el paciente (opcional)"
+            className="w-full rounded-xl border border-line bg-surface px-3 py-2 text-sm"
+          />
           <PrimaryButton>Añadir documento</PrimaryButton>
         </form>
       </Card>
@@ -55,6 +61,18 @@ export default async function ConsentimientosPage() {
                     </Badge>
                   </td>
                   <td className={tdEl}>
+                    {!c.signed && (
+                      <a
+                        href={`https://wa.me/${(c.contacts?.phone ?? "").replace(/\D/g, "")}?text=${encodeURIComponent(
+                          `Por favor, firma este documento: ${process.env.NEXT_PUBLIC_SITE_URL ?? "https://app.zenzia.es"}/consentimiento/${c.sign_token}`
+                        )}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="mr-2 text-xs font-semibold text-brand hover:underline"
+                      >
+                        Enviar para firmar
+                      </a>
+                    )}
                     {!c.signed && (
                       <form action={sign}>
                         <GhostButton>Marcar firmado</GhostButton>

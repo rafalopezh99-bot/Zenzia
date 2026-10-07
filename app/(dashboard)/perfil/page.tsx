@@ -34,7 +34,7 @@ export default async function PerfilPage(props: { searchParams: Promise<{ tab?: 
   const { data: company } = await supabase
     .from("companies")
     .select(
-      "name, vertical, business_type, phone, email, tax_id, address, postal_code, city, default_vat, default_irpf, logo_path, booking, google_review_url, verifactu_state"
+      "name, vertical, business_type, phone, email, tax_id, address, postal_code, city, default_vat, default_irpf, logo_path, booking, google_review_url, verifactu_state, calendar_token"
     )
     .eq("id", companyId)
     .single();
@@ -318,6 +318,15 @@ export default async function PerfilPage(props: { searchParams: Promise<{ tab?: 
             )}
           </Card>
           {(planHas(plan, "booking") || planHas(plan, "reviews")) && <PrimaryButton>Guardar</PrimaryButton>}
+          <Card className="mt-6">
+            <h2 className={h2}>Ver tus citas en Google Calendar</h2>
+            <p className="text-sm text-slate">
+              En Google Calendar: Otros calendarios → + → Desde URL, y pega este enlace (no lo compartas):
+            </p>
+            <code className="mt-2 block break-all rounded-lg bg-paper-deep px-3 py-2 text-xs text-ink">
+              {`${process.env.NEXT_PUBLIC_SITE_URL ?? "https://app.zenzia.es"}/api/calendar/${company?.calendar_token}.ics`}
+            </code>
+          </Card>
         </form>
       )}
 

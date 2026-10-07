@@ -12,7 +12,7 @@ export const dynamic = "force-dynamic";
 export default async function ReservarPage(
   props: {
     params: Promise<{ companyId: string }>;
-    searchParams: Promise<{ day?: string; at?: string; ok?: string; error?: string }>;
+    searchParams: Promise<{ day?: string; at?: string; ok?: string; error?: string; s?: string }>;
   }
 ) {
   const searchParams = await props.searchParams;
@@ -22,6 +22,17 @@ export default async function ReservarPage(
   if (!info) notFound();
 
   const settings = parseBooking(info.booking);
+  // Servicios del negocio: si hay, el cliente elige uno y la duración del
+  // hueco es la del servicio.
+  const { data: services } = await supabase
+    .from("services")
+    .select("id, name, duration_min, price")
+    .eq("company_id", params.companyId)
+    .eq("active", true)
+    .order("name");
+  const svc = (services ?? []).find((x: any) => x.id === searchParams.s) ?? (services ?? [])[0] ?? null;
+  if (svc) settings.duration = svc.duration_min;
+  const sq = svc ? `&s=${svc.id}` : "";
   const days = bookableDays(settings);
   const day = days.includes(searchParams.day ?? "") ? searchParams.day! : days[0];
   const from = fromAppLocalInput(`${day}T00:00`);
@@ -71,11 +82,29 @@ export default async function ReservarPage(
               <p className="mb-4 rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700">{searchParams.error}</p>
             )}
 
+            {(services ?? []).length > 1 && (
+              <div className="mb-4 grid gap-2 sm:grid-cols-2">
+                {(services ?? []).map((x: any) => (
+                  <Link
+                    key={x.id}
+                    href={`${base}?day=${day}&s=${x.id}`}
+                    className={`rounded-xl border px-3 py-2 text-sm ${
+                      svc?.id === x.id ? "border-brand bg-brand text-white" : "border-line bg-surface"
+                    }`}
+                  >
+                    <div className="font-semibold">{x.name}</div>
+                    <div className="text-xs opacity-80">
+                      {x.duration_min} min · {Number(x.price).toFixed(2)} €
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            )}
             <div className="mb-4 flex gap-2 overflow-x-auto pb-2">
               {days.map((d) => (
                 <Link
                   key={d}
-                  href={`${base}?day=${d}`}
+                  href={`${base}?day=${d}${sq}`}
                   className={`shrink-0 rounded-xl border px-3 py-2 text-sm capitalize ${
                     d === day ? "border-brand bg-brand text-white" : "border-line bg-surface"
                   }`}
@@ -91,7 +120,7 @@ export default async function ReservarPage(
                 return (
                   <Link
                     key={iso}
-                    href={`${base}?day=${day}&at=${encodeURIComponent(iso)}`}
+                    href={`${base}?day=${day}&at=${encodeURIComponent(iso)}${sq}`}
                     className={`rounded-xl border py-2 text-center text-sm font-medium ${
                       searchParams.at === iso ? "border-brand bg-brand text-white" : "border-line bg-surface hover:border-brand"
                     }`}
@@ -106,8 +135,9 @@ export default async function ReservarPage(
             {searchParams.at && (
               <form action={book} className="space-y-3 rounded-2xl border border-line bg-surface p-5">
                 <input type="hidden" name="starts_at" value={searchParams.at} />
+                {svc && <input type="hidden" name="service_id" value={svc.id} />}
                 <p className="text-sm font-semibold">
-                  {dayLabel(day)} · {formatAppTime(searchParams.at)} ({settings.duration} min)
+                  {dayLabel(day)} · {formatAppTime(searchParams.at)} ({svc ? `${svc.name}, ` : ""}{settings.duration} min)
                 </p>
                 <input name="name" required placeholder="Nombre y apellidos" className="w-full rounded-xl border border-line bg-paper px-3 py-2 text-sm" />
                 <input name="phone" type="tel" required placeholder="Teléfono" className="w-full rounded-xl border border-line bg-paper px-3 py-2 text-sm" />

@@ -14,6 +14,7 @@ export async function bookAppointment(companyId: string, formData: FormData) {
     p_phone: String(formData.get("phone") ?? ""),
     p_email: String(formData.get("email") ?? ""),
     p_starts_at: startsAt,
+    p_service: String(formData.get("service_id") ?? "") || null,
   });
   if (error) redirect(`/reservar/${companyId}?error=${encodeURIComponent(error.message)}`);
   redirect(`/reservar/${companyId}?ok=${encodeURIComponent(startsAt)}`);

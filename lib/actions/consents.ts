@@ -12,7 +12,8 @@ export async function createConsent(formData: FormData) {
 
   if (!contact_id || !title) throw new Error("Cliente y título del documento son obligatorios");
 
-  const { error } = await supabase.from("consents").insert({ contact_id, title });
+  const body = String(formData.get("body") ?? "").trim() || null;
+  const { error } = await supabase.from("consents").insert({ contact_id, title, body });
   if (error) throw new Error(error.message);
 
   revalidatePath("/consentimientos");
