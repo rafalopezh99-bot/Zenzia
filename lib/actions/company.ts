@@ -19,27 +19,22 @@ export async function updateCompanyProfile(formData: FormData) {
 
   const companyId = await getCurrentCompanyId();
 
-  const name = String(formData.get("name") ?? "").trim();
-  if (!name) throw new Error("El nombre de la empresa es obligatorio");
-  const vertical = String(formData.get("vertical") ?? "").trim();
-  const business_type = String(formData.get("business_type") ?? "").trim();
-  const manager_name = String(formData.get("manager_name") ?? "").trim();
-  const phone = String(formData.get("phone") ?? "").trim();
-  const email = String(formData.get("email") ?? "").trim();
-  const tax_id = String(formData.get("tax_id") ?? "").trim();
-  const address = String(formData.get("address") ?? "").trim();
-
-  const companyUpdate: Record<string, unknown> = {
-    name,
-    phone: phone || null,
-    email: email || null,
-    tax_id: tax_id || null,
-    address: address || null,
-    postal_code: String(formData.get("postal_code") ?? "").trim() || null,
-    city: String(formData.get("city") ?? "").trim() || null,
-    default_vat: Number(formData.get("default_vat") ?? 21),
-    default_irpf: Number(formData.get("default_irpf") ?? 0),
-  };
+  // Perfil está dividido en pestañas y cada una envía solo sus campos: se
+  // actualiza únicamente lo que llega en el formulario.
+  const text = (k: string) => String(formData.get(k) ?? "").trim();
+  const companyUpdate: Record<string, unknown> = {};
+  if (formData.has("name")) {
+    if (!text("name")) throw new Error("El nombre del negocio es obligatorio");
+    companyUpdate.name = text("name");
+  }
+  for (const k of ["phone", "email", "tax_id", "address", "postal_code", "city"]) {
+    if (formData.has(k)) companyUpdate[k] = text(k) || null;
+  }
+  if (formData.has("default_vat")) companyUpdate.default_vat = Number(formData.get("default_vat"));
+  if (formData.has("default_irpf")) companyUpdate.default_irpf = Number(formData.get("default_irpf"));
+  const vertical = text("vertical");
+  const business_type = text("business_type");
+  const tax_id = text("tax_id");
   // Reservas online y reseñas: solo llegan si el plan las incluye.
   if (formData.has("booking_duration")) {
     companyUpdate.booking = {
@@ -72,22 +67,29 @@ export async function updateCompanyProfile(formData: FormData) {
     companyUpdate.logo_path = path;
   }
 
-  const { error: companyError } = await supabase.from("companies").update(companyUpdate).eq("id", companyId);
-  // Alta del NIF en VeriFactu (Verifacti) en cuanto hay NIF fiscal.
-  if (!companyError && tax_id) await ensureVerifactuNif(companyId, tax_id, name);
+  const { data: saved, error: companyError } = await supabase
+    .from("companies")
+    .update(companyUpdate)
+    .eq("id", companyId)
+    .select("name")
+    .single();
   if (companyError) throw new Error(companyError.message);
+  // Alta del NIF en VeriFactu (Verifacti) en cuanto hay NIF fiscal.
+  if (tax_id) await ensureVerifactuNif(companyId, tax_id, saved?.name ?? "");
 
-  const { error: memberError } = await supabase
-    .from("company_users")
-    .update({ full_name: manager_name || null })
-    .eq("user_id", user.id)
-    .eq("company_id", companyId);
-  if (memberError) throw new Error(memberError.message);
+  if (formData.has("manager_name")) {
+    const { error: memberError } = await supabase
+      .from("company_users")
+      .update({ full_name: text("manager_name") || null })
+      .eq("user_id", user.id)
+      .eq("company_id", companyId);
+    if (memberError) throw new Error(memberError.message);
+  }
 
   revalidatePath("/perfil");
   revalidatePath("/dashboard");
   revalidatePath("/onboarding");
-  redirect("/perfil");
+  redirect(`/perfil?tab=${text("tab") || "negocio"}&ok=1`);
 }
 
 // Botón "Firmar representación" de Perfil: abre la firma remota de Verifacti.

@@ -70,7 +70,7 @@ export default function Sidebar({
 
       {/* Nav: cajón deslizante en móvil, columna fija en escritorio */}
       <nav
-        className={`fixed inset-y-0 left-0 z-50 flex w-64 transform flex-col overflow-y-auto border-r border-line bg-surface p-4 text-sm transition-transform duration-200 ease-out sm:static sm:z-auto sm:w-56 sm:shrink-0 sm:translate-x-0 sm:transition-none ${
+        className={`fixed inset-y-0 left-0 z-50 flex w-64 transform flex-col overflow-y-auto border-r border-line bg-surface p-4 text-sm transition-transform duration-200 ease-out sm:sticky sm:top-0 sm:h-screen sm:z-auto sm:w-56 sm:shrink-0 sm:translate-x-0 sm:transition-none ${
           open ? "translate-x-0" : "-translate-x-full"
         }`}
       >
