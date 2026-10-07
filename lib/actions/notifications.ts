@@ -11,7 +11,7 @@ import { revalidatePath } from "next/cache";
 // nuevo, así no se pierde de dónde vino.
 export async function convertNotificationToContact(notificationId: string) {
   const companyId = await getCurrentCompanyId();
-  const supabase = createClient();
+  const supabase = await createClient();
 
   const { data: notification, error: fetchError } = await supabase
     .from("notifications")
@@ -50,7 +50,7 @@ export async function convertNotificationToContact(notificationId: string) {
 }
 
 export async function dismissNotification(notificationId: string) {
-  const supabase = createClient();
+  const supabase = await createClient();
   const { error } = await supabase.from("notifications").update({ status: "descartada" }).eq("id", notificationId);
   if (error) throw new Error(error.message);
 

@@ -4,7 +4,7 @@ import { Card, PageHeader } from "@/components/ui";
 // Módulo "historial_clinico": vista global de sesiones/notas de todos los
 // contactos. La ficha por contacto individual vive en /contactos/[id].
 export default async function HistorialPage() {
-  const supabase = createClient();
+  const supabase = await createClient();
   const { data: activities } = await supabase
     .from("activities")
     .select("id, type, content, created_at, contacts(full_name)")

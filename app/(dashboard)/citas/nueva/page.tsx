@@ -4,8 +4,9 @@ import { getCurrentCompanyProfile } from "@/lib/company";
 import { getTerminology } from "@/lib/terminology";
 import NuevaClaseForm from "@/components/NuevaClaseForm";
 
-export default async function NuevaCitaPage({ searchParams }: { searchParams: { at?: string } }) {
-  const supabase = createClient();
+export default async function NuevaCitaPage(props: { searchParams: Promise<{ at?: string }> }) {
+  const searchParams = await props.searchParams;
+  const supabase = await createClient();
   const { vertical } = await getCurrentCompanyProfile();
   const terms = getTerminology(vertical);
   const { data: contacts } = await supabase

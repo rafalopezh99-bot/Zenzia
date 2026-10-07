@@ -29,8 +29,9 @@ function EmailIcon() {
   );
 }
 
-export default async function ContactosPage({ searchParams }: { searchParams: { q?: string } }) {
-  const supabase = createClient();
+export default async function ContactosPage(props: { searchParams: Promise<{ q?: string }> }) {
+  const searchParams = await props.searchParams;
+  const supabase = await createClient();
   const { vertical, plan } = await getCurrentCompanyProfile();
   const terms = getTerminology(vertical);
   // El pipeline de ventas (etapa, tipo de negocio, enlace de demo) es una

@@ -5,7 +5,7 @@ import { Card, PageHeader, Select, PrimaryButton } from "@/components/ui";
 const KIND_LABEL: Record<string, string> = { antes: "Antes", despues: "Después" };
 
 export default async function FotosPage() {
-  const supabase = createClient();
+  const supabase = await createClient();
   // Sin límite esto se iría haciendo más lento con cada foto subida (más
   // filas a traer y una llamada al Storage por cada una, ver abajo) — se
   // enseñan las 60 más recientes, que ya llenan varias pantallas de sobra.

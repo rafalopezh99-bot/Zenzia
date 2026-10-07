@@ -36,7 +36,8 @@ function formatMonthParam(year: number, monthIndex: number) {
 // Calendario mensual navegable por URL (?month=YYYY-MM) — sin JS en el
 // cliente, coherente con el resto del panel (todo Server Components +
 // Server Actions). Anterior/Siguiente son enlaces normales.
-export default async function CalendarioPage({ searchParams }: { searchParams: { month?: string } }) {
+export default async function CalendarioPage(props: { searchParams: Promise<{ month?: string }> }) {
+  const searchParams = await props.searchParams;
   const { year, monthIndex } = parseMonthParam(searchParams.month);
 
   const firstOfMonth = new Date(year, monthIndex, 1);
@@ -44,7 +45,7 @@ export default async function CalendarioPage({ searchParams }: { searchParams: {
   const daysInMonth = new Date(year, monthIndex + 1, 0).getDate();
   const firstWeekday = (firstOfMonth.getDay() + 6) % 7; // 0 = lunes ... 6 = domingo
 
-  const supabase = createClient();
+  const supabase = await createClient();
   const { vertical } = await getCurrentCompanyProfile();
   if (showsAcademiaFields(vertical)) {
     await supabase.rpc("complete_finished_academia_appointments");

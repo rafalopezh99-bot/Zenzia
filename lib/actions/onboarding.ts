@@ -12,7 +12,7 @@ import { stripeEnabled } from "@/lib/stripe";
 // módulos común para ese tipo de negocio en company_modules — así el
 // cliente entra directo al dashboard con lo que necesita ya encendido.
 export async function completeOnboarding(formData: FormData) {
-  const supabase = createClient();
+  const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();

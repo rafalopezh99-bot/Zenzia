@@ -4,7 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 // Pro: clientes que llevan más de 60 días sin venir, con WhatsApp directo
 // para recuperarlos (además del email automático, ver /api/cron/automations).
 export default async function InactiveClientsCard() {
-  const supabase = createClient();
+  const supabase = await createClient();
   const { data } = await supabase
     .from("contacts")
     .select("id, full_name, phone, appointments(starts_at)")

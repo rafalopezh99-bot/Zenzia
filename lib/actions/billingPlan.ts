@@ -9,7 +9,7 @@ import type { PlanKey } from "@/lib/plans";
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
 
 async function customerId(companyId: string, name: string) {
-  const supabase = createClient();
+  const supabase = await createClient();
   const { data } = await supabase.from("companies").select("stripe_customer_id, email").eq("id", companyId).single();
   if (data?.stripe_customer_id) return data.stripe_customer_id as string;
   const customer = await stripe("customers", { name, email: data?.email ?? undefined, metadata: { company_id: companyId } });
@@ -21,7 +21,7 @@ async function customerId(companyId: string, name: string) {
 // (Stripe prorratea); si no, se abre Stripe Checkout (cuota + implantación).
 export async function choosePlan(plan: PlanKey) {
   const { companyId, companyName } = await getCurrentCompanyProfile();
-  const supabase = createClient();
+  const supabase = await createClient();
   const { data: co } = await supabase
     .from("companies")
     .select("stripe_subscription_id, subscription_status")

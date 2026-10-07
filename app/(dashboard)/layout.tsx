@@ -24,9 +24,9 @@ export default async function DashboardLayout({ children }: { children: React.Re
 
   // Sin suscripción activa (Stripe configurado), solo se puede entrar a
   // /planes para pagar y a /perfil. La cuenta de Zenzia (admin) no paga.
-  const currentPath = headers().get("x-pathname") ?? "";
+  const currentPath = (await headers()).get("x-pathname") ?? "";
   if (stripeEnabled() && !isAdmin && !["/planes", "/perfil"].some((p) => currentPath.startsWith(p))) {
-    const { data: sub } = await createClient()
+    const { data: sub } = await (await createClient())
       .from("companies")
       .select("subscription_status")
       .eq("id", profile.companyId)
@@ -39,7 +39,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
   // una para pedir la siguiente — la página tarda lo que tarda la más
   // lenta, no la suma de todas. "Solicitudes" solo existe para la empresa
   // de Rafa, así que esa consulta ni se hace para el resto.
-  const supabase = createClient();
+  const supabase = await createClient();
   const [allModules, { count: notificationCount }, signupRequestCount] = await Promise.all([
     getEnabledModules(profile.companyId),
     supabase.from("notifications").select("*", { count: "exact", head: true }).eq("status", "nueva"),
@@ -58,7 +58,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
   // Presupuestos (y proformas) están dentro de Facturación: sin enlace propio en el menú.
   const modules = filterModulesByPlan(allModules, profile.plan);
   const menuModules = modules.filter((m) => m.key !== "presupuestos");
-  const pathname = headers().get("x-pathname") ?? "";
+  const pathname = (await headers()).get("x-pathname") ?? "";
   const inPath = (href: string) => pathname === href || pathname.startsWith(`${href}/`);
   const blockedModule = MODULE_CATALOG.some((m) => inPath(m.href) && !modules.some((x) => x.key === m.key));
   const showSuppliers = planAllowsSuppliers(profile.plan);

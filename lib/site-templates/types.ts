@@ -1,3 +1,4 @@
+import type React from "react";
 // Forma común de los datos editables de una web (columna `site_content.data`,
 // jsonb). Todas las plantillas leen esta misma forma — así el mismo
 // formulario del editor (/mi-web) sirve para cualquier plantilla, y añadir
@@ -21,7 +22,7 @@ export interface SiteTemplateProps {
   accentColor: string;
 }
 
-export type SiteTemplateComponent = (props: SiteTemplateProps) => JSX.Element;
+export type SiteTemplateComponent = (props: SiteTemplateProps) => React.JSX.Element;
 
 export interface SiteTemplateDef {
   key: string;

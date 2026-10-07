@@ -10,7 +10,7 @@ import { revalidatePath } from "next/cache";
 // formas distintas entre alumnos.
 export async function createSubject(formData: FormData) {
   const companyId = await getCurrentCompanyId();
-  const supabase = createClient();
+  const supabase = await createClient();
 
   const name = String(formData.get("name") ?? "").trim();
   if (!name) return;

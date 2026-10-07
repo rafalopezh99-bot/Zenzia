@@ -5,10 +5,11 @@ import { createDocument } from "@/lib/actions/documents";
 import { DOC_LABEL, type DocKind } from "@/lib/documents";
 import { getCurrentCompanyBillingInfo } from "@/lib/company";
 
-export default async function NuevoDocumentoPage({ searchParams }: { searchParams: { tipo?: string } }) {
+export default async function NuevoDocumentoPage(props: { searchParams: Promise<{ tipo?: string }> }) {
+  const searchParams = await props.searchParams;
   const kind: DocKind =
     searchParams.tipo === "presupuesto" || searchParams.tipo === "proforma" ? searchParams.tipo : "factura";
-  const supabase = createClient();
+  const supabase = await createClient();
   const { defaultVat, defaultIrpf } = await getCurrentCompanyBillingInfo();
   const { data: contacts } = await supabase
     .from("contacts")

@@ -8,7 +8,7 @@ import { redirect } from "next/navigation";
 
 export async function createInvoice(formData: FormData) {
   await assertWithinLimit((await getCurrentCompanyProfile()).plan, "invoices");
-  const supabase = createClient();
+  const supabase = await createClient();
 
   const contact_id = String(formData.get("contact_id") ?? "");
   const concept = String(formData.get("concept") ?? "").trim();
@@ -24,7 +24,7 @@ export async function createInvoice(formData: FormData) {
 }
 
 export async function markInvoicePaid(invoiceId: string, formData: FormData) {
-  const supabase = createClient();
+  const supabase = await createClient();
   const payment_method = String(formData.get("payment_method") ?? "");
   if (!payment_method) throw new Error("Indica el método de pago");
 
@@ -43,7 +43,7 @@ export async function markInvoicePaid(invoiceId: string, formData: FormData) {
 // ella se borran solas (invoice_id on delete cascade, ver migración de
 // facturación recurrente).
 export async function deleteInvoice(invoiceId: string) {
-  const supabase = createClient();
+  const supabase = await createClient();
   const { error } = await supabase.from("invoices").delete().eq("id", invoiceId);
   if (error) throw new Error(error.message);
 

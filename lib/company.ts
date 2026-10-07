@@ -24,7 +24,7 @@ export const ZENZIA_ADMIN_COMPANY_ID = "5a279e59-d107-4341-80a2-f33bb5f71b24";
 // el layout del panel (para redirigir a /onboarding si falta), en el propio
 // dashboard (saludo) y en la pantalla de onboarding.
 export const getCurrentCompanyProfile = cache(async () => {
-  const supabase = createClient();
+  const supabase = await createClient();
   // getSession() lee la cookie tal cual (sin red); no hace falta volver a
   // verificarla contra el servidor de Supabase porque el middleware ya lo
   // ha hecho justo antes, en esta misma petición (ver
@@ -84,7 +84,7 @@ export async function getCurrentCompanyId(): Promise<string> {
 // Aparte de getCurrentCompanyProfile porque esos campos no hacen falta en
 // casi ninguna otra pantalla del panel — no tiene sentido cargarlos siempre.
 export async function getCurrentCompanyBillingInfo() {
-  const supabase = createClient();
+  const supabase = await createClient();
   const companyId = await getCurrentCompanyId();
 
   const { data: company } = await supabase

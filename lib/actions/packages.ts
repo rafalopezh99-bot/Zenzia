@@ -5,7 +5,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
 export async function createPackage(formData: FormData) {
-  const supabase = createClient();
+  const supabase = await createClient();
 
   const contact_id = String(formData.get("contact_id") ?? "");
   const name = String(formData.get("name") ?? "").trim();
@@ -21,7 +21,7 @@ export async function createPackage(formData: FormData) {
 }
 
 export async function usePackageSession(packageId: string, currentUsed: number) {
-  const supabase = createClient();
+  const supabase = await createClient();
   const { error } = await supabase
     .from("packages")
     .update({ used_sessions: currentUsed + 1 })
@@ -35,7 +35,7 @@ export async function usePackageSession(packageId: string, currentUsed: number) 
 // generarle facturas nuevas, sin perder el historial de sesiones ni las
 // facturas ya emitidas.
 export async function togglePackageActive(packageId: string, currentActive: boolean) {
-  const supabase = createClient();
+  const supabase = await createClient();
   const { error } = await supabase.from("packages").update({ active: !currentActive }).eq("id", packageId);
   if (error) throw new Error(error.message);
   revalidatePath("/bonos");

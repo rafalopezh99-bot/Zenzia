@@ -25,7 +25,7 @@ export async function selfSignup(formData: FormData) {
   if (!VERTICAL_PACKS[vertical]) fail("Elige a qué te dedicas");
   if (password.length < 8) fail("La contraseña debe tener al menos 8 caracteres");
 
-  const supabase = createClient();
+  const supabase = await createClient();
   const { data, error } = await supabase.auth.signUp({
     email,
     password,

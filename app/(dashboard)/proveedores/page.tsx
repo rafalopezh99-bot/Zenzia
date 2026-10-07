@@ -22,7 +22,7 @@ import {
 // alta — porque la ficha de un proveedor es siempre la misma, sin campos
 // que cambien según el vertical.
 export default async function ProveedoresPage() {
-  const supabase = createClient();
+  const supabase = await createClient();
   const { data } = await supabase
     .from("suppliers")
     .select("id, name, contact_person, phone, email, category, created_at")

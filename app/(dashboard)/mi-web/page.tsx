@@ -14,7 +14,7 @@ import { Card, PageHeader, PrimaryButton } from "@/components/ui";
 // no es algo que el cliente cambie desde aquí, así que se muestra como
 // dato informativo, no como campo editable.
 export default async function MiWebPage() {
-  const supabase = createClient();
+  const supabase = await createClient();
   const companyId = await getCurrentCompanyId();
 
   const { data: site } = await supabase

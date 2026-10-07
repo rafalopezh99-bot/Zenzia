@@ -10,7 +10,7 @@ import { revalidatePath } from "next/cache";
 // tipo de negocio: a quién le compras, cómo le contactas, para qué.
 export async function createSupplier(formData: FormData) {
   const companyId = await getCurrentCompanyId();
-  const supabase = createClient();
+  const supabase = await createClient();
 
   const name = String(formData.get("name") ?? "").trim();
   if (!name) throw new Error("El nombre es obligatorio");
@@ -34,7 +34,7 @@ export async function updateSupplier(supplierId: string, formData: FormData) {
   const name = String(formData.get("name") ?? "").trim();
   if (!name) throw new Error("El nombre es obligatorio");
 
-  const supabase = createClient();
+  const supabase = await createClient();
   const { error } = await supabase
     .from("suppliers")
     .update({
@@ -53,7 +53,7 @@ export async function updateSupplier(supplierId: string, formData: FormData) {
 }
 
 export async function deleteSupplier(supplierId: string) {
-  const supabase = createClient();
+  const supabase = await createClient();
   const { error } = await supabase.from("suppliers").delete().eq("id", supplierId);
   if (error) throw new Error(error.message);
 

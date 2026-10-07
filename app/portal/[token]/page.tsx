@@ -16,8 +16,9 @@ const fecha = (d: string, time = false) =>
 
 // Portal del cliente (Pro): enlace privado por cliente (contacts.portal_token)
 // con sus citas, su evolución/pautas y sus facturas en PDF.
-export default async function PortalPage({ params }: { params: { token: string } }) {
-  const supabase = createClient();
+export default async function PortalPage(props: { params: Promise<{ token: string }> }) {
+  const params = await props.params;
+  const supabase = await createClient();
   const { data } = await supabase.rpc("public_portal", { p_token: params.token });
   if (!data) notFound();
 

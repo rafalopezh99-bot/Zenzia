@@ -8,7 +8,7 @@ import { redirect } from "next/navigation";
 
 export async function createQuote(formData: FormData) {
   await assertWithinLimit((await getCurrentCompanyProfile()).plan, "quotes");
-  const supabase = createClient();
+  const supabase = await createClient();
 
   const contact_id = String(formData.get("contact_id") ?? "");
   const title = String(formData.get("title") ?? "").trim();
@@ -32,14 +32,14 @@ export async function advanceQuoteStatus(quoteId: string, currentStatus: string)
   const next = NEXT_STATUS[currentStatus];
   if (!next) return;
 
-  const supabase = createClient();
+  const supabase = await createClient();
   const { error } = await supabase.from("quotes").update({ status: next }).eq("id", quoteId);
   if (error) throw new Error(error.message);
   revalidatePath("/presupuestos");
 }
 
 export async function rejectQuote(quoteId: string) {
-  const supabase = createClient();
+  const supabase = await createClient();
   const { error } = await supabase.from("quotes").update({ status: "rechazado" }).eq("id", quoteId);
   if (error) throw new Error(error.message);
   revalidatePath("/presupuestos");

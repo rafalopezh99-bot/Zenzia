@@ -7,11 +7,14 @@ import { createClient } from "@/lib/supabase/server";
 
 // Pantalla de "mejorar plan": a donde llevan los apartados con candado del
 // menú. De momento el cambio de plan se pide por email (no hay pasarela).
-export default async function PlanesPage({ searchParams }: { searchParams: { ok?: string; pagar?: string; bienvenida?: string } }) {
+export default async function PlanesPage(
+  props: { searchParams: Promise<{ ok?: string; pagar?: string; bienvenida?: string }> }
+) {
+  const searchParams = await props.searchParams;
   const { plan, companyName, companyId } = await getCurrentCompanyProfile();
   const payments = stripeEnabled();
   const trialDays = Number(process.env.STRIPE_TRIAL_DAYS ?? 14);
-  const { data: co } = await createClient()
+  const { data: co } = await (await createClient())
     .from("companies")
     .select("stripe_customer_id, subscription_status")
     .eq("id", companyId)

@@ -18,7 +18,7 @@ import { TopRankingCard } from "@/components/TopRankingCard";
 const MONTH_LABELS = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
 
 export default async function DashboardPage() {
-  const supabase = createClient();
+  const supabase = await createClient();
   // getCurrentCompanyProfile() está cacheada por petición (ver lib/company.ts):
   // el layout ya la llamó justo antes, así que esto no repite el viaje a
   // Supabase, solo reutiliza el resultado.

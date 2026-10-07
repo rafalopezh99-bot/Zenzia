@@ -19,9 +19,10 @@ const fecha = (d: string | null) => (d ? new Date(d).toLocaleDateString("es-ES")
 // Facturación: facturas, presupuestos y proformas en pestañas (?tab=...).
 // Crear lleva a /facturacion/nuevo?tipo=...; cada documento se descarga en
 // PDF con los datos fiscales y el logo del negocio.
-export default async function FacturacionPage({ searchParams }: { searchParams: { tab?: string } }) {
+export default async function FacturacionPage(props: { searchParams: Promise<{ tab?: string }> }) {
+  const searchParams = await props.searchParams;
   const tab = TABS.find((t) => t.key === searchParams.tab) ?? TABS[0];
-  const supabase = createClient();
+  const supabase = await createClient();
 
   const isInvoices = tab.key === "facturas";
   if (isInvoices) await refreshPendingVerifactu();

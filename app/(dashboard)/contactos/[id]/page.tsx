@@ -11,8 +11,9 @@ import Link from "next/link";
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://app.zenzia.es";
 const PORTAL_MSG = "Aquí tienes tu área personal con tus citas, pautas y facturas: ";
 
-export default async function ContactoDetailPage({ params }: { params: { id: string } }) {
-  const supabase = createClient();
+export default async function ContactoDetailPage(props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
+  const supabase = await createClient();
   const { vertical, plan } = await getCurrentCompanyProfile();
   const showPipeline = showsAgencyPipeline(vertical);
   const showAcademia = showsAcademiaFields(vertical);

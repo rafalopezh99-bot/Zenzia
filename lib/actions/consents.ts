@@ -5,7 +5,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
 export async function createConsent(formData: FormData) {
-  const supabase = createClient();
+  const supabase = await createClient();
 
   const contact_id = String(formData.get("contact_id") ?? "");
   const title = String(formData.get("title") ?? "").trim();
@@ -20,7 +20,7 @@ export async function createConsent(formData: FormData) {
 }
 
 export async function markConsentSigned(consentId: string) {
-  const supabase = createClient();
+  const supabase = await createClient();
   const { error } = await supabase
     .from("consents")
     .update({ signed: true, signed_at: new Date().toISOString() })

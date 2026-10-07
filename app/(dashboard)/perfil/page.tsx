@@ -19,7 +19,7 @@ const WEEK_LETTERS = ["L", "M", "X", "J", "V", "S", "D"];
 // único formulario con un único botón "Guardar" — mismo criterio que la
 // ficha de contacto.
 export default async function PerfilPage() {
-  const supabase = createClient();
+  const supabase = await createClient();
   const { companyId, fullName, plan } = await getCurrentCompanyProfile();
 
   const { data: company } = await supabase

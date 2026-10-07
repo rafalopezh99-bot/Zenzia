@@ -56,7 +56,7 @@ const STATUS_TONE: Record<string, "neutral" | "green" | "amber" | "red" | "viole
 };
 
 export default async function NotificacionesPage() {
-  const supabase = createClient();
+  const supabase = await createClient();
   const { data: notifications } = await supabase
     .from("notifications")
     .select("id, kind, source, full_name, email, phone, handle, message, status, contact_id, created_at")

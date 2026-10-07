@@ -8,8 +8,9 @@ import { getCurrentCompanyProfile } from "@/lib/company";
 import { getTerminology } from "@/lib/terminology";
 import { toAppLocalInput } from "@/lib/timezone";
 
-export default async function EditarCitaPage({ params }: { params: { id: string } }) {
-  const supabase = createClient();
+export default async function EditarCitaPage(props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
+  const supabase = await createClient();
   const { vertical, plan } = await getCurrentCompanyProfile();
   const terms = getTerminology(vertical);
 

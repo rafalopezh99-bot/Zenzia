@@ -6,14 +6,14 @@ import { setDefaultAgendaView } from "@/lib/actions/agendaView";
 // Selector Día / Semana / Mes de la agenda, compartido por /citas (día y
 // semana) y /citas/calendario (mes), más el botón de nueva cita y el de
 // fijar la vista actual como la que se abre por defecto.
-export default function AgendaViewSwitch({
+export default async function AgendaViewSwitch({
   current,
   newLabel,
 }: {
   current: "day" | "week" | "month";
   newLabel: string;
 }) {
-  const defaultView = cookies().get("agenda_view")?.value ?? "week";
+  const defaultView = (await cookies()).get("agenda_view")?.value ?? "week";
   const views = [
     { key: "day", label: "Día", href: "/citas?view=day" },
     { key: "week", label: "Semana", href: "/citas?view=week" },

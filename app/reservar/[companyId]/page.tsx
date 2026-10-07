@@ -9,14 +9,15 @@ export const dynamic = "force-dynamic";
 
 // Reservas online (Smart y Pro): página pública donde el cliente elige día y
 // hora libres y deja nombre y teléfono. Sin cuenta ni login.
-export default async function ReservarPage({
-  params,
-  searchParams,
-}: {
-  params: { companyId: string };
-  searchParams: { day?: string; at?: string; ok?: string; error?: string };
-}) {
-  const supabase = createClient();
+export default async function ReservarPage(
+  props: {
+    params: Promise<{ companyId: string }>;
+    searchParams: Promise<{ day?: string; at?: string; ok?: string; error?: string }>;
+  }
+) {
+  const searchParams = await props.searchParams;
+  const params = await props.params;
+  const supabase = await createClient();
   const { data: info } = await supabase.rpc("public_booking_info", { p_company: params.companyId });
   if (!info) notFound();
 

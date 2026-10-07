@@ -11,7 +11,7 @@ import { redirect } from "next/navigation";
 // logo si se ha elegido uno nuevo — un único formulario con un único botón
 // "Guardar" en /perfil, mismo criterio que la ficha de contacto.
 export async function updateCompanyProfile(formData: FormData) {
-  const supabase = createClient();
+  const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -91,7 +91,7 @@ export async function updateCompanyProfile(formData: FormData) {
 
 // Botón "Firmar representación" de Perfil: abre la firma remota de Verifacti.
 export async function signVerifactuRepresentation() {
-  const supabase = createClient();
+  const supabase = await createClient();
   const companyId = await getCurrentCompanyId();
   const { data } = await supabase.from("companies").select("tax_id, verifactu_state").eq("id", companyId).single();
   if (!data?.tax_id) throw new Error("Añade primero tu NIF");

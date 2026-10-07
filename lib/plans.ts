@@ -101,7 +101,7 @@ export async function assertWithinLimit(plan: PlanKey, key: LimitKey) {
 
   const now = new Date();
   const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
-  const supabase = createClient();
+  const supabase = await createClient();
   let query = supabase.from(LIMIT_TABLE[key]).select("id", { count: "exact", head: true }).gte("created_at", monthStart);
   const kind = LIMIT_KIND[key];
   if (kind) query = query.eq("kind", kind);

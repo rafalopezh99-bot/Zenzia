@@ -11,7 +11,7 @@ import { sendInvoiceToVerifactu } from "@/lib/verifactu";
 // Copia de los datos del emisor y del cliente en el momento de emitir: el
 // PDF sale siempre igual aunque luego se edite el perfil o la ficha.
 async function snapshots(contactId: string) {
-  const supabase = createClient();
+  const supabase = await createClient();
   const [issuer, { data: contact }] = await Promise.all([
     getCurrentCompanyBillingInfo(),
     supabase.from("contacts").select("full_name, phone, email, custom_fields").eq("id", contactId).single(),
@@ -60,7 +60,7 @@ async function insertDocument(
   }
   if (!lines.length) throw new Error("Añade al menos una línea");
 
-  const supabase = createClient();
+  const supabase = await createClient();
   const summary = lines.length > 1 ? `${lines[0].concept} (+${lines.length - 1})` : lines[0].concept;
   const base = {
     contact_id: contactId,
@@ -113,7 +113,7 @@ export async function createDocument(formData: FormData) {
 // Presupuesto → proforma, o presupuesto/proforma → factura, con un clic.
 // El original queda marcado como aceptado.
 export async function convertQuote(quoteId: string, to: "proforma" | "factura") {
-  const supabase = createClient();
+  const supabase = await createClient();
   const { data: q } = await supabase
     .from("quotes")
     .select("contact_id, lines, irpf_rate, notes, title, amount")
@@ -137,7 +137,7 @@ export async function convertQuote(quoteId: string, to: "proforma" | "factura") 
 }
 
 export async function deleteQuote(quoteId: string) {
-  const supabase = createClient();
+  const supabase = await createClient();
   const { error } = await supabase.from("quotes").delete().eq("id", quoteId);
   if (error) throw new Error(error.message);
   revalidatePath("/facturacion");
@@ -147,7 +147,7 @@ export async function deleteQuote(quoteId: string) {
 // Anular una factura ya emitida: no se borra (VeriFactu no lo permite), se
 // emite una rectificativa (serie R) con los mismos importes en negativo.
 export async function annulInvoice(invoiceId: string) {
-  const supabase = createClient();
+  const supabase = await createClient();
   const { data: inv } = await supabase
     .from("invoices")
     .select("contact_id, lines, irpf_rate, doc_number, status")

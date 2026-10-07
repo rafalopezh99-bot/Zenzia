@@ -6,7 +6,7 @@ import { CURSO_ORDER } from "@/lib/academia";
 const SIN_CURSO = "Sin curso asignado";
 
 export default async function GruposPage() {
-  const supabase = createClient();
+  const supabase = await createClient();
   const { data: contacts } = await supabase
     .from("contacts")
     .select("id, full_name, custom_fields")

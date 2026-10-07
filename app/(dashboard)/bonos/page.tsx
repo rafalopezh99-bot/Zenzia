@@ -12,7 +12,7 @@ const PERIODO_LABEL: Record<string, string> = { semanal: "Semanal", mensual: "Me
 // al terminar la clase) y su seguimiento vive en /seguimiento, con las
 // horas gastadas por alumno cada mes.
 export default async function BonosPage() {
-  const supabase = createClient();
+  const supabase = await createClient();
   const { companyId, vertical } = await getCurrentCompanyProfile();
   const terms = getTerminology(vertical);
   const showAcademia = showsAcademiaFields(vertical);

@@ -8,7 +8,7 @@ import { parseLines, type DocKind } from "@/lib/documents";
 // /api/presupuestos/[id]/pdf (presupuestos y proformas). RLS ya limita la
 // lectura a documentos de la empresa del usuario.
 export async function documentPdfResponse(table: "invoices" | "quotes", id: string) {
-  const supabase = createClient();
+  const supabase = await createClient();
   const { data: doc } = await supabase
     .from(table)
     .select("*, contacts(full_name, phone, email, custom_fields)")

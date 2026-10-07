@@ -6,7 +6,7 @@ import { redirect } from "next/navigation";
 // Reserva desde la página pública: toda la validación (hueco libre, plan,
 // reservas activadas) la hace la función public_book en la base de datos.
 export async function bookAppointment(companyId: string, formData: FormData) {
-  const supabase = createClient();
+  const supabase = await createClient();
   const startsAt = String(formData.get("starts_at") ?? "");
   const { error } = await supabase.rpc("public_book", {
     p_company: companyId,

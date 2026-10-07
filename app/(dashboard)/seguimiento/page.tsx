@@ -11,7 +11,7 @@ import { appLocalParts, fromAppLocalInput } from "@/lib/timezone";
 // resto de verticales sigue con la métrica genérica de siempre (peso,
 // dolor, medidas...) y su propio formulario de entradas.
 export default async function SeguimientoPage() {
-  const supabase = createClient();
+  const supabase = await createClient();
   const { vertical } = await getCurrentCompanyProfile();
   const terms = getTerminology(vertical);
   const showAcademia = showsAcademiaFields(vertical);

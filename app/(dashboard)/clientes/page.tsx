@@ -9,7 +9,7 @@ import ContactarClienteButton from "@/components/ContactarClienteButton";
 // /notificaciones (leads que llegan solos por el formulario) — esta es su
 // propia lista de prospección para hacer outreach.
 export default async function ClientesPage() {
-  const supabase = createClient();
+  const supabase = await createClient();
   const { data: prospects } = await supabase
     .from("prospects")
     .select("id, contact_name, email, instagram_handle, business_type, business_name, service_offer, status, created_at")

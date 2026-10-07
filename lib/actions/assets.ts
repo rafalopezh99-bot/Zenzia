@@ -5,7 +5,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
 export async function createVehicle(formData: FormData) {
-  const supabase = createClient();
+  const supabase = await createClient();
 
   const contact_id = String(formData.get("contact_id") ?? "");
   const plate = String(formData.get("plate") ?? "").trim();

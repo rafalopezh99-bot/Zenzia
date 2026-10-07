@@ -9,7 +9,7 @@ import { revalidatePath } from "next/cache";
 // el cliente ya trae todas las casillas a la vez en un único formulario.
 export async function saveDashboardWidgets(enabledKeys: string[]) {
   const companyId = await getCurrentCompanyId();
-  const supabase = createClient();
+  const supabase = await createClient();
 
   const { error } = await supabase
     .from("companies")

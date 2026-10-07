@@ -3,7 +3,7 @@ import { createVehicle } from "@/lib/actions/assets";
 import { Card, PageHeader, Input, Select, PrimaryButton, tableWrap, tableEl, theadEl, thEl, tdEl, trEl } from "@/components/ui";
 
 export default async function VehiculosPage() {
-  const supabase = createClient();
+  const supabase = await createClient();
   // Independientes entre sí: se piden a la vez en vez de una detrás de otra.
   const [{ data: contacts }, { data: vehicles }] = await Promise.all([
     supabase.from("contacts").select("id, full_name").order("full_name"),

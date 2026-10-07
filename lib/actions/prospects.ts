@@ -7,7 +7,7 @@ import { redirect } from "next/navigation";
 
 export async function createProspect(formData: FormData) {
   const companyId = await getCurrentCompanyId();
-  const supabase = createClient();
+  const supabase = await createClient();
 
   const contact_name = String(formData.get("contact_name") ?? "").trim();
   const email = String(formData.get("email") ?? "").trim();
@@ -40,7 +40,7 @@ export async function createProspect(formData: FormData) {
 // components/ContactarClienteButton.tsx) — no manda ningún email, solo
 // deja constancia de que ya generaste el mensaje para este cliente.
 export async function markProspectContacted(prospectId: string) {
-  const supabase = createClient();
+  const supabase = await createClient();
   const { error } = await supabase.from("prospects").update({ status: "contactado" }).eq("id", prospectId);
   if (error) throw new Error(error.message);
   revalidatePath("/clientes");

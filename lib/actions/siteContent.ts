@@ -10,7 +10,7 @@ import { revalidatePath } from "next/cache";
 // servicios (lista repetible) tienen sus propias acciones más abajo porque
 // añadir/quitar uno no debería obligar a re-guardar todo el formulario.
 export async function updateSiteContent(formData: FormData) {
-  const supabase = createClient();
+  const supabase = await createClient();
   const companyId = await getCurrentCompanyId();
 
   const { data: existing } = await supabase
@@ -54,7 +54,7 @@ export async function updateSiteContent(formData: FormData) {
 }
 
 export async function addService(formData: FormData) {
-  const supabase = createClient();
+  const supabase = await createClient();
   const companyId = await getCurrentCompanyId();
 
   const name = String(formData.get("service_name") ?? "").trim();
@@ -85,7 +85,7 @@ export async function addService(formData: FormData) {
 }
 
 export async function removeService(formData: FormData) {
-  const supabase = createClient();
+  const supabase = await createClient();
   const companyId = await getCurrentCompanyId();
   const index = Number(formData.get("index"));
 
@@ -118,7 +118,7 @@ export async function removeService(formData: FormData) {
 // cliente puede dejar cambios a medias sin que se vean fuera hasta que
 // decida publicar.
 export async function toggleSitePublished(formData: FormData) {
-  const supabase = createClient();
+  const supabase = await createClient();
   const companyId = await getCurrentCompanyId();
   const published = formData.get("published") === "true";
 

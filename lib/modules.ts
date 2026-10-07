@@ -96,7 +96,7 @@ import { createClient } from "@/lib/supabase/server";
 // Devuelve solo los módulos activados para la empresa del usuario actual.
 // Esto es lo que decide qué aparece en el menú y qué rutas son accesibles.
 export async function getEnabledModules(companyId: string): Promise<ModuleDef[]> {
-  const supabase = createClient();
+  const supabase = await createClient();
   const { data, error } = await supabase
     .from("company_modules")
     .select("module_key")

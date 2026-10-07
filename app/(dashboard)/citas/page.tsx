@@ -132,16 +132,17 @@ const COLUMN_HEIGHT = ROW_HEIGHT * HOURS.length;
 // 16:00 a 17:30 ocupa toda esa franja, no solo la hora de inicio), y
 // enlaza a /citas/[id]/editar.
 // Con ?view=day muestra un solo día (?day=YYYY-MM-DD) con la misma rejilla.
-export default async function CitasPage({
-  searchParams,
-}: {
-  searchParams: { week?: string; view?: string; day?: string };
-}) {
+export default async function CitasPage(
+  props: {
+    searchParams: Promise<{ week?: string; view?: string; day?: string }>;
+  }
+) {
+  const searchParams = await props.searchParams;
   const { vertical } = await getCurrentCompanyProfile();
   const terms = getTerminology(vertical);
   // Sin vista en la URL (entrar desde el menú), se abre la predeterminada
   // que haya fijado el usuario (ver AgendaViewSwitch).
-  const preferred = cookies().get("agenda_view")?.value;
+  const preferred = (await cookies()).get("agenda_view")?.value;
   const noParams = !searchParams.view && !searchParams.week && !searchParams.day;
   if (noParams && preferred === "month") redirect("/citas/calendario");
   const isDay = searchParams.view === "day" || (noParams && preferred === "day");
@@ -162,7 +163,7 @@ export default async function CitasPage({
   const rangeEnd = new Date(firstDay);
   rangeEnd.setDate(rangeEnd.getDate() + (isDay ? 1 : 7));
 
-  const supabase = createClient();
+  const supabase = await createClient();
   if (showsAcademiaFields(vertical)) {
     await supabase.rpc("complete_finished_academia_appointments");
   }

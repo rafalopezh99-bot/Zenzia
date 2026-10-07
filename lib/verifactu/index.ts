@@ -20,7 +20,7 @@ export async function sendInvoiceToVerifactu(invoiceId: string) {
   const provider = await getVerifactuProvider();
   if (!provider) return;
 
-  const supabase = createClient();
+  const supabase = await createClient();
   const { data: inv } = await supabase
     .from("invoices")
     .select("series, number, issue_date, concept, lines, amount, client_snapshot, rectifies_id")
@@ -69,7 +69,7 @@ export async function sendInvoiceToVerifactu(invoiceId: string) {
 export async function refreshPendingVerifactu() {
   const provider = await getVerifactuProvider();
   if (!provider) return;
-  const supabase = createClient();
+  const supabase = await createClient();
   const { data: pending } = await supabase
     .from("invoices")
     .select("id, verifactu")

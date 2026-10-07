@@ -8,7 +8,7 @@ import { redirect } from "next/navigation";
 // app/login/page.tsx, que hace router.push("/dashboard") a mano si no hay
 // error.
 export async function signIn(formData: FormData): Promise<{ error: string | null }> {
-  const supabase = createClient();
+  const supabase = await createClient();
   const email = String(formData.get("email") ?? "");
   const password = String(formData.get("password") ?? "");
 
@@ -17,10 +17,10 @@ export async function signIn(formData: FormData): Promise<{ error: string | null
 }
 
 // Cierra la sesión del usuario actual. Al llamarse desde un Server Action
-// (no un Server Component), createClient() sí puede escribir cookies, así
+// (no un Server Component), (await createClient()) sí puede escribir cookies, así
 // que esto borra la cookie de sesión de verdad, no solo en el cliente.
 export async function signOut() {
-  const supabase = createClient();
+  const supabase = await createClient();
   await supabase.auth.signOut();
   redirect("/login");
 }

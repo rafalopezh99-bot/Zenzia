@@ -32,7 +32,7 @@ export default async function SolicitudesPage() {
   const profile = await getCurrentCompanyProfile();
   if (profile.companyId !== ZENZIA_ADMIN_COMPANY_ID) redirect("/dashboard");
 
-  const supabase = createClient();
+  const supabase = await createClient();
   const { data: requests } = await supabase
     .from("signup_requests")
     .select("*")

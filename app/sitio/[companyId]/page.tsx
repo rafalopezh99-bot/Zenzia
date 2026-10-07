@@ -9,8 +9,9 @@ import { notFound } from "next/navigation";
 // `template_key` a través del registro de plantillas (ver
 // lib/site-templates/registry.ts) — cada cliente puede tener una plantilla
 // distinta sin que este archivo cambie.
-export default async function SitioPublicoPage({ params }: { params: { companyId: string } }) {
-  const supabase = createClient();
+export default async function SitioPublicoPage(props: { params: Promise<{ companyId: string }> }) {
+  const params = await props.params;
+  const supabase = await createClient();
   const { data: site } = await supabase
     .from("site_content")
     .select("template_key, accent_color, data")

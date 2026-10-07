@@ -8,7 +8,7 @@ import { fromAppLocalInput } from "@/lib/timezone";
 
 export async function createAppointment(formData: FormData) {
   const companyId = await getCurrentCompanyId();
-  const supabase = createClient();
+  const supabase = await createClient();
 
   const contact_id = String(formData.get("contact_id") ?? "");
   const starts_at = String(formData.get("starts_at") ?? "");
@@ -39,7 +39,7 @@ export async function createAppointment(formData: FormData) {
 }
 
 export async function markAppointmentStatus(appointmentId: string, status: string) {
-  const supabase = createClient();
+  const supabase = await createClient();
   const { error } = await supabase.from("appointments").update({ status }).eq("id", appointmentId);
   if (error) throw new Error(error.message);
   revalidatePath("/citas");
@@ -49,7 +49,7 @@ export async function markAppointmentStatus(appointmentId: string, status: strin
 // No toca schedule_id: si la cita viene de un horario recurrente sigue
 // perteneciendo a él, solo cambian sus datos concretos.
 export async function updateAppointment(appointmentId: string, formData: FormData) {
-  const supabase = createClient();
+  const supabase = await createClient();
 
   const contact_id = String(formData.get("contact_id") ?? "");
   const starts_at = String(formData.get("starts_at") ?? "");
@@ -93,7 +93,7 @@ export async function updateAppointment(appointmentId: string, formData: FormDat
 }
 
 export async function deleteAppointment(appointmentId: string) {
-  const supabase = createClient();
+  const supabase = await createClient();
   const { error } = await supabase.from("appointments").delete().eq("id", appointmentId);
   if (error) throw new Error(error.message);
   revalidatePath("/citas");
@@ -108,7 +108,7 @@ export async function deleteAppointment(appointmentId: string) {
 // momento, sin esperar al ciclo del día siguiente.
 export async function createClassSchedule(formData: FormData) {
   const companyId = await getCurrentCompanyId();
-  const supabase = createClient();
+  const supabase = await createClient();
 
   const contact_id = String(formData.get("contact_id") ?? "");
   const weekday = Number(formData.get("weekday") ?? 0);
@@ -149,7 +149,7 @@ export async function createClassSchedule(formData: FormData) {
 // Botones "Asistió" / "No asistió" de la cita: un clic, sin pasar por el
 // formulario completo. Las ausencias alimentan el aviso del dashboard.
 export async function setAppointmentStatus(appointmentId: string, status: "completed" | "no_show") {
-  const supabase = createClient();
+  const supabase = await createClient();
   const { error } = await supabase.from("appointments").update({ status }).eq("id", appointmentId);
   if (error) throw new Error(error.message);
   revalidatePath("/citas");

@@ -8,7 +8,8 @@ import ZenziaLogo from "@/components/ZenziaLogo";
 // Alta de cuenta en Zenzia (autoservicio): crea usuario, negocio y módulos
 // de su sector. Después: asistente inicial (/onboarding) y pago del plan
 // elegido en /planes (con días de prueba si Stripe está configurado).
-export default function RegistroPage({ searchParams }: { searchParams: { plan?: string; error?: string } }) {
+export default async function RegistroPage(props: { searchParams: Promise<{ plan?: string; error?: string }> }) {
+  const searchParams = await props.searchParams;
   const defaultPlan = PLANS.some((p) => p.key === searchParams.plan) ? searchParams.plan : "smart";
 
   return (

@@ -15,12 +15,13 @@ const MONTH_NAMES = [
 // ya cobrado (status = "pagada"). Filtros combinables por año, mes, alumno
 // y método de pago, para poder ir mirando estadísticas — todo por URL
 // (?year=&month=&contact_id=&method=), sin JS en el cliente.
-export default async function PagosPage({
-  searchParams,
-}: {
-  searchParams: { year?: string; month?: string; contact_id?: string; method?: string };
-}) {
-  const supabase = createClient();
+export default async function PagosPage(
+  props: {
+    searchParams: Promise<{ year?: string; month?: string; contact_id?: string; method?: string }>;
+  }
+) {
+  const searchParams = await props.searchParams;
+  const supabase = await createClient();
   const { vertical } = await getCurrentCompanyProfile();
   const terms = getTerminology(vertical);
 

@@ -7,7 +7,7 @@ import { getTerminology } from "@/lib/terminology";
 import { formatAppDateTime } from "@/lib/timezone";
 
 export default async function CitasListaPage() {
-  const supabase = createClient();
+  const supabase = await createClient();
   const { vertical } = await getCurrentCompanyProfile();
   const terms = getTerminology(vertical);
   const { data: appointments } = await supabase

@@ -12,7 +12,7 @@ const USAGE: { key: LimitKey; table: string; label: string }[] = [
 
 export default async function PlanUsageCard({ plan, monthStart }: { plan: PlanKey; monthStart: Date }) {
   if (plan === "pro") return null;
-  const supabase = createClient();
+  const supabase = await createClient();
   const since = monthStart.toISOString();
 
   const [usage, { count: noShows }] = await Promise.all([

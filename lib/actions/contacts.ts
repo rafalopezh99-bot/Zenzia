@@ -9,7 +9,7 @@ import { redirect } from "next/navigation";
 export async function createContact(formData: FormData) {
   await assertWithinLimit((await getCurrentCompanyProfile()).plan, "contacts");
   const companyId = await getCurrentCompanyId();
-  const supabase = createClient();
+  const supabase = await createClient();
 
   const full_name = String(formData.get("full_name") ?? "").trim();
   if (!full_name) throw new Error("El nombre es obligatorio");
@@ -120,7 +120,7 @@ export async function createContact(formData: FormData) {
 // que ya estaban puestas en el calendario pero todavía no han pasado. Las
 // clases ya dadas se dejan tal cual — son historial, no algo que "quitar
 // del calendario".
-async function clearFutureClasses(supabase: ReturnType<typeof createClient>, contactId: string) {
+async function clearFutureClasses(supabase: Awaited<ReturnType<typeof createClient>>, contactId: string) {
   await supabase.from("class_schedules").update({ active: false }).eq("contact_id", contactId);
 
   const { error } = await supabase
@@ -144,7 +144,7 @@ function revalidateCalendars() {
 // "eliminar", esto no lo archiva. Para cuando la baja es de las clases,
 // no del alumno como contacto (ficha, historial de facturación...).
 export async function unenrollContact(contactId: string) {
-  const supabase = createClient();
+  const supabase = await createClient();
   await clearFutureClasses(supabase, contactId);
   revalidateCalendars();
 }
@@ -160,7 +160,7 @@ export async function unenrollContact(contactId: string) {
 // eliminado no debería seguir generando clases nuevas ni aparecer en citas
 // que ya no se van a dar.
 export async function deleteContact(contactId: string) {
-  const supabase = createClient();
+  const supabase = await createClient();
   await clearFutureClasses(supabase, contactId);
 
   const { error } = await supabase.from("contacts").update({ status: "inactive" }).eq("id", contactId);
@@ -175,7 +175,7 @@ export async function deleteContact(contactId: string) {
 // ficha de cada contacto). No redirige: la fila ya está en /contactos,
 // revalidar el path basta para que la tabla refleje el cambio.
 export async function updateContactStageInline(contactId: string, stage: string) {
-  const supabase = createClient();
+  const supabase = await createClient();
   const { data: contact } = await supabase
     .from("contacts")
     .select("custom_fields")
@@ -202,7 +202,7 @@ export async function updateContact(contactId: string, formData: FormData) {
   const phone = String(formData.get("phone") ?? "").trim();
   const email = String(formData.get("email") ?? "").trim();
 
-  const supabase = createClient();
+  const supabase = await createClient();
   const { data: existing } = await supabase
     .from("contacts")
     .select("custom_fields")
@@ -253,7 +253,7 @@ export async function updateContact(contactId: string, formData: FormData) {
 // pasa con .bind(null, contactId) al usar esta acción como form action.
 export async function addActivity(contactId: string, formData: FormData) {
   const companyId = await getCurrentCompanyId();
-  const supabase = createClient();
+  const supabase = await createClient();
 
   const content = String(formData.get("content") ?? "").trim();
   if (!content) return;

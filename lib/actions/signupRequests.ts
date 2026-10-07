@@ -29,7 +29,7 @@ export async function createSignupRequest(formData: FormData) {
     throw new Error("Tipo de uso no válido");
   }
 
-  const supabase = createClient();
+  const supabase = await createClient();
   const { error } = await supabase.from("signup_requests").insert({
     manager_name,
     business_name,
@@ -50,7 +50,7 @@ export async function createSignupRequest(formData: FormData) {
 // no crea ninguna cuenta; eso lo sigue haciendo Rafa a mano en Supabase,
 // igual que con cada cliente hasta ahora.
 export async function reviewSignupRequest(requestId: string, status: "aprobada" | "denegada") {
-  const supabase = createClient();
+  const supabase = await createClient();
 
   const { error } = await supabase
     .from("signup_requests")

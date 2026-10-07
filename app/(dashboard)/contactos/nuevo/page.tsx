@@ -18,7 +18,7 @@ export default async function NuevoContactoPage() {
   let subjects: { id: string; name: string }[] = [];
 
   if (showAcademia) {
-    const supabase = createClient();
+    const supabase = await createClient();
     const [{ data: bonoTypes }, { data: subjectRows }] = await Promise.all([
       supabase
         .from("bono_types")

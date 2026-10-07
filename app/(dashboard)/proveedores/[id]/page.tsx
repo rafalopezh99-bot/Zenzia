@@ -3,8 +3,9 @@ import { createClient } from "@/lib/supabase/server";
 import { updateSupplier, deleteSupplier } from "@/lib/actions/suppliers";
 import { Card, PageHeader, Input, Textarea, PrimaryButton, GhostButton } from "@/components/ui";
 
-export default async function ProveedorPage({ params }: { params: { id: string } }) {
-  const supabase = createClient();
+export default async function ProveedorPage(props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
+  const supabase = await createClient();
   const { data: supplier } = await supabase.from("suppliers").select("*").eq("id", params.id).single();
   if (!supplier) notFound();
 

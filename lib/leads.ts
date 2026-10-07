@@ -50,7 +50,7 @@ export async function insertLead(input: {
   const origenLabel = input.origen === "rldigitalstudios" ? "rldigitalstudios.com" : "zenzia.es";
   const interesLabel = input.interest ? INTEREST_LABEL[input.interest] : null;
 
-  const supabase = createClient();
+  const supabase = await createClient();
   const { error } = await supabase.from("notifications").insert({
     company_id: RL_DIGITAL_STUDIOS_COMPANY_ID,
     source: "formulario_web",

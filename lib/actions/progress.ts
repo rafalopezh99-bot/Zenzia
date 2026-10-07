@@ -6,7 +6,7 @@ import { revalidatePath } from "next/cache";
 
 export async function addProgress(formData: FormData) {
   const companyId = await getCurrentCompanyId();
-  const supabase = createClient();
+  const supabase = await createClient();
 
   const contact_id = String(formData.get("contact_id") ?? "");
   if (!contact_id) throw new Error("Faltan datos de seguimiento");

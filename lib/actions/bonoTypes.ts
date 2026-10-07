@@ -13,7 +13,7 @@ import { revalidatePath } from "next/cache";
 // generate_recurring_invoices() (ver migración de facturación recurrente).
 export async function createBonoType(formData: FormData) {
   const companyId = await getCurrentCompanyId();
-  const supabase = createClient();
+  const supabase = await createClient();
 
   const nivel = String(formData.get("nivel") ?? "").trim();
   const name = String(formData.get("name") ?? "").trim();
@@ -42,7 +42,7 @@ export async function createBonoType(formData: FormData) {
 }
 
 export async function deleteBonoType(bonoTypeId: string) {
-  const supabase = createClient();
+  const supabase = await createClient();
   const { error } = await supabase.from("bono_types").delete().eq("id", bonoTypeId);
   if (error) throw new Error(error.message);
 
