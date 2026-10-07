@@ -76,6 +76,21 @@ export default async function FacturacionPage(props: { searchParams: Promise<{ t
         ))}
       </div>
 
+      {isInvoices && (
+        <div className="mb-4 flex flex-wrap items-center gap-2 text-xs text-slate">
+          <span>Exportar para tu gestor ({new Date().getFullYear()}):</span>
+          {[1, 2, 3, 4].map((q) => (
+            <a
+              key={q}
+              href={`/api/export/facturas?year=${new Date().getFullYear()}&q=${q}`}
+              className="rounded-full border border-line px-2.5 py-1 font-semibold text-ink hover:border-brand"
+            >
+              T{q}
+            </a>
+          ))}
+        </div>
+      )}
+
       <div className="mb-6 grid max-w-md grid-cols-2 gap-4">
         <Card>
           <div className="text-2xl font-semibold text-ink">{euro(total)}</div>

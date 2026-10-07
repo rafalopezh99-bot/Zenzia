@@ -14,7 +14,7 @@ const PORTAL_MSG = "Aquí tienes tu área personal con tus citas, pautas y factu
 export default async function ContactoDetailPage(props: { params: Promise<{ id: string }> }) {
   const params = await props.params;
   const supabase = await createClient();
-  const { vertical, plan } = await getCurrentCompanyProfile();
+  const { vertical, plan, companyId } = await getCurrentCompanyProfile();
   const showPipeline = showsAgencyPipeline(vertical);
   const showAcademia = showsAcademiaFields(vertical);
 
@@ -53,6 +53,19 @@ export default async function ContactoDetailPage(props: { params: Promise<{ id: 
   // Sectores de consulta (nutrición, psicología, entrenador...): ficha
   // simple. Las notas de cada sesión van en la propia cita, no aquí.
   if (!showPipeline && !showAcademia) {
+    // Registro de accesos a la ficha (datos de salud, RGPD).
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (user) {
+      await supabase.from("access_log").insert({ company_id: companyId, user_id: user.id, contact_id: contact.id, action: "ver_ficha" });
+    }
+    const { data: accesses } = await supabase
+      .from("access_log")
+      .select("created_at")
+      .eq("contact_id", contact.id)
+      .order("created_at", { ascending: false })
+      .limit(5);
     const birth = contact.birth_date ? new Date(contact.birth_date) : null;
     const age = birth ? Math.floor((Date.now() - birth.getTime()) / (365.25 * 24 * 3600 * 1000)) : null;
     const actionClass =
@@ -150,6 +163,16 @@ export default async function ContactoDetailPage(props: { params: Promise<{ id: 
             </Link>
           )}
         </Card>
+
+        <div className="mt-6 flex flex-wrap items-center justify-between gap-2 text-xs text-slate">
+          <span>
+            Últimos accesos:{" "}
+            {(accesses ?? []).map((a: any) => new Date(a.created_at).toLocaleString("es-ES", { timeZone: "Europe/Madrid", dateStyle: "short", timeStyle: "short" })).join(" · ")}
+          </span>
+          <a href={`/api/export/paciente/${contact.id}`} className="font-semibold text-brand hover:underline">
+            Descargar sus datos (RGPD)
+          </a>
+        </div>
       </div>
     );
   }

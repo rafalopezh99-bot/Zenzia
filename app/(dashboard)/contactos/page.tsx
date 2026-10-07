@@ -62,6 +62,7 @@ export default async function ContactosPage(props: { searchParams: Promise<{ q?:
           .from("contacts")
           .select("id", { count: "exact", head: true })
           .gte("created_at", new Date(now.getFullYear(), now.getMonth(), 1).toISOString())
+          .is("custom_fields->>imported", null)
       : { count: null };
 
     return (
@@ -75,6 +76,9 @@ export default async function ContactosPage(props: { searchParams: Promise<{ q?:
                   {thisMonth ?? 0}/{limit} este mes
                 </span>
               )}
+              <Link href="/contactos/importar" className="text-sm font-medium text-slate hover:text-brand">
+                Importar
+              </Link>
               <Link href="/contactos/nuevo" className={primaryButtonClass}>
                 {terms.newContact}
               </Link>

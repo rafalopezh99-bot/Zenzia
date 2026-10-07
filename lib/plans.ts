@@ -105,6 +105,7 @@ export async function assertWithinLimit(plan: PlanKey, key: LimitKey) {
   let query = supabase.from(LIMIT_TABLE[key]).select("id", { count: "exact", head: true }).gte("created_at", monthStart);
   const kind = LIMIT_KIND[key];
   if (kind) query = query.eq("kind", kind);
+  if (key === "contacts") query = query.is("custom_fields->>imported", null);
   const { count } = await query;
 
   if ((count ?? 0) >= limit) {

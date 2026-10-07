@@ -18,10 +18,10 @@ export default async function PlanUsageCard({ plan, monthStart }: { plan: PlanKe
   const [usage, { count: noShows }] = await Promise.all([
     Promise.all(
       USAGE.map(async (u) => {
-        const { count } = await supabase
-          .from(u.table)
-          .select("id", { count: "exact", head: true })
-          .gte("created_at", since);
+        let query = supabase.from(u.table).select("id", { count: "exact", head: true }).gte("created_at", since);
+        // Los pacientes importados no cuentan para el límite.
+        if (u.table === "contacts") query = query.is("custom_fields->>imported", null);
+        const { count } = await query;
         return { ...u, used: count ?? 0, limit: PLAN_LIMITS[plan][u.key] ?? 0 };
       })
     ),
