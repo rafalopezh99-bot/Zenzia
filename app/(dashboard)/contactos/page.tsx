@@ -66,7 +66,7 @@ export default async function ContactosPage(props: { searchParams: Promise<{ q?:
 
     return (
       <div>
-        <PageHeader
+        <PageHeader moduleHeader
           title={terms.contacts}
           action={
             <div className="flex items-center gap-3">

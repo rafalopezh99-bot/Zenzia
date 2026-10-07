@@ -30,7 +30,7 @@ export default async function MiWebPage() {
 
   return (
     <div>
-      <PageHeader title="Mi Web" />
+      <PageHeader moduleHeader title="Mi Web" />
 
       <Card className="mb-6 flex flex-wrap items-center justify-between gap-3">
         <div className="text-sm text-slate">

@@ -8,7 +8,7 @@ import Link from "next/link";
 // redondeadas y amables, botones en píldora. Ver ".mk" en
 // app/globals.css para los tokens. El logo es el PNG real de marca.
 
-function ZenziaWordmark({ heightClass = "h-[5.5rem]" }: { heightClass?: string }) {
+function ZenziaWordmark({ heightClass = "h-9 sm:h-12" }: { heightClass?: string }) {
   return (
     <ZenziaLogo light className={heightClass} />
   );
@@ -71,7 +71,7 @@ export function MarketingFooter() {
       <div className="mx-auto max-w-6xl px-6 py-12">
         <div className="flex flex-wrap items-start justify-between gap-8">
           <div>
-            <ZenziaWordmark heightClass="h-14 sm:h-16" />
+            <ZenziaWordmark heightClass="h-10 sm:h-12" />
             <p className="mt-4 max-w-xs text-sm leading-relaxed text-mk-muted">
               CRM y desarrollo web, hechos a mano por una sola persona para que dejes de perder el tiempo.
             </p>

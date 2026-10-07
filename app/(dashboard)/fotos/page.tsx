@@ -27,7 +27,7 @@ export default async function FotosPage() {
 
   return (
     <div>
-      <PageHeader title="Fotos antes / después" />
+      <PageHeader moduleHeader title="Fotos antes / después" />
 
       <Card className="mb-6">
         <form action={uploadPhoto} encType="multipart/form-data" className="flex flex-wrap items-end gap-2 text-sm">

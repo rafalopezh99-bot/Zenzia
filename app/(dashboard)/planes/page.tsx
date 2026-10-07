@@ -23,7 +23,7 @@ export default async function PlanesPage(
 
   return (
     <div>
-      <PageHeader
+      <PageHeader moduleHeader
         eyebrow="Tu plan"
         title="Mejora tu plan"
         action={

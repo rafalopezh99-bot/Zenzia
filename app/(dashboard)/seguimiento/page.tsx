@@ -71,7 +71,7 @@ export default async function SeguimientoPage() {
 
     return (
       <div>
-        <PageHeader title="Seguimiento" />
+        <PageHeader moduleHeader title="Seguimiento" />
         <Card>
           <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-slate">
             Horas gastadas este mes <span className="normal-case text-slate/50">({monthLabel})</span>

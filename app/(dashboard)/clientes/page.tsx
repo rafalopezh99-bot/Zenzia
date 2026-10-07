@@ -17,7 +17,7 @@ export default async function ClientesPage() {
 
   return (
     <div>
-      <PageHeader
+      <PageHeader moduleHeader
         title="Clientes"
         action={
           <Link href="/clientes/nuevo" className={primaryButtonClass}>

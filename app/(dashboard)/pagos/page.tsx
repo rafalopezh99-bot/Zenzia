@@ -70,7 +70,7 @@ export default async function PagosPage(
 
   return (
     <div>
-      <PageHeader
+      <PageHeader moduleHeader
         title="Historial de pagos"
         action={
           <Link

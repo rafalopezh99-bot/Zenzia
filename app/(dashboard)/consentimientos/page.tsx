@@ -15,7 +15,7 @@ export default async function ConsentimientosPage() {
 
   return (
     <div>
-      <PageHeader title="Consentimientos" />
+      <PageHeader moduleHeader title="Consentimientos" />
 
       <Card className="mb-6">
         <form action={createConsent} className="flex flex-wrap items-end gap-2 text-sm">

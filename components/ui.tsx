@@ -9,17 +9,29 @@ import type { InputHTMLAttributes, ReactNode, SelectHTMLAttributes, ButtonHTMLAt
 // Todo el panel usa estas piezas para que cambiar el look en un sitio lo
 // cambie en todos lados.
 
+// En las páginas principales de cada módulo (moduleHeader) el título no se
+// pinta: el menú lateral ya dice dónde estás. Se deja para lectores de
+// pantalla. Las páginas internas (nuevo paciente, editar cita...) sí lo muestran.
 export function PageHeader({
-  eyebrow,
   title,
   action,
   logoUrl,
+  moduleHeader = false,
 }: {
   eyebrow?: string;
   title: string;
   action?: ReactNode;
   logoUrl?: string | null;
+  moduleHeader?: boolean;
 }) {
+  if (moduleHeader) {
+    return (
+      <div className="mb-6 flex flex-wrap items-center justify-end gap-3">
+        <h1 className="sr-only">{title}</h1>
+        {action}
+      </div>
+    );
+  }
   return (
     <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
       <div className="flex items-center gap-3">
@@ -32,8 +44,7 @@ export function PageHeader({
           />
         )}
         <div>
-          {eyebrow && <div className="mb-1 text-xs font-semibold uppercase tracking-widest text-brand">{eyebrow}</div>}
-          <h1 className="text-2xl font-black uppercase tracking-tight text-ink">{title}</h1>
+          <h1 className="text-xl font-black uppercase tracking-tight text-ink sm:text-2xl">{title}</h1>
         </div>
       </div>
       {action}

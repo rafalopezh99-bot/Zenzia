@@ -43,7 +43,7 @@ export default async function FacturacionPage(props: { searchParams: Promise<{ t
 
   return (
     <div>
-      <PageHeader
+      <PageHeader moduleHeader
         title="Facturación"
         action={
           <div className="flex flex-wrap gap-2">

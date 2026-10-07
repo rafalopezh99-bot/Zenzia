@@ -67,7 +67,7 @@ export default async function NotificacionesPage() {
 
   return (
     <div>
-      <PageHeader eyebrow={nuevas > 0 ? `${nuevas} sin leer` : "Al día"} title="Notificaciones" />
+      <PageHeader moduleHeader eyebrow={nuevas > 0 ? `${nuevas} sin leer` : "Al día"} title="Notificaciones" />
 
       <div className={tableWrap}>
         <table className={tableEl}>

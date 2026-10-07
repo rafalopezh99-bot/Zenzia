@@ -229,7 +229,7 @@ export default async function CitasPage(
 
   return (
     <div>
-      <PageHeader
+      <PageHeader moduleHeader
         title={terms.agendaLabel}
         action={<AgendaViewSwitch current={isDay ? "day" : "week"} newLabel={terms.newAppointment} />}
       />

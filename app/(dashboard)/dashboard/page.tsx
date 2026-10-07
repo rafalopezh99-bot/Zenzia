@@ -232,17 +232,34 @@ export default async function DashboardPage() {
 
   return (
     <div>
-      <PageHeader
-        eyebrow="Dashboard"
-        title={fullName ? `¡Hola, ${fullName}!` : "Panel de control"}
-        action={
-          <div className="flex items-center gap-3">
-            <LiveClock />
-            <DashboardWidgetsEditor catalog={widgetCatalog} enabledKeys={Array.from(enabledWidgets)} />
+      {/* Cabecera del dashboard: logo del negocio + saludo + fecha; a la
+          derecha el reloj (solo escritorio) y "Editar panel". */}
+      <div className="mb-6 flex items-center justify-between gap-3 sm:mb-8">
+        <div className="flex min-w-0 items-center gap-3">
+          {logoUrl && (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={logoUrl}
+              alt=""
+              className="h-10 w-10 shrink-0 rounded-xl border border-line bg-surface object-contain p-1 sm:h-14 sm:w-14"
+            />
+          )}
+          <div className="min-w-0">
+            <h1 className="truncate text-xl font-bold tracking-tight text-ink sm:text-3xl">
+              {fullName ? `¡Hola, ${fullName}!` : "¡Hola!"}
+            </h1>
+            <p className="text-xs capitalize text-slate sm:hidden">
+              {new Date().toLocaleDateString("es-ES", { timeZone: "Europe/Madrid", weekday: "long", day: "numeric", month: "long" })}
+            </p>
           </div>
-        }
-        logoUrl={logoUrl}
-      />
+        </div>
+        <div className="flex shrink-0 items-center gap-3">
+          <div className="hidden sm:block">
+            <LiveClock />
+          </div>
+          <DashboardWidgetsEditor catalog={widgetCatalog} enabledKeys={Array.from(enabledWidgets)} />
+        </div>
+      </div>
 
       <PlanUsageCard plan={plan} monthStart={monthStart} />
       {planHas(plan, "winback") && <InactiveClientsCard />}

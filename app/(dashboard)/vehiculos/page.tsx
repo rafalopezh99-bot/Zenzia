@@ -16,7 +16,7 @@ export default async function VehiculosPage() {
 
   return (
     <div>
-      <PageHeader title="Vehículos" />
+      <PageHeader moduleHeader title="Vehículos" />
 
       <Card className="mb-6">
         <form action={createVehicle} className="flex flex-wrap items-end gap-2 text-sm">

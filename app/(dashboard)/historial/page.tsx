@@ -13,7 +13,7 @@ export default async function HistorialPage() {
 
   return (
     <div>
-      <PageHeader title="Historial" />
+      <PageHeader moduleHeader title="Historial" />
       <Card>
         <ul className="space-y-2 text-sm">
           {(activities ?? []).map((a: any) => (

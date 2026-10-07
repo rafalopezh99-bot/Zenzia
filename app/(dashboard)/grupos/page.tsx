@@ -33,7 +33,7 @@ export default async function GruposPage() {
 
   return (
     <div>
-      <PageHeader title="Grupos" />
+      <PageHeader moduleHeader title="Grupos" />
 
       {orderedCursos.length === 0 && (
         <p className="text-sm text-slate/70">Todavía no hay alumnos dados de alta.</p>

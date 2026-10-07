@@ -40,7 +40,7 @@ export default async function BonosPage() {
 
   return (
     <div>
-      <PageHeader title="Bonos / paquetes de sesiones" />
+      <PageHeader moduleHeader title="Bonos / paquetes de sesiones" />
 
       {showAcademia && (
         <Card className="mb-6">

@@ -43,7 +43,7 @@ export default async function SolicitudesPage() {
 
   return (
     <div>
-      <PageHeader
+      <PageHeader moduleHeader
         eyebrow={pendientes.length > 0 ? `${pendientes.length} pendientes` : "Al día"}
         title="Solicitudes de registro"
       />

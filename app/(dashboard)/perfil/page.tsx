@@ -45,7 +45,7 @@ export default async function PerfilPage(props: { searchParams: Promise<{ tab?: 
 
   return (
     <div className="max-w-2xl">
-      <PageHeader
+      <PageHeader moduleHeader
         title="Perfil del negocio"
         action={
           <form action={signOut}>

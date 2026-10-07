@@ -31,7 +31,7 @@ export default async function ProveedoresPage() {
 
   return (
     <div>
-      <PageHeader title="Proveedores" />
+      <PageHeader moduleHeader title="Proveedores" />
 
       <Card className="mb-6">
         <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-slate">Nuevo proveedor</h2>
