@@ -33,6 +33,13 @@ export default function PrivacidadPage() {
         Rafael López Hidalgo (Zenzia) actúa como encargado del tratamiento: aloja y procesa esos datos únicamente
         para prestar el servicio, siguiendo tus instrucciones, y no los usa para ningún otro fin.
       </p>
+      <p>
+        Datos de salud: si eres profesional sanitario o de bienestar (fisioterapia, psicología, nutrición...) y
+        registras en Zenzia datos de salud de tus pacientes (notas de sesión, historial, evolución), estos son
+        categorías especiales de datos (art. 9 RGPD). Tú eres el responsable de recabar la base legal y el
+        consentimiento informado necesarios; Zenzia los trata solo como encargado, con acceso restringido a tu
+        cuenta y cifrado en tránsito y en reposo por parte de nuestros proveedores.
+      </p>
 
       <LegalHeading>3. Legitimación</LegalHeading>
       <p>
@@ -53,7 +60,9 @@ export default function PrivacidadPage() {
       <p>
         No se ceden datos a terceros salvo obligación legal. Para el funcionamiento del sitio y de la aplicación se
         utilizan proveedores de infraestructura tecnológica que actúan como encargados del tratamiento conforme al
-        RGPD, en concreto Supabase (base de datos y autenticación) y Netlify (alojamiento web).
+        RGPD, en concreto Supabase (base de datos y autenticación), Netlify (alojamiento web), Stripe (cobro de
+        suscripciones), Resend (envío de emails), Verifacti (registro de facturas en VERI*FACTU ante la Agencia
+        Tributaria) y, si se activa, Meta (WhatsApp Business) para los recordatorios.
       </p>
 
       <LegalHeading>6. Tus derechos</LegalHeading>

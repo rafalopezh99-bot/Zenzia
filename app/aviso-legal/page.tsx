@@ -18,7 +18,7 @@ export default function AvisoLegalPage() {
         <li>Nombre comercial: Zenzia</li>
         <li>Domicilio: Sevilla, España</li>
         <li>Email de contacto: zenzia.co@gmail.com</li>
-        <li>Actividad: desarrollo de software y páginas web (Zenzia, CRM de gestión para pymes y autónomos)</li>
+        <li>Actividad: desarrollo de software y páginas web (Zenzia, CRM de gestión para autónomos y profesionales)</li>
       </ul>
 
       <LegalHeading>2. Objeto</LegalHeading>
