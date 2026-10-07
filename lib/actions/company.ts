@@ -63,6 +63,7 @@ export async function updateCompanyProfile(formData: FormData) {
   const logo = formData.get("logo") as File | null;
   if (logo && logo.size > 0) {
     if (!logo.type.startsWith("image/")) throw new Error("El logo debe ser una imagen");
+    if (logo.size > 4 * 1024 * 1024) throw new Error("El logo no puede pesar más de 4 MB");
     const path = `${companyId}/logo`;
     const { error: uploadError } = await supabase.storage
       .from("logos")
