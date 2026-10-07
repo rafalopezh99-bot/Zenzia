@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { notFound } from "next/navigation";
-import { updateAppointment, deleteAppointment } from "@/lib/actions/appointments";
+import { updateAppointment, deleteAppointment, setAppointmentStatus } from "@/lib/actions/appointments";
+import Link from "next/link";
 import { Card, PageHeader, Input, Select, Textarea, PrimaryButton, GhostButton } from "@/components/ui";
 import { APPOINTMENT_STATUS_LABEL } from "@/lib/appointmentStatus";
 import { getCurrentCompanyProfile } from "@/lib/company";
@@ -9,7 +10,7 @@ import { toAppLocalInput } from "@/lib/timezone";
 
 export default async function EditarCitaPage({ params }: { params: { id: string } }) {
   const supabase = createClient();
-  const { vertical } = await getCurrentCompanyProfile();
+  const { vertical, plan } = await getCurrentCompanyProfile();
   const terms = getTerminology(vertical);
 
   // Ninguna depende de la otra, así que se piden a la vez en vez de una
@@ -42,6 +43,32 @@ export default async function EditarCitaPage({ params }: { params: { id: string 
   return (
     <div>
       <PageHeader title={`Editar ${terms.appointment.toLowerCase()}`} />
+      <Card className="mb-4 max-w-sm">
+        <div className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate">Asistencia</div>
+        <div className="flex gap-2">
+          {(["completed", "no_show"] as const).map((st) => (
+            <form key={st} action={setAppointmentStatus.bind(null, appointment.id, st)} className="flex-1">
+              <button
+                type="submit"
+                className={`w-full rounded-xl border px-3 py-2 text-sm font-semibold transition ${
+                  appointment.status === st
+                    ? st === "completed"
+                      ? "border-green-600 bg-green-600 text-white"
+                      : "border-slate bg-slate text-white"
+                    : "border-line text-ink hover:border-brand"
+                }`}
+              >
+                {st === "completed" ? "✓ Asistió" : "✗ No asistió"}
+              </button>
+            </form>
+          ))}
+        </div>
+        {plan === "start" && (
+          <Link href="/planes" className="mt-3 block text-xs text-slate hover:text-brand">
+            🔒 Enviar recordatorio automático · disponible en Smart
+          </Link>
+        )}
+      </Card>
       <Card className="max-w-sm">
         <form action={updateThisAppointment} className="space-y-3">
           <Select name="contact_id" required defaultValue={appointment.contact_id} className="w-full">

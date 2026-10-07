@@ -25,9 +25,12 @@ const TAB_INACTIVE = "border border-line text-slate hover:border-brand hover:tex
 export default function NuevaClaseForm({
   contacts,
   contactLabel,
+  defaultStartsAt,
 }: {
   contacts: { id: string; full_name: string; curso: string | null }[];
   contactLabel: string;
+  // Fecha/hora ya rellena al venir de pulsar un hueco libre de la agenda.
+  defaultStartsAt?: string;
 }) {
   const [mode, setMode] = useState<"puntual" | "recurrente">("puntual");
 
@@ -69,7 +72,7 @@ export default function NuevaClaseForm({
       {mode === "puntual" ? (
         <form action={createAppointment} className="space-y-3">
           {contactSelect}
-          <Input name="starts_at" type="datetime-local" required className="w-full" />
+          <Input name="starts_at" type="datetime-local" required defaultValue={defaultStartsAt} className="w-full" />
           <Input
             name="duration_hours"
             type="number"

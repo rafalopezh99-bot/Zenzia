@@ -4,7 +4,7 @@ import { getCurrentCompanyProfile } from "@/lib/company";
 import { getTerminology } from "@/lib/terminology";
 import NuevaClaseForm from "@/components/NuevaClaseForm";
 
-export default async function NuevaCitaPage() {
+export default async function NuevaCitaPage({ searchParams }: { searchParams: { at?: string } }) {
   const supabase = createClient();
   const { vertical } = await getCurrentCompanyProfile();
   const terms = getTerminology(vertical);
@@ -22,7 +22,11 @@ export default async function NuevaCitaPage() {
   return (
     <div>
       <PageHeader title={terms.newAppointment} />
-      <NuevaClaseForm contacts={contactOptions} contactLabel={terms.contact} />
+      <NuevaClaseForm
+        contacts={contactOptions}
+        contactLabel={terms.contact}
+        defaultStartsAt={/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(searchParams.at ?? "") ? searchParams.at : undefined}
+      />
     </div>
   );
 }

@@ -145,3 +145,14 @@ export async function createClassSchedule(formData: FormData) {
   revalidatePath("/citas");
   redirect("/citas");
 }
+
+// Botones "Asistió" / "No asistió" de la cita: un clic, sin pasar por el
+// formulario completo. Las ausencias alimentan el aviso del dashboard.
+export async function setAppointmentStatus(appointmentId: string, status: "completed" | "no_show") {
+  const supabase = createClient();
+  const { error } = await supabase.from("appointments").update({ status }).eq("id", appointmentId);
+  if (error) throw new Error(error.message);
+  revalidatePath("/citas");
+  revalidatePath(`/citas/${appointmentId}/editar`);
+  revalidatePath("/dashboard");
+}

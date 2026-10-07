@@ -288,8 +288,15 @@ export default async function CitasPage({
                 posicionados por encima, con la altura de su duración real. */}
             {days.map((d, dayIdx) => (
               <div key={dayIdx} className="relative border-l border-line" style={{ height: COLUMN_HEIGHT }}>
+                {/* Cada hora es un hueco que lleva a crear una cita a esa hora. */}
                 {HOURS.map((hour) => (
-                  <div key={hour} className="border-t border-line" style={{ height: ROW_HEIGHT }} />
+                  <Link
+                    key={hour}
+                    href={`/citas/nueva?at=${formatWeekParam(d)}T${String(hour).padStart(2, "0")}:00`}
+                    title="Nueva cita a esta hora"
+                    className="block border-t border-line transition hover:bg-paper-deep"
+                    style={{ height: ROW_HEIGHT }}
+                  />
                 ))}
                 <NowLine dateStr={formatWeekParam(d)} startHour={START_HOUR} endHour={END_HOUR} rowHeight={ROW_HEIGHT} />
                 {byDay[dayIdx].map((a) => {
