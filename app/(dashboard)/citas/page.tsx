@@ -1,12 +1,15 @@
 import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
-import { Card, PageHeader, primaryButtonClass } from "@/components/ui";
+import { Card, PageHeader } from "@/components/ui";
+import AgendaViewSwitch from "@/components/AgendaViewSwitch";
 import { getCurrentCompanyProfile } from "@/lib/company";
 import { getTerminology, showsAcademiaFields } from "@/lib/terminology";
 import { appLocalParts, formatAppTime } from "@/lib/timezone";
 import NowLine from "@/components/NowLine";
 
-const WEEKDAY_NAMES = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes"];
+const WEEKDAY_NAMES = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"];
+// Semana de lunes a sábado: muchos autónomos (entrenadores, peluquerías...) trabajan el sábado.
+const WEEK_DAYS = 6;
 
 // Un color distinto por alumno (no por estado): antes, dos clases a la
 // misma hora ocupaban el mismo hueco y solo se veía el nombre de una. Ahora
@@ -126,18 +129,31 @@ const COLUMN_HEIGHT = ROW_HEIGHT * HOURS.length;
 // bloque posicionado y con la altura de su duración real (una clase de
 // 16:00 a 17:30 ocupa toda esa franja, no solo la hora de inicio), y
 // enlaza a /citas/[id]/editar.
-export default async function CitasPage({ searchParams }: { searchParams: { week?: string } }) {
+// Con ?view=day muestra un solo día (?day=YYYY-MM-DD) con la misma rejilla.
+export default async function CitasPage({
+  searchParams,
+}: {
+  searchParams: { week?: string; view?: string; day?: string };
+}) {
   const { vertical } = await getCurrentCompanyProfile();
   const terms = getTerminology(vertical);
+  const isDay = searchParams.view === "day";
   const monday = parseWeekParam(searchParams.week);
-  const days = Array.from({ length: 5 }, (_, i) => {
-    const d = new Date(monday);
+  const dayStart = (() => {
+    const d = searchParams.day && /^\d{4}-\d{2}-\d{2}$/.test(searchParams.day) ? new Date(`${searchParams.day}T00:00:00`) : new Date();
+    d.setHours(0, 0, 0, 0);
+    return isNaN(d.getTime()) ? new Date(new Date().setHours(0, 0, 0, 0)) : d;
+  })();
+  const firstDay = isDay ? dayStart : monday;
+  const days = Array.from({ length: isDay ? 1 : WEEK_DAYS }, (_, i) => {
+    const d = new Date(firstDay);
     d.setDate(d.getDate() + i);
     return d;
   });
+  const dayKeys = days.map(formatWeekParam);
 
-  const rangeEnd = new Date(monday);
-  rangeEnd.setDate(rangeEnd.getDate() + 7);
+  const rangeEnd = new Date(firstDay);
+  rangeEnd.setDate(rangeEnd.getDate() + (isDay ? 1 : 7));
 
   const supabase = createClient();
   if (showsAcademiaFields(vertical)) {
@@ -146,28 +162,24 @@ export default async function CitasPage({ searchParams }: { searchParams: { week
   const { data: appointments } = await supabase
     .from("appointments")
     .select("id, starts_at, ends_at, status, contacts(id, full_name)")
-    .gte("starts_at", monday.toISOString())
+    .gte("starts_at", firstDay.toISOString())
     .lt("starts_at", rangeEnd.toISOString())
     .order("starts_at", { ascending: true });
 
   // Una lista por día (0=lunes..4=viernes) con la posición y altura ya
   // calculadas en píxeles a partir de starts_at/ends_at. Las citas fuera
   // de 08:00–20:00 no se muestran en esta vista.
-  const byDay: { id: string; starts_at: string; status: string; contacts: any; top: number; height: number }[][] = [
-    [],
-    [],
-    [],
-    [],
-    [],
-  ];
+  const byDay: { id: string; starts_at: string; status: string; contacts: any; top: number; height: number }[][] =
+    days.map(() => []);
   const visibleMinutes = (END_HOUR - START_HOUR) * 60;
   (appointments ?? []).forEach((a: any) => {
     // Posición y día calculados en hora de Sevilla/Madrid, no en la del
     // servidor (Netlify corre en UTC).
     const start = appLocalParts(a.starts_at);
     const end = appLocalParts(a.ends_at);
-    const dayIdx = (start.weekday + 6) % 7;
-    if (dayIdx > 4) return; // fin de semana no se muestra en esta vista
+    const pad = (n: number) => String(n).padStart(2, "0");
+    const dayIdx = dayKeys.indexOf(`${start.year}-${pad(start.month)}-${pad(start.day)}`);
+    if (dayIdx < 0) return; // día fuera de la vista (p. ej. domingo)
 
     const startMinutes = (start.hour - START_HOUR) * 60 + start.minute;
     const endMinutes = (end.hour - START_HOUR) * 60 + end.minute;
@@ -188,59 +200,51 @@ export default async function CitasPage({ searchParams }: { searchParams: { week
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
-  const prevWeek = new Date(monday);
-  prevWeek.setDate(prevWeek.getDate() - 7);
-  const nextWeek = new Date(monday);
-  nextWeek.setDate(nextWeek.getDate() + 7);
+  const step = isDay ? 1 : 7;
+  const prev = new Date(firstDay);
+  prev.setDate(prev.getDate() - step);
+  const next = new Date(firstDay);
+  next.setDate(next.getDate() + step);
+  const hrefFor = (d: Date) => (isDay ? `/citas?view=day&day=${formatWeekParam(d)}` : `/citas?week=${formatWeekParam(d)}`);
 
   const navLinkClass =
     "rounded-full border border-line px-3 py-1.5 text-sm text-slate transition hover:border-brand hover:text-brand";
 
-  const rangeLabel = `${days[0].toLocaleDateString("es-ES", { day: "numeric", month: "short" })} – ${days[4].toLocaleDateString(
-    "es-ES",
-    { day: "numeric", month: "short" }
-  )}`;
+  const rangeLabel = isDay
+    ? days[0].toLocaleDateString("es-ES", { weekday: "long", day: "numeric", month: "long" })
+    : `${days[0].toLocaleDateString("es-ES", { day: "numeric", month: "short" })} – ${days[days.length - 1].toLocaleDateString(
+        "es-ES",
+        { day: "numeric", month: "short" }
+      )}`;
 
   return (
     <div>
       <PageHeader
         title={terms.agendaLabel}
-        action={
-          <div className="flex gap-2">
-            <Link href="/citas/calendario" className={primaryButtonClass}>
-              Ver mes
-            </Link>
-            <Link
-              href="/citas/lista"
-              className="inline-block rounded-full border border-line px-5 py-2.5 text-sm font-medium text-ink transition hover:border-brand hover:text-brand"
-            >
-              Ver lista
-            </Link>
-            <Link href="/citas/nueva" className={primaryButtonClass}>
-              {terms.newAppointment}
-            </Link>
-          </div>
-        }
+        action={<AgendaViewSwitch current={isDay ? "day" : "week"} newLabel={terms.newAppointment} />}
       />
 
       <Card>
         <div className="mb-4 flex items-center justify-between">
-          <Link href={`/citas?week=${formatWeekParam(prevWeek)}`} className={navLinkClass}>
-            ← Semana anterior
+          <Link href={hrefFor(prev)} className={navLinkClass}>
+            ← {isDay ? "Anterior" : "Semana anterior"}
           </Link>
           <div className="flex items-center gap-3">
             <div className="text-sm font-semibold text-ink">{rangeLabel}</div>
-            <Link href="/citas" className="text-xs text-brand hover:underline">
+            <Link href={isDay ? "/citas?view=day" : "/citas"} className="text-xs text-brand hover:underline">
               Hoy
             </Link>
           </div>
-          <Link href={`/citas?week=${formatWeekParam(nextWeek)}`} className={navLinkClass}>
-            Semana siguiente →
+          <Link href={hrefFor(next)} className={navLinkClass}>
+            {isDay ? "Siguiente" : "Semana siguiente"} →
           </Link>
         </div>
 
         <div className="overflow-x-auto">
-          <div className="grid min-w-[720px] grid-cols-[56px_repeat(5,1fr)]">
+          <div
+            className={`grid ${isDay ? "" : "min-w-[820px]"}`}
+            style={{ gridTemplateColumns: `56px repeat(${days.length}, minmax(0, 1fr))` }}
+          >
             {/* Cabecera */}
             <div />
             {days.map((d) => {

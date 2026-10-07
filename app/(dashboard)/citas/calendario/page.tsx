@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
+import AgendaViewSwitch from "@/components/AgendaViewSwitch";
 import { Card, PageHeader, primaryButtonClass } from "@/components/ui";
 import { APPOINTMENT_STATUS_TONE } from "@/lib/appointmentStatus";
 import { appLocalParts, formatAppTime } from "@/lib/timezone";
@@ -80,19 +81,7 @@ export default async function CalendarioPage({ searchParams }: { searchParams: {
     <div>
       <PageHeader
         title="Calendario"
-        action={
-          <div className="flex gap-2">
-            <Link
-              href="/citas"
-              className="inline-block rounded-full border border-line px-5 py-2.5 text-sm font-medium text-ink transition hover:border-brand hover:text-brand"
-            >
-              Ver semana
-            </Link>
-            <Link href="/citas/lista" className={primaryButtonClass}>
-              Ver como lista
-            </Link>
-          </div>
-        }
+        action={<AgendaViewSwitch current="month" newLabel="Nueva cita" />}
       />
 
       <Card>
