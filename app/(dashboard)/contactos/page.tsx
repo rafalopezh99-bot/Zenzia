@@ -3,7 +3,8 @@ import Link from "next/link";
 import { PageHeader, primaryButtonClass, tableWrap, tableEl, theadEl, thEl, tdEl, trEl } from "@/components/ui";
 import { getStage, CHANNEL_LABEL } from "@/lib/pipeline";
 import { getCurrentCompanyProfile } from "@/lib/company";
-import { getTerminology, showsAgencyPipeline, showsAcademiaFields } from "@/lib/terminology";
+import { getTerminology, showsAgencyPipeline, showsAcademiaFields, isConsultaVertical } from "@/lib/terminology";
+import { PLAN_LIMITS } from "@/lib/plans";
 import { updateContactStageInline, deleteContact, unenrollContact } from "@/lib/actions/contacts";
 import StageSelect from "@/components/StageSelect";
 import DeleteContactButton from "@/components/DeleteContactButton";
@@ -28,9 +29,9 @@ function EmailIcon() {
   );
 }
 
-export default async function ContactosPage() {
+export default async function ContactosPage({ searchParams }: { searchParams: { q?: string } }) {
   const supabase = createClient();
-  const { vertical } = await getCurrentCompanyProfile();
+  const { vertical, plan } = await getCurrentCompanyProfile();
   const terms = getTerminology(vertical);
   // El pipeline de ventas (etapa, tipo de negocio, enlace de demo) es una
   // herramienta de RL Digital Studios para captar clientes nuevos — no
@@ -38,11 +39,124 @@ export default async function ContactosPage() {
   const showPipeline = showsAgencyPipeline(vertical);
   const showAcademia = showsAcademiaFields(vertical);
 
-  const { data: contacts } = await supabase
+  const consulta = isConsultaVertical(vertical);
+  // Buscador por nombre o teléfono (solo sectores de consulta). Se quitan
+  // los caracteres que romperían el filtro .or() de Supabase.
+  const q = (searchParams.q ?? "").replace(/[,()%*]/g, " ").trim();
+
+  let query = supabase
     .from("contacts")
     .select("id, full_name, status, custom_fields, contact_number, created_at, phone, email")
     .eq("status", "active")
     .order("created_at", { ascending: false });
+  if (consulta && q) query = query.or(`full_name.ilike.%${q}%,phone.ilike.%${q}%`);
+  const { data: contacts } = await query;
+
+  if (consulta) {
+    // Contador del límite mensual del plan junto al botón de alta.
+    const limit = PLAN_LIMITS[plan].contacts;
+    const now = new Date();
+    const { count: thisMonth } = limit
+      ? await supabase
+          .from("contacts")
+          .select("id", { count: "exact", head: true })
+          .gte("created_at", new Date(now.getFullYear(), now.getMonth(), 1).toISOString())
+      : { count: null };
+
+    return (
+      <div>
+        <PageHeader
+          title={terms.contacts}
+          action={
+            <div className="flex items-center gap-3">
+              {limit !== null && (
+                <span className="text-xs text-slate">
+                  {thisMonth ?? 0}/{limit} este mes
+                </span>
+              )}
+              <Link href="/contactos/nuevo" className={primaryButtonClass}>
+                {terms.newContact}
+              </Link>
+            </div>
+          }
+        />
+
+        <form className="mb-4 max-w-sm">
+          <input
+            name="q"
+            defaultValue={searchParams.q ?? ""}
+            placeholder="Buscar por nombre o teléfono"
+            className="w-full rounded-xl border border-line bg-surface px-3 py-2 text-sm text-ink outline-none focus:border-brand"
+          />
+        </form>
+
+        <div className={tableWrap}>
+          <table className={tableEl}>
+            <thead className={theadEl}>
+              <tr>
+                <th className={thEl}>Nombre</th>
+                <th className={thEl}>Teléfono</th>
+                <th className={`${thEl} hidden sm:table-cell`}>Dirección</th>
+                <th className={thEl}>WhatsApp</th>
+                <th className={thEl}></th>
+              </tr>
+            </thead>
+            <tbody>
+              {(contacts ?? []).map((c: any) => {
+                const whatsappDigits: string = (c.phone ?? "").replace(/[^\d]/g, "");
+                return (
+                  <tr key={c.id} className={trEl}>
+                    <td className={tdEl}>
+                      <Link href={`/contactos/${c.id}`} className="font-medium text-ink hover:text-brand">
+                        {c.full_name}
+                      </Link>
+                    </td>
+                    <td className={tdEl}>
+                      {c.phone ? (
+                        <a href={`tel:${c.phone}`} className="text-ink hover:text-brand">
+                          {c.phone}
+                        </a>
+                      ) : (
+                        <span className="text-slate/50">—</span>
+                      )}
+                    </td>
+                    <td className={`${tdEl} hidden sm:table-cell`}>
+                      {c.custom_fields?.billing_address || <span className="text-slate/50">—</span>}
+                    </td>
+                    <td className={tdEl}>
+                      {whatsappDigits ? (
+                        <a
+                          href={`https://wa.me/${whatsappDigits}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          title="WhatsApp"
+                          className={contactIconLinkClass}
+                        >
+                          <WhatsAppIcon />
+                        </a>
+                      ) : (
+                        <span className="text-slate/50">—</span>
+                      )}
+                    </td>
+                    <td className={tdEl}>
+                      <DeleteContactButton contactId={c.id} contactName={c.full_name} deleteContact={deleteContact} />
+                    </td>
+                  </tr>
+                );
+              })}
+              {(contacts ?? []).length === 0 && (
+                <tr>
+                  <td colSpan={5} className={`${tdEl} text-center text-slate`}>
+                    {q ? "Ningún cliente coincide con la búsqueda." : "Todavía no tienes clientes."}
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div>
