@@ -27,6 +27,8 @@ export interface BillingDocInput {
   notes?: string | null;
   statusLabel?: string | null;
   logoUrl?: string | null;
+  // QR de VeriFactu (PNG en base64) si la factura está registrada.
+  verifactuQr?: string | null;
 }
 
 const euro = (n: number) => `${n.toLocaleString("es-ES", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €`;
@@ -175,6 +177,17 @@ export async function buildBillingPdf(input: BillingDocInput): Promise<Uint8Arra
       y -= 12;
     }
     y -= 4;
+  }
+
+  // VeriFactu: QR + leyenda obligatoria en la cabecera de la primera página.
+  if (input.verifactuQr) {
+    try {
+      const qr = await pdf.embedPng(Buffer.from(input.verifactuQr, "base64"));
+      const first = pdf.getPage(0);
+      first.drawImage(qr, { x: W / 2 - 35, y: H - M - 70, width: 70, height: 70 });
+      const legend = "VERI*FACTU";
+      first.drawText(legend, { x: W / 2 - bold.widthOfTextAtSize(legend, 8) / 2, y: H - M - 82, size: 8, font: bold, color: ink });
+    } catch {}
   }
 
   page.drawText("Generado con Zenzia", { x: M, y: M - 20, size: 7, font, color: slate });

@@ -1,6 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { markInvoicePaid, deleteInvoice } from "@/lib/actions/invoices";
-import { convertQuote, deleteQuote } from "@/lib/actions/documents";
+import { convertQuote, deleteQuote, annulInvoice, retryVerifactu } from "@/lib/actions/documents";
 import { Card, PageHeader, Select, GhostButton, ghostLinkClass, primaryButtonClass, Badge, tableWrap, tableEl, theadEl, thEl, tdEl, trEl } from "@/components/ui";
 import { PAYMENT_METHOD_LABEL, PAYMENT_METHODS } from "@/lib/paymentMethod";
 import DeleteInvoiceButton from "@/components/DeleteInvoiceButton";
@@ -26,7 +26,7 @@ export default async function FacturacionPage({ searchParams }: { searchParams: 
   const { data: rows } = isInvoices
     ? await supabase
         .from("invoices")
-        .select("id, doc_number, issue_date, concept, amount, status, due_date, contacts(full_name)")
+        .select("id, doc_number, issue_date, concept, amount, status, due_date, verifactu_status, rectifies_id, contacts(full_name)")
         .order("created_at", { ascending: false })
     : await supabase
         .from("quotes")
@@ -36,7 +36,7 @@ export default async function FacturacionPage({ searchParams }: { searchParams: 
 
   const list = (rows ?? []) as any[];
   const total = list.reduce((s, i) => s + Number(i.amount), 0);
-  const pendiente = list.filter((i) => i.status === "pendiente").reduce((s, i) => s + Number(i.amount), 0);
+  const pendiente = list.filter((i) => i.status === "pendiente" && !i.rectifies_id).reduce((s, i) => s + Number(i.amount), 0);
 
   return (
     <div>
@@ -109,7 +109,11 @@ export default async function FacturacionPage({ searchParams }: { searchParams: 
                   <td className={`${tdEl} hidden sm:table-cell`}>{i.concept ?? i.title}</td>
                   <td className={`${tdEl} whitespace-nowrap`}>{euro(i.amount)}</td>
                   <td className={tdEl}>
-                    {i.status === "pagada" ? (
+                    {i.status === "anulada" ? (
+                      <Badge tone="neutral">Anulada</Badge>
+                    ) : i.rectifies_id ? (
+                      <Badge tone="neutral">Rectificativa</Badge>
+                    ) : i.status === "pagada" ? (
                       <Badge tone="green">Pagada</Badge>
                     ) : i.status === "aceptado" ? (
                       <Badge tone="green">Aceptado</Badge>
@@ -146,7 +150,24 @@ export default async function FacturacionPage({ searchParams }: { searchParams: 
                         <GhostButton>→ Factura</GhostButton>
                       </form>
                     )}
-                    {isInvoices ? (
+                    {isInvoices && i.verifactu_status === "enviada" && (
+                      <span className="text-xs font-semibold text-green-700" title="Registrada en VeriFactu">
+                        VERI*FACTU ✓
+                      </span>
+                    )}
+                    {isInvoices && i.verifactu_status === "error" && (
+                      <form action={retryVerifactu.bind(null, i.id)}>
+                        <GhostButton>⚠ Reenviar a VeriFactu</GhostButton>
+                      </form>
+                    )}
+                    {isInvoices && i.verifactu_status !== "no_enviada" ? (
+                      i.status !== "anulada" &&
+                      !i.rectifies_id && (
+                        <form action={annulInvoice.bind(null, i.id)}>
+                          <GhostButton>Anular</GhostButton>
+                        </form>
+                      )
+                    ) : isInvoices ? (
                       <DeleteInvoiceButton
                         invoiceId={i.id}
                         invoiceLabel={`${i.doc_number ?? i.concept} · ${i.contacts?.full_name ?? ""}`}

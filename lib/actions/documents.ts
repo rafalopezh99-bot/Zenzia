@@ -6,6 +6,7 @@ import { redirect } from "next/navigation";
 import { getCurrentCompanyBillingInfo, getCurrentCompanyProfile } from "@/lib/company";
 import { assertWithinLimit } from "@/lib/plans";
 import { computeTotals, parseLines, type DocKind, type DocLine } from "@/lib/documents";
+import { sendInvoiceToVerifactu } from "@/lib/verifactu";
 
 // Copia de los datos del emisor y del cliente en el momento de emitir: el
 // PDF sale siempre igual aunque luego se edite el perfil o la ficha.
@@ -50,10 +51,13 @@ async function insertDocument(
   contactId: string,
   lines: DocLine[],
   irpfRate: number,
-  extra: { issue_date?: string; notes?: string | null; from_quote_id?: string | null }
+  extra: { issue_date?: string; notes?: string | null; from_quote_id?: string | null; rectifies_id?: string }
 ) {
   const { plan } = await getCurrentCompanyProfile();
-  await assertWithinLimit(plan, kind === "factura" ? "invoices" : kind === "proforma" ? "proformas" : "quotes");
+  // Las rectificativas (anulaciones) no cuentan para el límite del plan.
+  if (!extra.rectifies_id) {
+    await assertWithinLimit(plan, kind === "factura" ? "invoices" : kind === "proforma" ? "proformas" : "quotes");
+  }
   if (!lines.length) throw new Error("Añade al menos una línea");
 
   const supabase = createClient();
@@ -67,11 +71,20 @@ async function insertDocument(
     from_quote_id: extra.from_quote_id ?? null,
   };
 
-  const { error } =
-    kind === "factura"
-      ? await supabase.from("invoices").insert({ ...base, concept: summary })
-      : await supabase.from("quotes").insert({ ...base, kind, title: summary });
+  if (kind !== "factura") {
+    const { error } = await supabase.from("quotes").insert({ ...base, kind, title: summary });
+    if (error) throw new Error(error.message);
+    return;
+  }
+
+  const { data: inv, error } = await supabase
+    .from("invoices")
+    .insert({ ...base, concept: summary, ...(extra.rectifies_id ? { rectifies_id: extra.rectifies_id } : {}) })
+    .select("id")
+    .single();
   if (error) throw new Error(error.message);
+  // Las facturas se envían a VeriFactu al emitirse (si está configurado).
+  await sendInvoiceToVerifactu(inv.id);
 }
 
 export async function createDocument(formData: FormData) {
@@ -129,4 +142,32 @@ export async function deleteQuote(quoteId: string) {
   if (error) throw new Error(error.message);
   revalidatePath("/facturacion");
   revalidatePath("/dashboard");
+}
+
+// Anular una factura ya emitida: no se borra (VeriFactu no lo permite), se
+// emite una rectificativa (serie R) con los mismos importes en negativo.
+export async function annulInvoice(invoiceId: string) {
+  const supabase = createClient();
+  const { data: inv } = await supabase
+    .from("invoices")
+    .select("contact_id, lines, irpf_rate, doc_number, status")
+    .eq("id", invoiceId)
+    .single();
+  if (!inv) throw new Error("Factura no encontrada");
+  if (inv.status === "anulada") throw new Error("La factura ya está anulada");
+
+  const lines = parseLines(inv.lines).map((l) => ({ ...l, price: -l.price }));
+  await insertDocument("factura", inv.contact_id, lines, Number(inv.irpf_rate) || 0, {
+    notes: `Rectifica y anula la factura ${inv.doc_number}.`,
+    rectifies_id: invoiceId,
+  });
+  await supabase.from("invoices").update({ status: "anulada" }).eq("id", invoiceId);
+
+  revalidatePath("/facturacion");
+  revalidatePath("/dashboard");
+}
+
+export async function retryVerifactu(invoiceId: string) {
+  await sendInvoiceToVerifactu(invoiceId);
+  revalidatePath("/facturacion");
 }

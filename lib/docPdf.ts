@@ -47,8 +47,18 @@ export async function documentPdfResponse(table: "invoices" | "quotes", id: stri
     lines,
     irpfRate: Number(doc.irpf_rate) || 0,
     notes: doc.notes,
-    statusLabel: kind === "factura" ? (doc.status === "pagada" ? "Pagada" : "Pendiente de pago") : null,
+    statusLabel:
+      kind === "factura"
+        ? doc.status === "anulada"
+          ? "Anulada"
+          : doc.rectifies_id
+            ? "Factura rectificativa"
+            : doc.status === "pagada"
+              ? "Pagada"
+              : "Pendiente de pago"
+        : null,
     logoUrl: company.logoUrl,
+    verifactuQr: doc.verifactu?.qr ?? null,
   });
 
   return new NextResponse(Buffer.from(bytes), {
