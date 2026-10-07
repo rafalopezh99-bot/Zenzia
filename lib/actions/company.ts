@@ -1,6 +1,7 @@
 "use server";
 
 import { createClient } from "@/lib/supabase/server";
+import { ensureVerifactuNif, startRepresentation } from "@/lib/verifactu/nifs";
 import { getCurrentCompanyId } from "@/lib/company";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
@@ -71,6 +72,8 @@ export async function updateCompanyProfile(formData: FormData) {
   }
 
   const { error: companyError } = await supabase.from("companies").update(companyUpdate).eq("id", companyId);
+  // Alta del NIF en VeriFactu (Verifacti) en cuanto hay NIF fiscal.
+  if (!companyError && tax_id) await ensureVerifactuNif(companyId, tax_id, name);
   if (companyError) throw new Error(companyError.message);
 
   const { error: memberError } = await supabase
@@ -84,4 +87,19 @@ export async function updateCompanyProfile(formData: FormData) {
   revalidatePath("/dashboard");
   revalidatePath("/onboarding");
   redirect("/perfil");
+}
+
+// Botón "Firmar representación" de Perfil: abre la firma remota de Verifacti.
+export async function signVerifactuRepresentation() {
+  const supabase = createClient();
+  const companyId = await getCurrentCompanyId();
+  const { data } = await supabase.from("companies").select("tax_id, verifactu_state").eq("id", companyId).single();
+  if (!data?.tax_id) throw new Error("Añade primero tu NIF");
+  const { url, error } = await startRepresentation(data.tax_id.toUpperCase().replace(/[^A-Z0-9]/g, ""));
+  await supabase
+    .from("companies")
+    .update({ verifactu_state: { ...(data.verifactu_state ?? {}), representation_url: url, representation_error: error ?? null } })
+    .eq("id", companyId);
+  if (url) redirect(url);
+  revalidatePath("/perfil");
 }

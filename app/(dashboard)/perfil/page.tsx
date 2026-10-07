@@ -1,6 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentCompanyProfile } from "@/lib/company";
-import { updateCompanyProfile } from "@/lib/actions/company";
+import { updateCompanyProfile, signVerifactuRepresentation } from "@/lib/actions/company";
 import { signOut } from "@/lib/actions/auth";
 import { Card, PageHeader, Input, Select, PrimaryButton, GhostButton } from "@/components/ui";
 import { VERTICAL_CATALOG, VERTICAL_CATEGORIES } from "@/lib/verticals";
@@ -24,11 +24,12 @@ export default async function PerfilPage() {
 
   const { data: company } = await supabase
     .from("companies")
-    .select("name, vertical, business_type, phone, email, tax_id, address, postal_code, city, default_vat, default_irpf, logo_path, booking, google_review_url")
+    .select("name, vertical, business_type, phone, email, tax_id, address, postal_code, city, default_vat, default_irpf, logo_path, booking, google_review_url, verifactu_state")
     .eq("id", companyId)
     .single();
 
   const booking = parseBooking(company?.booking);
+  const vf = company?.verifactu_state as any;
   const logoUrl = company?.logo_path
     ? `${supabase.storage.from("logos").getPublicUrl(company.logo_path).data.publicUrl}?t=${Date.now()}`
     : null;
@@ -231,6 +232,25 @@ export default async function PerfilPage() {
 
         <PrimaryButton className="w-full">Guardar</PrimaryButton>
       </form>
+
+      <Card className="mt-6">
+        <h2 className="mb-2 text-sm font-semibold uppercase tracking-wide text-slate">VeriFactu (Hacienda)</h2>
+        {vf?.registered ? (
+          <p className="text-sm text-ink">✓ NIF {vf.nif} dado de alta en VeriFactu.</p>
+        ) : vf?.error ? (
+          <p className="text-sm text-red-600">No se pudo dar de alta el NIF: {vf.error}</p>
+        ) : (
+          <p className="text-sm text-slate">Guarda tu NIF en "Datos fiscales" y se dará de alta automáticamente.</p>
+        )}
+        <p className="mt-2 text-xs text-slate/70">
+          Para que tus facturas se envíen a Hacienda en tu nombre tienes que firmar una autorización (representación), una sola
+          vez y online.
+        </p>
+        {vf?.representation_error && <p className="mt-2 text-xs text-red-600">{vf.representation_error}</p>}
+        <form action={signVerifactuRepresentation} className="mt-3">
+          <GhostButton>Firmar autorización</GhostButton>
+        </form>
+      </Card>
     </div>
   );
 }

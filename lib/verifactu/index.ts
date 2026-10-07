@@ -2,11 +2,14 @@ import { createClient } from "@/lib/supabase/server";
 import { parseLines } from "@/lib/documents";
 import { verifactiProvider } from "./verifacti";
 import type { VerifactuProvider } from "./types";
+import { getCompanyVerifactuKey } from "./nifs";
+import { getCurrentCompanyId } from "@/lib/company";
 
-// Proveedor activo según variables de entorno. Sin clave configurada,
-// VeriFactu queda desactivado y las facturas se quedan en "no_enviada".
-export function getVerifactuProvider(): VerifactuProvider | null {
-  const key = process.env.VERIFACTI_API_KEY;
+// Proveedor de la empresa del usuario: cada negocio usa la API key de su
+// propio NIF (company_secrets); en desarrollo, la de pruebas de .env.local.
+// Sin clave, VeriFactu queda desactivado y las facturas en "no_enviada".
+export async function getVerifactuProvider(): Promise<VerifactuProvider | null> {
+  const key = await getCompanyVerifactuKey(await getCurrentCompanyId());
   return key ? verifactiProvider(key) : null;
 }
 
@@ -14,7 +17,7 @@ export function getVerifactuProvider(): VerifactuProvider | null {
 // Nunca lanza: un fallo de VeriFactu no debe impedir emitir la factura; se
 // queda en estado "error" para reintentar.
 export async function sendInvoiceToVerifactu(invoiceId: string) {
-  const provider = getVerifactuProvider();
+  const provider = await getVerifactuProvider();
   if (!provider) return;
 
   const supabase = createClient();
@@ -64,7 +67,7 @@ export async function sendInvoiceToVerifactu(invoiceId: string) {
 // Actualiza las facturas que siguen "pendiente" de respuesta de Hacienda.
 // Se llama al abrir Facturación (pocas filas, una consulta por factura).
 export async function refreshPendingVerifactu() {
-  const provider = getVerifactuProvider();
+  const provider = await getVerifactuProvider();
   if (!provider) return;
   const supabase = createClient();
   const { data: pending } = await supabase
