@@ -249,8 +249,10 @@ export default async function DashboardPage() {
 
       {statWidgetsShown > 0 && (
         <div
-          className="mb-8 grid grid-cols-1 gap-4 sm:max-w-4xl"
-          style={{ gridTemplateColumns: `repeat(${Math.min(statWidgetsShown, 4)}, minmax(0, 1fr))` }}
+          // Móvil: 2 por fila; escritorio: hasta 4.
+          className={`mb-8 grid grid-cols-2 gap-3 sm:max-w-4xl sm:gap-4 ${
+            statWidgetsShown >= 4 ? "lg:grid-cols-4" : statWidgetsShown === 3 ? "lg:grid-cols-3" : ""
+          }`}
         >
           {show("stat_contactos") && (
             <StatCard icon={UsersIcon} tone="brand" value={contactCount ?? 0} label={`${terms.contacts} activos`} />

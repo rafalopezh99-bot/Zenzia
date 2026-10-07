@@ -28,12 +28,12 @@ export function StatCard({
   tone?: "brand" | "mint" | "money" | "amber" | "slate";
 }) {
   return (
-    <Card className="flex items-center gap-4">
+    <Card className="flex flex-col items-start gap-3 sm:flex-row sm:items-center sm:gap-4">
       <div className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ${TONE_CLASSES[tone]}`}>
         <Icon />
       </div>
       <div className="min-w-0">
-        <div className="text-2xl font-semibold text-ink">{value}</div>
+        <div className="whitespace-nowrap text-xl font-semibold text-ink sm:text-2xl">{value}</div>
         <div className="text-sm leading-snug text-slate">{label}</div>
       </div>
     </Card>

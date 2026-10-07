@@ -1,6 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { Card, PageHeader } from "@/components/ui";
 import AgendaViewSwitch from "@/components/AgendaViewSwitch";
@@ -145,7 +145,9 @@ export default async function CitasPage(
   const preferred = (await cookies()).get("agenda_view")?.value;
   const noParams = !searchParams.view && !searchParams.week && !searchParams.day;
   if (noParams && preferred === "month") redirect("/citas/calendario");
-  const isDay = searchParams.view === "day" || (noParams && preferred === "day");
+  const ua = (await headers()).get("user-agent") ?? "";
+  const mobileDefault = !preferred && /Mobile|Android|iPhone/i.test(ua);
+  const isDay = searchParams.view === "day" || (noParams && (preferred === "day" || mobileDefault));
   const monday = parseWeekParam(searchParams.week);
   const dayStart = (() => {
     const d = searchParams.day && /^\d{4}-\d{2}-\d{2}$/.test(searchParams.day) ? new Date(`${searchParams.day}T00:00:00`) : new Date();
@@ -235,7 +237,7 @@ export default async function CitasPage(
       <Card>
         <div className="mb-4 flex items-center justify-between">
           <Link href={hrefFor(prev)} className={navLinkClass}>
-            ← {isDay ? "Anterior" : "Semana anterior"}
+            ← <span className="hidden sm:inline">{isDay ? "Anterior" : "Semana anterior"}</span>
           </Link>
           <div className="flex items-center gap-3">
             <div className="text-sm font-semibold text-ink">{rangeLabel}</div>
@@ -244,7 +246,7 @@ export default async function CitasPage(
             </Link>
           </div>
           <Link href={hrefFor(next)} className={navLinkClass}>
-            {isDay ? "Siguiente" : "Semana siguiente"} →
+            <span className="hidden sm:inline">{isDay ? "Siguiente" : "Semana siguiente"}</span> →
           </Link>
         </div>
 
