@@ -179,14 +179,27 @@ export async function buildBillingPdf(input: BillingDocInput): Promise<Uint8Arra
     y -= 4;
   }
 
-  // VeriFactu: QR + leyenda obligatoria en la cabecera de la primera página.
+  // VeriFactu: QR abajo a la izquierda de la última página, con la leyenda
+  // obligatoria y el aviso de que la factura no se puede borrar.
   if (input.verifactuQr) {
     try {
       const qr = await pdf.embedPng(Buffer.from(input.verifactuQr, "base64"));
-      const first = pdf.getPage(0);
-      first.drawImage(qr, { x: W / 2 - 35, y: H - M - 70, width: 70, height: 70 });
-      const legend = "VERI*FACTU";
-      first.drawText(legend, { x: W / 2 - bold.widthOfTextAtSize(legend, 8) / 2, y: H - M - 82, size: 8, font: bold, color: ink });
+      if (y < M + 110) page = pdf.addPage([W, H]);
+      const size = 80;
+      const qy = M + 5;
+      page.drawImage(qr, { x: M, y: qy, width: size, height: size });
+      const tx = M + size + 14;
+      let ty = qy + size - 10;
+      text("VERI*FACTU", tx, ty, 10, bold, brand);
+      ty -= 14;
+      text("Factura verificable en la sede electrónica de la AEAT.", tx, ty, 8, bold, ink);
+      ty -= 12;
+      const legal =
+        "Factura registrada en el sistema VERI*FACTU de la Agencia Tributaria (RD 1007/2023). Una vez emitida no puede modificarse ni eliminarse: cualquier corrección se realiza mediante una factura rectificativa.";
+      for (const l of wrap(legal, font, 8, W - M - tx)) {
+        text(l, tx, ty, 8, font, slate);
+        ty -= 10;
+      }
     } catch {}
   }
 
