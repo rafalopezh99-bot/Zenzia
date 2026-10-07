@@ -1,14 +1,21 @@
 import type { VerifactuInvoice, VerifactuProvider, VerifactuResult } from "./types";
 
-// Proveedor Verifacti (https://www.verifacti.com). Campos según su
-// documentación pública: POST /verifactu/create con serie, numero,
-// fecha_expedicion, tipo_factura, descripcion, lineas, importe_total, nif,
-// nombre. PENDIENTE de verificar con la cuenta de pruebas: URL base,
-// cabecera de autenticación, formato exacto de "lineas" y de la respuesta.
+// Proveedor Verifacti (https://www.verifacti.com). Probado en su entorno de
+// test (07/10/2026): auth "Bearer <clave del NIF>", POST /verifactu/create
+// devuelve { estado: "Pendiente", uuid, url, qr (PNG base64), huella } y
+// GET /verifactu/status?uuid=... devuelve el estado final que da Hacienda.
 const BASE_URL = process.env.VERIFACTI_API_URL ?? "https://api.verifacti.com";
 
 const ddmmyyyy = (iso: string) => iso.split("-").reverse().join("-");
 const money = (n: number) => n.toFixed(2);
+
+// Estados de Verifacti: Pendiente → Correcto / Aceptado con errores / Incorrecto.
+function mapEstado(estado: unknown): "pendiente" | "enviada" | "error" {
+  const e = String(estado ?? "").toLowerCase();
+  if (e === "pendiente") return "pendiente";
+  if (e.startsWith("correcto") || e.startsWith("aceptado")) return "enviada";
+  return "error";
+}
 
 export function verifactiProvider(apiKey: string): VerifactuProvider {
   return {
@@ -53,14 +60,26 @@ export function verifactiProvider(apiKey: string): VerifactuProvider {
         const raw = await res.json().catch(() => null);
         if (!res.ok) return { ok: false, raw, error: (raw as any)?.error ?? `HTTP ${res.status}` };
         const qr = (raw as any)?.qr ?? null;
+        // El QR (base64) se guarda aparte; no se duplica en la respuesta guardada.
+        const { qr: _qr, ...rest } = (raw ?? {}) as Record<string, unknown>;
         return {
           ok: true,
-          raw,
+          status: mapEstado((raw as any)?.estado),
+          externalId: (raw as any)?.uuid ?? null,
+          raw: rest,
           qrPngBase64: typeof qr === "string" ? qr.replace(/^data:image\/png;base64,/, "") : null,
         };
       } catch (e) {
         return { ok: false, raw: null, error: e instanceof Error ? e.message : "Error de red" };
       }
+    },
+
+    async checkStatus(uuid: string) {
+      const res = await fetch(`${BASE_URL}/verifactu/status?uuid=${encodeURIComponent(uuid)}`, {
+        headers: { Authorization: `Bearer ${apiKey}` },
+      });
+      const raw = await res.json().catch(() => null);
+      return { status: mapEstado((raw as any)?.estado), error: (raw as any)?.mensaje_error ?? null, raw };
     },
   };
 }

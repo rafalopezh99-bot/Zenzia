@@ -3,6 +3,7 @@ import { markInvoicePaid, deleteInvoice } from "@/lib/actions/invoices";
 import { convertQuote, deleteQuote, annulInvoice, retryVerifactu } from "@/lib/actions/documents";
 import { Card, PageHeader, Select, GhostButton, ghostLinkClass, primaryButtonClass, Badge, tableWrap, tableEl, theadEl, thEl, tdEl, trEl } from "@/components/ui";
 import { PAYMENT_METHOD_LABEL, PAYMENT_METHODS } from "@/lib/paymentMethod";
+import { refreshPendingVerifactu } from "@/lib/verifactu";
 import DeleteInvoiceButton from "@/components/DeleteInvoiceButton";
 import Link from "next/link";
 
@@ -23,6 +24,7 @@ export default async function FacturacionPage({ searchParams }: { searchParams: 
   const supabase = createClient();
 
   const isInvoices = tab.key === "facturas";
+  if (isInvoices) await refreshPendingVerifactu();
   const { data: rows } = isInvoices
     ? await supabase
         .from("invoices")
@@ -149,6 +151,11 @@ export default async function FacturacionPage({ searchParams }: { searchParams: 
                       <form action={convertQuote.bind(null, i.id, "factura")}>
                         <GhostButton>→ Factura</GhostButton>
                       </form>
+                    )}
+                    {isInvoices && i.verifactu_status === "pendiente" && (
+                      <span className="text-xs text-slate" title="Enviada, esperando respuesta de Hacienda">
+                        VERI*FACTU…
+                      </span>
                     )}
                     {isInvoices && i.verifactu_status === "enviada" && (
                       <span className="text-xs font-semibold text-green-700" title="Registrada en VeriFactu">

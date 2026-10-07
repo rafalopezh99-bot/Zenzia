@@ -49,8 +49,39 @@ export async function sendInvoiceToVerifactu(invoiceId: string) {
   await supabase
     .from("invoices")
     .update({
-      verifactu_status: result.ok ? "enviada" : "error",
-      verifactu: { provider: provider.name, qr: result.qrPngBase64 ?? null, error: result.error ?? null, raw: result.raw },
+      verifactu_status: result.ok ? (result.status ?? "pendiente") : "error",
+      verifactu: {
+        provider: provider.name,
+        id: result.externalId ?? null,
+        qr: result.qrPngBase64 ?? null,
+        error: result.error ?? null,
+        raw: result.raw,
+      },
     })
     .eq("id", invoiceId);
+}
+
+// Actualiza las facturas que siguen "pendiente" de respuesta de Hacienda.
+// Se llama al abrir Facturación (pocas filas, una consulta por factura).
+export async function refreshPendingVerifactu() {
+  const provider = getVerifactuProvider();
+  if (!provider) return;
+  const supabase = createClient();
+  const { data: pending } = await supabase
+    .from("invoices")
+    .select("id, verifactu")
+    .eq("verifactu_status", "pendiente")
+    .limit(20);
+
+  await Promise.all(
+    (pending ?? []).map(async (inv: any) => {
+      if (!inv.verifactu?.id) return;
+      const r = await provider.checkStatus(inv.verifactu.id).catch(() => null);
+      if (!r || r.status === "pendiente") return;
+      await supabase
+        .from("invoices")
+        .update({ verifactu_status: r.status, verifactu: { ...inv.verifactu, error: r.error ?? null, status_raw: r.raw } })
+        .eq("id", inv.id);
+    })
+  );
 }
