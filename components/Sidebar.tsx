@@ -45,7 +45,7 @@ export default function Sidebar({
       {/* Barra superior: solo en móvil */}
       <div className="flex items-center justify-between border-b border-line bg-surface px-4 py-3 sm:hidden">
         <Link href="/dashboard" className="flex items-center" onClick={close}>
-          <ZenziaLogo className="h-6 w-auto" />
+          <ZenziaLogo className="h-8 w-auto" />
         </Link>
         <button
           type="button"
@@ -76,13 +76,13 @@ export default function Sidebar({
       >
         <div className="mb-6 hidden px-1 sm:block">
           <div className="flex items-center">
-            <ZenziaLogo className="h-[30px] w-auto" />
+            <ZenziaLogo className="h-11 w-auto" />
           </div>
         </div>
         <div className="mb-4 flex items-start justify-between px-1 sm:hidden">
           <div>
             <div className="flex items-center">
-              <ZenziaLogo className="h-7 w-auto" />
+              <ZenziaLogo className="h-9 w-auto" />
             </div>
           </div>
           <button
