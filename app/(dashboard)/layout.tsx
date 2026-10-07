@@ -4,6 +4,7 @@ import { getEnabledModules } from "@/lib/modules";
 import { getCurrentCompanyProfile, ZENZIA_ADMIN_COMPANY_ID } from "@/lib/company";
 import { createClient } from "@/lib/supabase/server";
 import { headers } from "next/headers";
+import { stripeEnabled } from "@/lib/stripe";
 import { MODULE_CATALOG } from "@/lib/modules";
 import { filterModulesByPlan, planAllowsNotifications, planAllowsSuppliers } from "@/lib/plans";
 
@@ -20,6 +21,18 @@ export default async function DashboardLayout({ children }: { children: React.Re
   if (!profile.onboarded) redirect("/onboarding");
 
   const isAdmin = profile.companyId === ZENZIA_ADMIN_COMPANY_ID;
+
+  // Sin suscripción activa (Stripe configurado), solo se puede entrar a
+  // /planes para pagar y a /perfil. La cuenta de Zenzia (admin) no paga.
+  const currentPath = headers().get("x-pathname") ?? "";
+  if (stripeEnabled() && !isAdmin && !["/planes", "/perfil"].some((p) => currentPath.startsWith(p))) {
+    const { data: sub } = await createClient()
+      .from("companies")
+      .select("subscription_status")
+      .eq("id", profile.companyId)
+      .single();
+    if (!["active", "trialing", "past_due"].includes(sub?.subscription_status ?? "")) redirect("/planes?pagar=1");
+  }
 
   // Estas consultas no dependen una de otra (solo del companyId, que ya
   // tenemos), así que se lanzan a la vez en vez de esperar a que termine

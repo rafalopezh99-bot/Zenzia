@@ -9,9 +9,9 @@ export default function RegistroEnviadoPage() {
         <div className="mb-2 flex items-center justify-center">
           <ZenziaLogo className="h-[38px] w-auto" />
         </div>
-        <h2 className="mb-2 text-base font-bold text-ink">Solicitud enviada</h2>
+        <h2 className="mb-2 text-base font-bold text-ink">Revisa tu email</h2>
         <p className="mb-5 text-sm text-slate">
-          Hemos recibido tu solicitud. La revisamos y te contactamos en breve por email o teléfono.
+          Te hemos enviado un enlace para confirmar tu cuenta. Después inicia sesión y configura tu consulta en un minuto.
         </p>
         <Link href="/" className={secondaryLinkClass}>
           Volver al inicio

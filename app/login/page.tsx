@@ -44,7 +44,7 @@ export default function LoginPage() {
         <p className="text-center text-xs text-slate">
           ¿No tienes cuenta todavía?{" "}
           <Link href="/registro" className="text-brand hover:underline">
-            Solicita acceso
+            Crea tu cuenta
           </Link>
         </p>
       </form>

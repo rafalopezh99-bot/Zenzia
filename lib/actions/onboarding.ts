@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { VERTICAL_PACKS } from "@/lib/modules";
+import { stripeEnabled } from "@/lib/stripe";
 
 // Guarda las respuestas del asistente inicial: nombre de quien gestiona la
 // cuenta, nombre del negocio, si es autónomo o empresa, y el tipo de
@@ -63,5 +64,6 @@ export async function completeOnboarding(formData: FormData) {
   }
 
   revalidatePath("/dashboard");
-  redirect("/dashboard");
+  // Con pagos activos, al terminar el asistente se paga el plan elegido.
+  redirect(stripeEnabled() ? "/planes?bienvenida=1" : "/dashboard");
 }

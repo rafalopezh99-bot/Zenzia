@@ -48,7 +48,13 @@ export async function choosePlan(plan: PlanKey) {
       0: { price: price.monthly, quantity: 1 },
       ...(price.setup ? { 1: { price: price.setup, quantity: 1 } } : {}),
     },
-    subscription_data: { metadata: { company_id: companyId } },
+    subscription_data: {
+      metadata: { company_id: companyId },
+      // Prueba gratis solo en la primera suscripción del negocio.
+      ...(Number(process.env.STRIPE_TRIAL_DAYS ?? 14) > 0 && !co?.stripe_subscription_id
+        ? { trial_period_days: Number(process.env.STRIPE_TRIAL_DAYS ?? 14) }
+        : {}),
+    },
     allow_promotion_codes: true,
     success_url: `${SITE_URL}/planes?ok=1`,
     cancel_url: `${SITE_URL}/planes`,

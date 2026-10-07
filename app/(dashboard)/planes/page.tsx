@@ -7,9 +7,10 @@ import { createClient } from "@/lib/supabase/server";
 
 // Pantalla de "mejorar plan": a donde llevan los apartados con candado del
 // menú. De momento el cambio de plan se pide por email (no hay pasarela).
-export default async function PlanesPage({ searchParams }: { searchParams: { ok?: string } }) {
+export default async function PlanesPage({ searchParams }: { searchParams: { ok?: string; pagar?: string; bienvenida?: string } }) {
   const { plan, companyName, companyId } = await getCurrentCompanyProfile();
   const payments = stripeEnabled();
+  const trialDays = Number(process.env.STRIPE_TRIAL_DAYS ?? 14);
   const { data: co } = await createClient()
     .from("companies")
     .select("stripe_customer_id, subscription_status")
@@ -30,6 +31,12 @@ export default async function PlanesPage({ searchParams }: { searchParams: { ok?
           ) : undefined
         }
       />
+      {(searchParams.pagar || searchParams.bienvenida) && !searchParams.ok && (
+        <p className="mb-4 rounded-xl bg-paper-deep px-4 py-3 text-sm text-ink">
+          {searchParams.bienvenida ? "¡Tu consulta está lista! " : ""}Activa tu plan para empezar a usar Zenzia.
+          {trialDays > 0 && ` Los primeros ${trialDays} días son gratis.`}
+        </p>
+      )}
       {searchParams.ok && (
         <p className="mb-4 rounded-xl bg-paper-deep px-4 py-3 text-sm text-ink">
           ¡Pago recibido! Tu plan se actualizará en unos segundos.
@@ -37,7 +44,8 @@ export default async function PlanesPage({ searchParams }: { searchParams: { ok?
       )}
       <div className="grid gap-4 md:grid-cols-3">
         {PLANS.map((p) => {
-          const current = p.key === plan;
+          const paid = ["active", "trialing", "past_due"].includes(co?.subscription_status ?? "");
+          const current = p.key === plan && (paid || !payments);
           return (
             <Card key={p.key} className={`flex flex-col ${p.featured ? "border-brand" : ""}`}>
               <div className="flex items-center justify-between">

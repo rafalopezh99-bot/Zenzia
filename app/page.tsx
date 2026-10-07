@@ -358,7 +358,7 @@ export default function LandingPage() {
                   ))}
                 </ul>
                 <a
-                  href="#contacto"
+                  href={`/registro?plan=${p.key}`}
                   className={`mt-8 rounded-xl px-4 py-3 text-center text-sm font-bold ${
                     p.featured ? "bg-mk-accent text-white" : "border border-mk-line text-mk-ink"
                   }`}
