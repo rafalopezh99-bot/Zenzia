@@ -37,6 +37,11 @@ export default function LoginPage() {
         </div>
         <Input name="email" type="email" placeholder="Email" required className="w-full" />
         <Input name="password" type="password" placeholder="Contraseña" required className="w-full" />
+        <div className="text-right">
+          <Link href="/recuperar" className="text-xs text-brand hover:underline">
+            ¿Olvidaste tu contraseña?
+          </Link>
+        </div>
         {error && <p className="text-sm text-red-600">{error}</p>}
         <PrimaryButton disabled={loading} className="w-full">
           {loading ? "Entrando..." : "Entrar"}
