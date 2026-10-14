@@ -154,7 +154,9 @@
     el.__zz = 1;
     try { el.contentEditable = 'plaintext-only'; } catch (e) {}
     if (el.contentEditable !== 'plaintext-only') el.contentEditable = 'true';
+    // Se compara con el texto que había al empezar a editar (no al cargar la página).
     var before = el.textContent;
+    el.addEventListener('focus', function () { before = el.textContent.replace(/\s+/g, ' ').trim(); });
     el.addEventListener('keydown', function (e) { if (e.key === 'Enter' && !/^(P|LI|BLOCKQUOTE)$/.test(el.tagName)) { e.preventDefault(); el.blur(); } });
     el.addEventListener('blur', function () {
       var v = el.textContent.replace(/\s+/g, ' ').trim();
