@@ -86,6 +86,9 @@ export function MarketingFooter() {
             <Link href="/cookies" className="text-xs text-mk-muted hover:text-mk-ink hover:underline">
               Política de cookies
             </Link>
+            <Link href="/condiciones" className="text-xs text-mk-muted hover:text-mk-ink hover:underline">
+              Condiciones de contratación
+            </Link>
           </nav>
         </div>
         <span className="mt-8 block text-[11px] text-mk-muted">© 2026 Zenzia. Todos los derechos reservados.</span>

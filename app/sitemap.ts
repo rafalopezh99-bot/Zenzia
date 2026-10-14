@@ -11,5 +11,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${base}/aviso-legal`, lastModified: now, changeFrequency: "yearly", priority: 0.2 },
     { url: `${base}/privacidad`, lastModified: now, changeFrequency: "yearly", priority: 0.2 },
     { url: `${base}/cookies`, lastModified: now, changeFrequency: "yearly", priority: 0.2 },
+    { url: `${base}/condiciones`, lastModified: now, changeFrequency: "yearly", priority: 0.2 },
+    { url: `${base}/encargado`, lastModified: now, changeFrequency: "yearly", priority: 0.2 },
   ];
 }

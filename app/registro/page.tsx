@@ -56,9 +56,13 @@ export default async function RegistroPage(props: { searchParams: Promise<{ plan
           <label className="flex items-start gap-2 text-xs text-slate">
             <input type="checkbox" name="terms" required className="mt-0.5" />
             <span>
-              Acepto el{" "}
-              <Link href="/aviso-legal" className="text-brand hover:underline">
-                aviso legal
+              Acepto las{" "}
+              <Link href="/condiciones" className="text-brand hover:underline">
+                condiciones de contratación
+              </Link>
+              , el{" "}
+              <Link href="/encargado" className="text-brand hover:underline">
+                contrato de encargado del tratamiento
               </Link>{" "}
               y la{" "}
               <Link href="/privacidad" className="text-brand hover:underline">
