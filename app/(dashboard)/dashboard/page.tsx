@@ -1,3 +1,4 @@
+import WebAnalytics from "@/components/WebAnalytics";
 import { UsersIcon, CalendarClockIcon, BellIcon, WalletIcon, TruckIcon } from "@/components/icons";
 import { createClient } from "@/lib/supabase/server";
 import { Card, PageHeader, Badge } from "@/components/ui";
@@ -23,6 +24,11 @@ export default async function DashboardPage() {
   // el layout ya la llamó justo antes, así que esto no repite el viaje a
   // Supabase, solo reutiliza el resultado.
   const { fullName, vertical, logoUrl, dashboardWidgets, plan } = await getCurrentCompanyProfile();
+  // Plan Web: el dashboard son las métricas de su web (visitas y clics).
+  if (plan === "web") {
+    const { data: co } = await supabase.from("companies").select("site_url").eq("id", (await getCurrentCompanyProfile()).companyId).single();
+    return <WebAnalytics siteUrl={co?.site_url ?? null} />;
+  }
   const terms = getTerminology(vertical);
   const appointmentsLower = terms.appointments.toLowerCase();
   const isAcademia = showsAcademiaFields(vertical);

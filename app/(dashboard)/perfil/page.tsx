@@ -84,7 +84,11 @@ export default async function PerfilPage(props: { searchParams: Promise<{ tab?: 
       />
 
       <div className="mb-6 flex flex-wrap gap-1 rounded-2xl border border-line p-1 sm:inline-flex sm:rounded-full">
-        {TABS.filter((t) => plan !== "start" || (t.key !== "reservas" && t.key !== "equipo")).map((t) => (
+        {TABS.filter((t) =>
+          plan === "web"
+            ? t.key === "negocio" || t.key === "seguridad"
+            : plan !== "start" || (t.key !== "reservas" && t.key !== "equipo")
+        ).map((t) => (
           <Link
             key={t.key}
             href={`/perfil?tab=${t.key}`}
@@ -205,7 +209,7 @@ export default async function PerfilPage(props: { searchParams: Promise<{ tab?: 
         </form>
       )}
 
-      {tab === "negocio" && optional.length > 0 && (
+      {tab === "negocio" && plan !== "web" && optional.length > 0 && (
         <form action={setCompanyModules} className="mt-6">
           <Card className="mb-4">
             <h2 className={h2}>Módulos</h2>

@@ -6,7 +6,6 @@ import type { ModuleDef } from "@/lib/modules";
 import { getTerminology, showsAcademiaFields } from "@/lib/terminology";
 import ThemeToggle from "@/components/ThemeToggle";
 import ZenziaLogo from "@/components/ZenziaLogo";
-import { signOut } from "@/lib/actions/auth";
 
 // El sidebar no sabe nada de "fisio" ni "taller": solo pinta los módulos
 // que llegan activados. Añadir o quitar una ventana para un cliente es
@@ -102,6 +101,9 @@ export default function Sidebar({
         </div>
         {webOnly ? (
           <>
+            <Link href="/dashboard" className={linkClass} onClick={close}>
+              Dashboard
+            </Link>
             <Link href="/mi-web" className={linkClass} onClick={close}>
               Mi web
             </Link>
@@ -177,16 +179,21 @@ export default function Sidebar({
           </>
         )}
 
-        <div className="mt-auto flex items-center justify-between gap-2 border-t border-line pt-3">
-          {webOnly ? (
-            <form action={signOut} className="flex-1">
-              <button className={`${linkClass} w-full px-2 text-left`}>Cerrar sesión</button>
-            </form>
-          ) : (
-            <Link href="/perfil" className={`${linkClass} flex-1 px-2`} onClick={close}>
-              Perfil del negocio
-            </Link>
-          )}
+        {/* Soporte de Zenzia (todos los planes) */}
+        <a
+          href="https://wa.me/34673895732?text=Hola%2C%20necesito%20ayuda%20con%20Zenzia"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="mt-auto mb-2 block rounded-xl border border-line px-3 py-2 text-xs text-slate transition hover:border-brand hover:text-brand"
+          onClick={close}
+        >
+          <span className="block font-semibold text-ink">Contactar con soporte</span>
+          WhatsApp · 673 895 732
+        </a>
+        <div className="flex items-center justify-between gap-2 border-t border-line pt-3">
+          <Link href="/perfil" className={`${linkClass} flex-1 px-2`} onClick={close}>
+            {webOnly ? "Perfil" : "Perfil del negocio"}
+          </Link>
           <ThemeToggle />
         </div>
       </nav>

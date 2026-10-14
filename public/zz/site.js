@@ -18,6 +18,36 @@
 
   function post(msg) { if (window.parent !== window) window.parent.postMessage(msg, '*'); }
 
+  // ---- Métricas (visitas y clics) para el dashboard de Zenzia ----
+  // No cuenta lo que se ve dentro de Zenzia (vista previa / edición).
+  if (!EDIT && window.parent === window) {
+    var sid = '';
+    try { sid = sessionStorage.getItem('zz_sid') || Math.random().toString(36).slice(2); sessionStorage.setItem('zz_sid', sid); } catch (e) {}
+    var device = /Mobi|Android|iPhone/i.test(navigator.userAgent) ? 'movil' : 'ordenador';
+    var track = function (type, extra) {
+      var body = { company_id: CID, type: type, path: location.pathname.slice(0, 250), device: device, session_id: sid };
+      for (var k in extra) body[k] = extra[k];
+      fetch(SB + '/rest/v1/web_events', {
+        method: 'POST', keepalive: true,
+        headers: { apikey: KEY, 'Content-Type': 'application/json', Prefer: 'return=minimal' },
+        body: JSON.stringify(body)
+      }).catch(function () {});
+    };
+    var NAMES = [[/wa\.me|whatsapp/i, 'WhatsApp'], [/^mailto:/i, 'Email'], [/^tel:/i, 'Teléfono'], [/instagram\.com/i, 'Instagram'],
+      [/tiktok\.com/i, 'TikTok'], [/facebook\.com/i, 'Facebook'], [/wallapop/i, 'Wallapop'], [/google\.[a-z.]+\/maps|maps\.app|goo\.gl\/maps/i, 'Cómo llegar']];
+    track('view', { referrer: (document.referrer || '').slice(0, 400) });
+    document.addEventListener('click', function (e) {
+      var a = e.target.closest && e.target.closest('a[href]');
+      if (!a) return;
+      var href = a.getAttribute('href') || '';
+      if (href.charAt(0) === '#') return; // saltos dentro de la misma página
+      var label = '';
+      for (var i = 0; i < NAMES.length; i++) if (NAMES[i][0].test(a.href)) { label = NAMES[i][1]; break; }
+      if (!label) label = (a.textContent || '').replace(/\s+/g, ' ').trim().slice(0, 80) || a.href.slice(0, 80);
+      track('click', { label: label, href: a.href.slice(0, 450) });
+    }, true);
+  }
+
   // Bloques: secciones de la página (más cabecera y pie).
   function blocks() {
     var out = [];

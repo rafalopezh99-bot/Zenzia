@@ -234,7 +234,7 @@ export default function SiteLiveEditor({ siteUrl, companyId }: { siteUrl: string
             }}
             className="rounded-full bg-brand px-5 py-2 text-sm font-bold text-white"
           >
-            {edit ? "Terminar" : "Editar"}
+            {edit ? "Guardar" : "Editar"}
           </button>
         </div>
       </div>

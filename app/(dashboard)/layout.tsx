@@ -32,7 +32,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
   // /planes para pagar y a /perfil. La cuenta de Zenzia (admin) no paga.
   const currentPath = (await headers()).get("x-pathname") ?? "";
   // Plan Web (interno): solo "Mi web" y su galería.
-  if (webOnly && !["/mi-web", "/galeria"].some((p) => currentPath.startsWith(p))) redirect("/mi-web");
+  if (webOnly && !["/mi-web", "/galeria", "/dashboard", "/perfil"].some((p) => currentPath.startsWith(p))) redirect("/mi-web");
   if (stripeEnabled() && !isAdmin && !webOnly && !["/planes", "/perfil"].some((p) => currentPath.startsWith(p))) {
     const { data: sub } = await (await createClient())
       .from("companies")
