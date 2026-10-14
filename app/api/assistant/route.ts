@@ -11,7 +11,8 @@ import { ASSISTANT_TOOLS, runAssistantTool } from "@/lib/assistant/tools";
 // el historial no se edita, solo se añade al final) y el mensaje nuevo.
 export const maxDuration = 60;
 
-const MODEL = "claude-opus-5-5";
+// Modelo más económico (Claude Haiku 5.5). Para más calidad: "claude-sonnet-5-5" o "claude-opus-5-5".
+const MODEL = "claude-haiku-5-5";
 const MONTHLY_LIMIT = 300; // mensajes del usuario al mes por negocio
 const MAX_TOOL_ROUNDS = 6;
 
@@ -69,8 +70,6 @@ export async function POST(req: Request) {
       const response = await client.beta.messages.create({
         model: MODEL,
         max_tokens: 16000,
-        betas: ["server-side-fallback-2026-07-01"],
-        fallbacks: "default",
         output_config: { effort: "low" },
         system,
         tools: ASSISTANT_TOOLS,
