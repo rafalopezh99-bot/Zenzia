@@ -9,8 +9,12 @@ const DESCRIPTION =
 // miniatura al compartir el enlace — sin esto, algunos clientes no la cargan.
 export const metadata: Metadata = {
   metadataBase: new URL("https://zenzia.es"),
-  title: "Zenzia",
+  title: {
+    default: "Zenzia · CRM para autónomos: agenda, clientes y facturación con VeriFactu",
+    template: "%s · Zenzia",
+  },
   description: DESCRIPTION,
+  alternates: { canonical: "/" },
   openGraph: {
     title: "Zenzia",
     description: DESCRIPTION,

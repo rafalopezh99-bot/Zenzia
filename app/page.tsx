@@ -412,6 +412,51 @@ export default function LandingPage() {
       </section>
 
       <MarketingFooter />
+
+      {/* Datos estructurados para Google (empresa + producto con sus planes). */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@graph": [
+              {
+                "@type": "Organization",
+                name: "Zenzia",
+                url: "https://zenzia.es",
+                logo: "https://zenzia.es/zenzia-icon.png",
+                email: "zenzia.co@gmail.com",
+                telephone: "+34673895732",
+                areaServed: "ES",
+              },
+              {
+                "@type": "SoftwareApplication",
+                name: "Zenzia",
+                applicationCategory: "BusinessApplication",
+                operatingSystem: "Web",
+                description: "CRM para autónomos que trabajan con citas: agenda, clientes, facturación con VeriFactu, reservas online y recordatorios.",
+                offers: PLANS.map((p) => ({ "@type": "Offer", name: `Zenzia ${p.name}`, price: p.price, priceCurrency: "EUR" })),
+              },
+            ],
+          }),
+        }}
+      />
+
+      {/* Botón flotante de WhatsApp */}
+      <a
+        href="https://wa.me/34673895732?text=Hola%2C%20quiero%20informaci%C3%B3n%20sobre%20Zenzia"
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label="Escríbenos por WhatsApp"
+        className="fixed bottom-5 right-5 z-40 flex h-14 w-14 items-center justify-center rounded-full bg-[#25D366] text-white shadow-lg transition hover:scale-105"
+      >
+        <svg viewBox="0 0 24 24" width="28" height="28" fill="currentColor" aria-hidden="true">
+          <path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2 22l5.25-1.38a9.87 9.87 0 0 0 4.79 1.22c5.46 0 9.91-4.45 9.91-9.91S17.5 2 12.04 2Zm5.8 14.04c-.25.69-1.45 1.32-2 1.36-.51.05-1 .24-3.37-.7-2.84-1.12-4.65-4.04-4.79-4.23-.14-.19-1.14-1.52-1.14-2.9 0-1.38.72-2.06.98-2.34.25-.28.55-.35.73-.35l.53.01c.17.01.4-.06.62.48.24.57.8 1.95.87 2.09.07.14.12.31.02.5-.09.19-.14.31-.28.48-.14.17-.3.37-.42.5-.14.14-.29.29-.12.57.17.28.73 1.2 1.57 1.95 1.08.96 1.99 1.26 2.27 1.4.28.14.45.12.61-.07.17-.19.71-.83.9-1.11.19-.28.38-.23.63-.14.26.09 1.63.77 1.91.91.28.14.47.21.53.33.07.12.07.69-.17 1.37Z" />
+        </svg>
+      </a>
+
+      {/* Métricas de visitas y clics (las mismas que el plan Web de los clientes). */}
+      <script src="/zz/site.js" data-company="5a279e59-d107-4341-80a2-f33bb5f71b24" defer />
     </div>
   );
 }
