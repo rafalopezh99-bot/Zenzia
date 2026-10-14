@@ -27,6 +27,8 @@ export default function NuevaClaseForm({
   contactLabel,
   defaultStartsAt,
   services = [],
+  staff = [],
+  defaultStaff,
 }: {
   contacts: { id: string; full_name: string; curso: string | null }[];
   contactLabel: string;
@@ -34,6 +36,9 @@ export default function NuevaClaseForm({
   defaultStartsAt?: string;
   // Catálogo de servicios: al elegir uno se rellena la duración.
   services?: { id: string; name: string; duration_min: number; price: number }[];
+  // Profesionales del negocio (solo se pide si hay más de uno).
+  staff?: { id: string; name: string }[];
+  defaultStaff?: string | null;
 }) {
   const [mode, setMode] = useState<"puntual" | "recurrente">("puntual");
   const [duration, setDuration] = useState<number>(services?.[0]?.duration_min ?? 60);
@@ -76,6 +81,15 @@ export default function NuevaClaseForm({
       {mode === "puntual" ? (
         <form action={createAppointment} className="space-y-3">
           {contactSelect}
+          {staff.length > 1 && (
+            <Select name="staff_user_id" defaultValue={defaultStaff ?? staff[0].id} className="w-full">
+              {staff.map((p) => (
+                <option key={p.id} value={p.id}>
+                  Profesional: {p.name}
+                </option>
+              ))}
+            </Select>
+          )}
           <Input name="starts_at" type="datetime-local" required defaultValue={defaultStartsAt} className="w-full" />
           {services.length > 0 && (
             <Select

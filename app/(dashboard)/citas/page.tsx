@@ -1,3 +1,4 @@
+import { getTeam } from "@/lib/team";
 import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
 import { cookies, headers } from "next/headers";
@@ -134,7 +135,7 @@ const COLUMN_HEIGHT = ROW_HEIGHT * HOURS.length;
 // Con ?view=day muestra un solo día (?day=YYYY-MM-DD) con la misma rejilla.
 export default async function CitasPage(
   props: {
-    searchParams: Promise<{ week?: string; view?: string; day?: string }>;
+    searchParams: Promise<{ week?: string; view?: string; day?: string; pro?: string }>;
   }
 ) {
   const searchParams = await props.searchParams;
@@ -165,16 +166,22 @@ export default async function CitasPage(
   const rangeEnd = new Date(firstDay);
   rangeEnd.setDate(rangeEnd.getDate() + (isDay ? 1 : 7));
 
+  // Filtro por profesional (?pro=<user_id>) cuando el negocio tiene equipo.
+  const { team } = await getTeam();
+  const pro = team.some((p) => p.id === searchParams.pro) ? searchParams.pro! : null;
+  const proName = (id: string | null) => team.find((p) => p.id === id)?.name.split(" ")[0] ?? "";
+
   const supabase = await createClient();
   if (showsAcademiaFields(vertical)) {
     await supabase.rpc("complete_finished_academia_appointments");
   }
   const { data: appointments } = await supabase
     .from("appointments")
-    .select("id, starts_at, ends_at, status, contacts(id, full_name)")
+    .select("id, starts_at, ends_at, status, staff_user_id, contacts(id, full_name)")
     .gte("starts_at", firstDay.toISOString())
     .lt("starts_at", rangeEnd.toISOString())
-    .order("starts_at", { ascending: true });
+    .order("starts_at", { ascending: true })
+    .match(pro ? { staff_user_id: pro } : {});
 
   // Una lista por día (0=lunes..4=viernes) con la posición y altura ya
   // calculadas en píxeles a partir de starts_at/ends_at. Las citas fuera
@@ -215,7 +222,10 @@ export default async function CitasPage(
   prev.setDate(prev.getDate() - step);
   const next = new Date(firstDay);
   next.setDate(next.getDate() + step);
-  const hrefFor = (d: Date) => (isDay ? `/citas?view=day&day=${formatWeekParam(d)}` : `/citas?view=week&week=${formatWeekParam(d)}`);
+  const proQ = pro ? `&pro=${pro}` : "";
+  const hrefFor = (d: Date) =>
+    (isDay ? `/citas?view=day&day=${formatWeekParam(d)}` : `/citas?view=week&week=${formatWeekParam(d)}`) + proQ;
+  const baseHref = isDay ? `/citas?view=day&day=${formatWeekParam(firstDay)}` : `/citas?view=week&week=${formatWeekParam(firstDay)}`;
 
   const navLinkClass =
     "rounded-full border border-line px-3 py-1.5 text-sm text-slate transition hover:border-brand hover:text-brand";
@@ -234,6 +244,21 @@ export default async function CitasPage(
         action={<AgendaViewSwitch current={isDay ? "day" : "week"} newLabel={terms.newAppointment} />}
       />
 
+      {team.length > 1 && (
+        <div className="mb-3 flex flex-wrap gap-2 text-sm">
+          {[{ id: "", name: "Todos" }, ...team].map((p) => (
+            <Link
+              key={p.id || "all"}
+              href={p.id ? `${baseHref}&pro=${p.id}` : baseHref}
+              className={`rounded-full border px-3 py-1 ${
+                (pro ?? "") === p.id ? "border-brand bg-brand text-white" : "border-line text-ink hover:border-brand"
+              }`}
+            >
+              {p.name}
+            </Link>
+          ))}
+        </div>
+      )}
       <Card>
         <div className="mb-4 flex items-center justify-between">
           <Link href={hrefFor(prev)} className={navLinkClass}>
@@ -320,6 +345,7 @@ export default async function CitasPage(
                       }}
                     >
                       {formatAppTime(a.starts_at)} {a.contacts?.full_name}
+                      {!pro && team.length > 1 && (a as any).staff_user_id ? ` · ${proName((a as any).staff_user_id)}` : ""}
                     </Link>
                   );
                 })}

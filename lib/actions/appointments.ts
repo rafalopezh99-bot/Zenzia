@@ -36,6 +36,7 @@ export async function createAppointment(formData: FormData) {
     notes: String(formData.get("notes") ?? "") || null,
     service_id,
     price: service?.price ?? null,
+    staff_user_id: String(formData.get("staff_user_id") ?? "") || (await supabase.auth.getUser()).data.user?.id || null,
   });
   if (error) throw new Error(error.message);
 
@@ -77,7 +78,17 @@ export async function updateAppointment(appointmentId: string, formData: FormDat
     ends_at: end.toISOString(),
     status,
     notes: String(formData.get("notes") ?? "") || null,
-  };
+  } as Record<string, unknown>;
+  // Profesional y servicio (si el formulario los trae).
+  if (formData.has("staff_user_id")) payload.staff_user_id = String(formData.get("staff_user_id")) || null;
+  if (formData.has("service_id")) {
+    const sid = String(formData.get("service_id")) || null;
+    payload.service_id = sid;
+    if (sid) {
+      const { data: svc } = await supabase.from("services").select("price").eq("id", sid).single();
+      if (svc) payload.price = svc.price;
+    }
+  }
 
   const { error } = await supabase.from("appointments").update(payload).eq("id", appointmentId);
   if (error) {

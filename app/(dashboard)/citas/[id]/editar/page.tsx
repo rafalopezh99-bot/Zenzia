@@ -1,3 +1,4 @@
+import { getTeam } from "@/lib/team";
 import { createClient } from "@/lib/supabase/server";
 import { notFound } from "next/navigation";
 import { updateAppointment, deleteAppointment, setAppointmentStatus } from "@/lib/actions/appointments";
@@ -23,12 +24,16 @@ export default async function EditarCitaPage(props: { params: Promise<{ id: stri
   const [{ data: appointment }, { data: contacts }] = await Promise.all([
     supabase
       .from("appointments")
-      .select("id, contact_id, starts_at, ends_at, status, notes, reminder_sent, price, invoice_id, package_id, paid_method, services(name, price)")
+      .select("id, contact_id, starts_at, ends_at, status, notes, reminder_sent, price, invoice_id, package_id, paid_method, service_id, staff_user_id, services(name, price)")
       .eq("id", params.id)
       .single(),
     supabase.from("contacts").select("id, full_name, custom_fields").order("full_name"),
   ]);
   if (!appointment) notFound();
+  const [{ team }, { data: serviceList }] = await Promise.all([
+    getTeam(),
+    supabase.from("services").select("id, name, duration_min").eq("active", true).order("name"),
+  ]);
   const service: any = Array.isArray(appointment.services) ? appointment.services[0] : appointment.services;
   // Bono activo con sesiones libres del cliente, para "descontar del bono".
   const { data: bonos } = await supabase
@@ -148,6 +153,26 @@ export default async function EditarCitaPage(props: { params: Promise<{ id: stri
             placeholder="Duración de la clase (horas)"
             className="w-full"
           />
+          {(serviceList ?? []).length > 0 && (
+            <Select name="service_id" defaultValue={appointment.service_id ?? ""} className="w-full">
+              <option value="">Sin servicio</option>
+              {(serviceList ?? []).map((s: any) => (
+                <option key={s.id} value={s.id}>
+                  {s.name} · {s.duration_min} min
+                </option>
+              ))}
+            </Select>
+          )}
+          {team.length > 1 && (
+            <Select name="staff_user_id" defaultValue={appointment.staff_user_id ?? ""} className="w-full">
+              <option value="">Sin asignar</option>
+              {team.map((p) => (
+                <option key={p.id} value={p.id}>
+                  Profesional: {p.name}
+                </option>
+              ))}
+            </Select>
+          )}
           <Select name="status" defaultValue={appointment.status} className="w-full">
             {Object.entries(APPOINTMENT_STATUS_LABEL).map(([value, label]) => (
               <option key={value} value={value}>

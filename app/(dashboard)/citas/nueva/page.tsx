@@ -1,3 +1,4 @@
+import { getTeam } from "@/lib/team";
 import { createClient } from "@/lib/supabase/server";
 import { PageHeader } from "@/components/ui";
 import { getCurrentCompanyProfile } from "@/lib/company";
@@ -9,6 +10,7 @@ export default async function NuevaCitaPage(props: { searchParams: Promise<{ at?
   const supabase = await createClient();
   const { vertical } = await getCurrentCompanyProfile();
   const terms = getTerminology(vertical);
+  const { team, me } = await getTeam();
   const { data: services } = await supabase
     .from("services")
     .select("id, name, duration_min, price")
@@ -32,6 +34,8 @@ export default async function NuevaCitaPage(props: { searchParams: Promise<{ at?
         contacts={contactOptions}
         contactLabel={terms.contact}
         services={services ?? []}
+        staff={team}
+        defaultStaff={me}
         defaultStartsAt={/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(searchParams.at ?? "") ? searchParams.at : undefined}
       />
     </div>
