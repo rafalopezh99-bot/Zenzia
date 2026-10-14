@@ -1,3 +1,4 @@
+import InfoTip from "@/components/InfoTip";
 import { Card } from "@/components/ui";
 import { createClient } from "@/lib/supabase/server";
 
@@ -51,9 +52,12 @@ export default async function WebAnalytics({ siteUrl, fullName }: { siteUrl: str
   const perDay = days.map((d) => views.filter((v) => key(new Date(v.created_at)) === key(d)).length);
   const maxDay = Math.max(1, ...perDay);
 
-  const kpi = (label: string, value: string | number, hint?: string) => (
-    <Card>
-      <div className="text-2xl font-semibold text-ink">{value}</div>
+  const kpi = (label: string, value: string | number, hint: string | undefined, info: string) => (
+    <Card className="relative">
+      <div className="absolute left-3 top-3">
+        <InfoTip text={info} />
+      </div>
+      <div className="mt-4 text-2xl font-semibold text-ink">{value}</div>
       <div className="text-sm text-slate">{label}</div>
       {hint && <div className="mt-1 text-xs text-slate/70">{hint}</div>}
     </Card>
@@ -94,14 +98,32 @@ export default async function WebAnalytics({ siteUrl, fullName }: { siteUrl: str
       </div>
       <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-slate">Últimos 30 días</p>
       <div className="mb-6 grid grid-cols-2 gap-3 lg:grid-cols-4">
-        {kpi("Visitas", views.length, `${views.filter((v) => inDays(v, 7)).length} esta semana · ${views.filter((v) => inDays(v, 1)).length} hoy`)}
-        {kpi("Visitantes", visitors)}
-        {kpi("Clics en enlaces", clicks.length, `${clicks.filter((c) => inDays(c, 7)).length} esta semana`)}
-        {kpi("Desde el móvil", views.length ? `${Math.round((mobile / views.length) * 100)} %` : "—")}
+        {kpi(
+          "Visitas",
+          views.length,
+          `${views.filter((v) => inDays(v, 7)).length} esta semana · ${views.filter((v) => inDays(v, 1)).length} hoy`,
+          "Veces que se ha abierto tu web en los últimos 30 días. Si alguien entra varias veces, cuenta cada vez."
+        )}
+        {kpi("Visitantes", visitors, undefined, "Personas distintas que han entrado (aproximado: cada visita desde un navegador nuevo cuenta como una persona).")}
+        {kpi(
+          "Clics en enlaces",
+          clicks.length,
+          `${clicks.filter((c) => inDays(c, 7)).length} esta semana`,
+          "Veces que alguien ha pulsado un enlace de tu web: WhatsApp, email, redes sociales, botones a otras páginas…"
+        )}
+        {kpi(
+          "Desde el móvil",
+          views.length ? `${Math.round((mobile / views.length) * 100)} %` : "—",
+          undefined,
+          "Porcentaje de visitas hechas desde un móvil. El resto son desde ordenador o tablet."
+        )}
       </div>
 
       <Card className="mb-4">
-        <h2 className="mb-4 text-sm font-semibold uppercase tracking-wide text-slate">Visitas por día</h2>
+        <h2 className="mb-4 flex items-center gap-2 text-sm font-semibold uppercase tracking-wide text-slate">
+          <InfoTip text="Cuántas veces se abrió tu web cada día en las últimas dos semanas. Pasa el ratón por una barra para ver la fecha." />
+          Visitas por día
+        </h2>
         <div className="flex h-36 items-end gap-1.5">
           {perDay.map((n, i) => (
             <div key={i} className="flex flex-1 flex-col items-center gap-1" title={`${key(days[i])}: ${n}`}>
@@ -115,11 +137,17 @@ export default async function WebAnalytics({ siteUrl, fullName }: { siteUrl: str
 
       <div className="grid gap-4 lg:grid-cols-2">
         <Card>
-          <h2 className="mb-4 text-sm font-semibold uppercase tracking-wide text-slate">Qué pulsan</h2>
+          <h2 className="mb-4 flex items-center gap-2 text-sm font-semibold uppercase tracking-wide text-slate">
+            <InfoTip text="Los enlaces y botones que más pulsan tus visitantes. Te dice cómo prefieren contactarte." />
+            Qué pulsan
+          </h2>
           {bars(topClicks, "Todavía no hay clics registrados.")}
         </Card>
         <Card>
-          <h2 className="mb-4 text-sm font-semibold uppercase tracking-wide text-slate">De dónde llegan</h2>
+          <h2 className="mb-4 flex items-center gap-2 text-sm font-semibold uppercase tracking-wide text-slate">
+            <InfoTip text="Desde dónde entran a tu web. «Directo» es quien escribe la dirección, usa un favorito o pulsa un enlace desde WhatsApp." />
+            De dónde llegan
+          </h2>
           {bars(sources, "Todavía no hay visitas registradas.")}
         </Card>
       </div>
