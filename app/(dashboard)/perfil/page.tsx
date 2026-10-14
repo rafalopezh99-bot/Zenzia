@@ -1,7 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentCompanyProfile } from "@/lib/company";
 import { updateCompanyProfile, signVerifactuRepresentation } from "@/lib/actions/company";
-import { signOut } from "@/lib/actions/auth";
 import { Card, PageHeader, Input, Select, PrimaryButton, GhostButton } from "@/components/ui";
 import { VERTICAL_CATALOG, VERTICAL_CATEGORIES } from "@/lib/verticals";
 import { VAT_OPTIONS, IRPF_OPTIONS } from "@/lib/documents";
@@ -75,11 +74,12 @@ export default async function PerfilPage(props: { searchParams: Promise<{ tab?: 
       <PageHeader moduleHeader
         title="Perfil del negocio"
         action={
-          <form action={signOut}>
-            <GhostButton className="text-red-600 hover:border-red-300 hover:text-red-600 dark:text-red-400 dark:hover:text-red-400">
-              Cerrar sesión
-            </GhostButton>
-          </form>
+          <a
+            href="/logout"
+            className="inline-block rounded-full border border-line px-4 py-2 text-sm font-medium text-red-600 transition hover:border-red-300 dark:text-red-400"
+          >
+            Cerrar sesión
+          </a>
         }
       />
 
