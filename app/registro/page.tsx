@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { selfSignup } from "@/lib/actions/signup";
 import { Card, Input, Select, PrimaryButton } from "@/components/ui";
 import { VERTICAL_CATALOG, VERTICAL_CATEGORIES } from "@/lib/verticals";
 import { PLANS } from "@/lib/planContent";
@@ -24,7 +23,7 @@ export default async function RegistroPage(props: { searchParams: Promise<{ plan
           <p className="mb-4 rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700">{searchParams.error}</p>
         )}
 
-        <form action={selfSignup} className="space-y-3">
+        <form action="/api/registro" method="post" className="space-y-3">
           <Input name="full_name" placeholder="Tu nombre" required className="w-full" />
           <Input name="business_name" placeholder="Nombre de tu consulta o negocio" required className="w-full" />
           <Select name="vertical" required defaultValue="" className="w-full">

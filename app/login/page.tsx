@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { signIn } from "@/lib/actions/auth";
 import { Input, PrimaryButton } from "@/components/ui";
 import ZenziaLogo from "@/components/ZenziaLogo";
 
@@ -16,7 +15,9 @@ export default function LoginPage() {
     e.preventDefault();
     setLoading(true);
     const formData = new FormData(e.currentTarget);
-    const result = await signIn(formData);
+    const result = await fetch("/api/login", { method: "POST", body: formData })
+      .then((r) => r.json())
+      .catch(() => ({ error: "No se pudo conectar. Inténtalo de nuevo." }));
     if (result.error) {
       setError(result.error);
       setLoading(false);

@@ -1,19 +1,20 @@
-"use server";
-
-import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { VERTICAL_PACKS } from "@/lib/modules";
 import { toPlanKey } from "@/lib/plans";
 
-const fail = (msg: string) => redirect(`/registro?error=${encodeURIComponent(msg)}`);
+class SignupError extends Error {}
+const fail = (msg: string): never => {
+  throw new SignupError(msg);
+};
 
 // Alta en autoservicio: usuario (Supabase Auth) + empresa + membresía +
 // módulos de su sector. La empresa y la membresía se crean con service_role
 // porque el usuario recién creado aún no pertenece a ninguna empresa (RLS).
 // El plan elegido se guarda como "pendiente de pago" (subscription_status
 // null) y se paga en /planes al terminar el asistente inicial.
-export async function selfSignup(formData: FormData) {
+// Devuelve la ruta a la que ir después (o lanza SignupError con el mensaje).
+async function doSignup(formData: FormData): Promise<string> {
   const full_name = String(formData.get("full_name") ?? "").trim();
   const business_name = String(formData.get("business_name") ?? "").trim();
   const vertical = String(formData.get("vertical") ?? "");
@@ -31,6 +32,9 @@ export async function selfSignup(formData: FormData) {
     password,
     options: { emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000"}/login` },
   });
+  if (error && /sending/i.test(error.message)) {
+    fail("No hemos podido enviarte el email de confirmación. Inténtalo en unos minutos o contacta con soporte (WhatsApp 673 895 732).");
+  }
   if (error || !data.user) fail(error?.message ?? "No se pudo crear la cuenta");
   // Email ya registrado: Supabase devuelve un usuario sin identidades.
   if (data.user!.identities?.length === 0) fail("Ese email ya tiene cuenta. Inicia sesión.");
@@ -49,5 +53,14 @@ export async function selfSignup(formData: FormData) {
     .insert((VERTICAL_PACKS[vertical] ?? []).map((module_key) => ({ company_id: company!.id, module_key, enabled: true })));
 
   // Con confirmación de email activada no hay sesión todavía.
-  redirect(data.session ? "/onboarding" : "/registro/enviado");
+  return data.session ? "/onboarding" : "/registro/enviado";
+}
+
+export async function signupRedirect(formData: FormData): Promise<string> {
+  try {
+    return await doSignup(formData);
+  } catch (e) {
+    const msg = e instanceof SignupError ? e.message : "No se pudo crear la cuenta. Inténtalo de nuevo.";
+    return `/registro?error=${encodeURIComponent(msg)}`;
+  }
 }
