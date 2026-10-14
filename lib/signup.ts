@@ -1,3 +1,5 @@
+import { ZENZIA_ADMIN_COMPANY_ID } from "@/lib/company";
+import { sendEmail, escapeHtml } from "@/lib/messaging";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { VERTICAL_PACKS } from "@/lib/modules";
@@ -42,7 +44,7 @@ async function doSignup(formData: FormData): Promise<string> {
   const db = createAdminClient();
   const { data: company, error: companyError } = await db
     .from("companies")
-    .insert({ name: business_name, vertical, business_type: "autonomo", plan, email, onboarded: false })
+    .insert({ name: business_name, vertical, business_type: "autonomo", plan, email, onboarded: false, activated: false })
     .select("id")
     .single();
   if (companyError || !company) fail("No se pudo crear tu negocio");
@@ -51,6 +53,23 @@ async function doSignup(formData: FormData): Promise<string> {
   await db
     .from("company_modules")
     .insert((VERTICAL_PACKS[vertical] ?? []).map((module_key) => ({ company_id: company!.id, module_key, enabled: true })));
+
+  // Aviso al admin de Zenzia (Notificaciones + email si Resend está configurado).
+  const planName = { start: "Start", smart: "Smart", pro: "Pro", web: "Web" }[plan];
+  await db.from("notifications").insert({
+    company_id: ZENZIA_ADMIN_COMPANY_ID,
+    source: "registro",
+    kind: "alta",
+    full_name,
+    email,
+    message: `Nueva cuenta pendiente de activar: ${business_name} (plan ${planName}). Actívala en Cuentas.`,
+    status: "nueva",
+  });
+  await sendEmail(
+    process.env.ADMIN_EMAIL ?? "zenzia.co@gmail.com",
+    `Nueva cuenta en Zenzia: ${business_name}`,
+    `<p><b>${escapeHtml(full_name)}</b> (${escapeHtml(email)}) ha creado la cuenta <b>${escapeHtml(business_name)}</b> con el plan <b>${planName}</b>.</p><p>Actívala desde Zenzia → Cuentas.</p>`
+  ).catch(() => false);
 
   // Con confirmación de email activada no hay sesión todavía.
   return data.session ? "/onboarding" : "/registro/enviado";

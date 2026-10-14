@@ -23,6 +23,34 @@ export default async function DashboardLayout({ children }: { children: React.Re
   const isAdmin = profile.companyId === ZENZIA_ADMIN_COMPANY_ID;
   const webOnly = profile.plan === "web";
 
+  // Cuenta nueva pendiente de que Zenzia la active (alta manual).
+  if (!profile.activated && !isAdmin) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-paper px-4 text-ink">
+        <div className="w-full max-w-md rounded-2xl border border-line bg-surface p-8 text-center">
+          <div className="text-4xl">⏳</div>
+          <h1 className="mt-3 text-xl font-bold">Tu cuenta está pendiente de activación</h1>
+          <p className="mt-2 text-sm text-slate">
+            Gracias por registrarte en Zenzia, {profile.companyName}. Revisamos tu alta y te contactamos en breve para activarla.
+          </p>
+          <a
+            href="https://wa.me/34673895732?text=Hola%2C%20acabo%20de%20registrarme%20en%20Zenzia"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="mt-6 inline-block rounded-xl bg-brand px-5 py-2.5 text-sm font-bold text-white"
+          >
+            Escribir a soporte · 673 895 732
+          </a>
+          <div className="mt-4">
+            <a href="/logout" className="text-xs text-slate hover:text-ink">
+              Cerrar sesión
+            </a>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   // Verificación en dos pasos: si la cuenta la tiene activada y esta sesión
   // aún no ha metido el código, al segundo paso del login.
   const { data: aal } = await (await createClient()).auth.mfa.getAuthenticatorAssuranceLevel();

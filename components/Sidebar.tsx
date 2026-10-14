@@ -166,6 +166,11 @@ export default function Sidebar({
           </Link>
         ))}
         {isAdmin && (
+          <Link href="/cuentas" className={linkClass} onClick={close}>
+            Cuentas
+          </Link>
+        )}
+        {isAdmin && (
           <Link href="/solicitudes" className={`${linkClass} flex items-center justify-between`} onClick={close}>
             <span>Solicitudes</span>
             {signupRequestCount > 0 && (
