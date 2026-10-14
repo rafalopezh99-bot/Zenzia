@@ -42,7 +42,7 @@ export default async function PerfilPage(props: { searchParams: Promise<{ tab?: 
   const { data: company } = await supabase
     .from("companies")
     .select(
-      "name, vertical, business_type, phone, email, tax_id, address, postal_code, city, default_vat, default_irpf, logo_path, booking, google_review_url, verifactu_state, calendar_token"
+      "name, vertical, sector_other, business_type, phone, email, tax_id, address, postal_code, city, default_vat, default_irpf, logo_path, booking, google_review_url, verifactu_state, calendar_token"
     )
     .eq("id", companyId)
     .single();
@@ -183,6 +183,12 @@ export default async function PerfilPage(props: { searchParams: Promise<{ tab?: 
                   </optgroup>
                 ))}
               </Select>
+              <Input
+                name="sector_other"
+                placeholder="Si eliges «Otros», escribe a qué te dedicas"
+                defaultValue={company?.sector_other ?? ""}
+                className="sm:col-span-2"
+              />
             </div>
           </Card>
           <Card className="mb-4">

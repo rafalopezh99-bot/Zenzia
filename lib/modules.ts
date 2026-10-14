@@ -88,6 +88,7 @@ export const VERTICAL_PACKS: Record<string, ModuleKey[]> = {
   // para historiales médicos/clínicos, no encaja en clases particulares —
   // el progreso del alumno ya lo cubre "seguimiento".
   academia: ["agenda", "seguimiento", "bonos", "facturacion"],
+  otros: ["agenda", "facturacion"],
   logopedia: ["agenda", "historial_clinico", "seguimiento", "bonos", "facturacion"],
   pilates_yoga: ["agenda", "seguimiento", "bonos", "facturacion"],
   coaching: ["agenda", "seguimiento", "bonos", "facturacion"],

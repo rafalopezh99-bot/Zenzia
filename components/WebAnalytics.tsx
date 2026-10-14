@@ -5,7 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 // web_events, la rellena el script de su web). Últimos 30 días.
 const DAY = 86400000;
 
-export default async function WebAnalytics({ siteUrl }: { siteUrl: string | null }) {
+export default async function WebAnalytics({ siteUrl, fullName }: { siteUrl: string | null; fullName?: string | null }) {
   const supabase = await createClient();
   const since = new Date(Date.now() - 30 * DAY);
   const { data } = await supabase
@@ -82,7 +82,10 @@ export default async function WebAnalytics({ siteUrl }: { siteUrl: string | null
   return (
     <div className="max-w-5xl">
       <div className="mb-4 flex flex-wrap items-baseline justify-between gap-2">
-        <h1 className="text-xl font-bold text-ink sm:text-2xl">Tu web en números</h1>
+        <div>
+          <h1 className="text-xl font-bold text-ink sm:text-3xl">{fullName ? `¡Hola, ${fullName}!` : "¡Hola!"}</h1>
+          <p className="text-sm text-slate">Así va tu web</p>
+        </div>
         {siteUrl && (
           <a href={siteUrl} target="_blank" rel="noopener noreferrer" className="text-sm text-brand hover:underline">
             {siteUrl.replace(/^https?:\/\//, "")} ↗

@@ -16,9 +16,11 @@ export const ALL_VERTICAL_CATEGORIES = [
   "Automoción",
   "Hogar y mantenimiento",
   "Negocios y servicios profesionales",
+  "Otros",
 ] as const;
 
 export const ALL_VERTICALS: VerticalDef[] = [
+  { key: "otros", label: "Otros (escríbelo)", category: "Otros" },
   // Salud y bienestar
   { key: "fisio", label: "Fisioterapia", category: "Salud y bienestar" },
   { key: "osteopatia", label: "Osteopatía", category: "Salud y bienestar" },
@@ -65,6 +67,7 @@ export const ALL_VERTICALS: VerticalDef[] = [
 // ofrecen en el alta, el perfil y la web. El resto sigue en ALL_VERTICALS
 // para no romper empresas ya dadas de alta con esos sectores.
 const FOCUS_KEYS = [
+  "otros",
   "nutricion",
   "psicologia",
   "entrenador_personal",

@@ -29,7 +29,7 @@ export async function updateCompanyProfile(formData: FormData) {
     if (!text("name")) throw new Error("El nombre del negocio es obligatorio");
     companyUpdate.name = text("name");
   }
-  for (const k of ["phone", "email", "tax_id", "address", "postal_code", "city"]) {
+  for (const k of ["phone", "email", "tax_id", "address", "postal_code", "city", "sector_other"]) {
     if (formData.has(k)) companyUpdate[k] = text(k) || null;
   }
   if (formData.has("default_vat")) companyUpdate.default_vat = Number(formData.get("default_vat"));
