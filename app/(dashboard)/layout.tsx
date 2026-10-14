@@ -6,7 +6,8 @@ import { createClient } from "@/lib/supabase/server";
 import { headers } from "next/headers";
 import { stripeEnabled } from "@/lib/stripe";
 import { MODULE_CATALOG } from "@/lib/modules";
-import { filterModulesByPlan, planAllowsNotifications } from "@/lib/plans";
+import { filterModulesByPlan, planAllowsNotifications, planHas } from "@/lib/plans";
+import AssistantChat from "@/components/AssistantChat";
 
 // Todo lo que cuelga de este layout depende de la sesión y de los módulos
 // activados por empresa — nunca se prerenderiza estático.
@@ -153,6 +154,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
         )}
         {children}
       </main>
+      {planHas(profile.plan, "assistant") && !!process.env.ANTHROPIC_API_KEY && <AssistantChat name={profile.fullName} />}
     </div>
   );
 }

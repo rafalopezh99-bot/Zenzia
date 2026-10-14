@@ -45,7 +45,7 @@ export function planAllowsNotifications(plan: PlanKey) {
 }
 
 // Funciones de Smart y Pro (ver lib/planContent.ts para el texto comercial).
-export type PlanFeature = "booking" | "email_reminders" | "whatsapp" | "reviews" | "winback" | "portal";
+export type PlanFeature = "booking" | "email_reminders" | "whatsapp" | "reviews" | "winback" | "portal" | "assistant";
 const FEATURE_MIN_PLAN: Record<PlanFeature, PlanKey> = {
   booking: "smart",
   email_reminders: "smart",
@@ -53,6 +53,7 @@ const FEATURE_MIN_PLAN: Record<PlanFeature, PlanKey> = {
   reviews: "pro",
   winback: "pro",
   portal: "pro",
+  assistant: "pro",
 };
 const PLAN_RANK: Record<PlanKey, number> = { start: 0, smart: 1, pro: 2, web: -1 };
 
