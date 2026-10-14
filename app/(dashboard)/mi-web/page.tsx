@@ -1,3 +1,4 @@
+import SiteLiveEditor from "@/components/SiteLiveEditor";
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentCompanyId } from "@/lib/company";
 import { updateSiteContent, addService, removeService, toggleSitePublished } from "@/lib/actions/siteContent";
@@ -16,6 +17,11 @@ import { Card, PageHeader, PrimaryButton } from "@/components/ui";
 export default async function MiWebPage() {
   const supabase = await createClient();
   const companyId = await getCurrentCompanyId();
+
+  // Web propia hecha por nosotros (companies.site_url): editor en vivo sobre
+  // la web real en vez del editor de plantillas.
+  const { data: co } = await supabase.from("companies").select("site_url").eq("id", companyId).single();
+  if (co?.site_url) return <SiteLiveEditor siteUrl={co.site_url.replace(/\/$/, "")} companyId={companyId} />;
 
   const { data: site } = await supabase
     .from("site_content")

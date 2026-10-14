@@ -32,7 +32,7 @@ export const MODULE_CATALOG: ModuleDef[] = [
   { key: "fotos", label: "Fotos", href: "/fotos" },
   { key: "consentimientos", label: "Consentimientos", href: "/consentimientos" },
   { key: "facturacion", label: "Facturación", href: "/facturacion" },
-  { key: "sitio_web", label: "Mi Web", href: "/mi-web" },
+  { key: "sitio_web", label: "Mi web", href: "/mi-web" },
   { key: "proveedores", label: "Proveedores", href: "/proveedores" },
 ];
 
