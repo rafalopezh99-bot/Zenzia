@@ -428,6 +428,7 @@ export default function LandingPage() {
                 email: "zenzia.co@gmail.com",
                 telephone: "+34673895732",
                 areaServed: "ES",
+                sameAs: ["https://share.google/ODzMS9pfn3emLD7PD"],
               },
               {
                 "@type": "SoftwareApplication",
