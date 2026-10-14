@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
+import WebGallery from "@/components/WebGallery";
 
 // "Mi web" para webas propias (companies.site_url): se ve la web real en un
 // iframe. Con "Editar", la web entra en modo edición (?zz_edit=1, ver
@@ -43,6 +44,8 @@ export default function SiteLiveEditor({ siteUrl, companyId }: { siteUrl: string
   const [busy, setBusy] = useState(false);
   // La web avisa al cargar si tiene álbumes de fotos (galerías gestionables).
   const [hasAlbums, setHasAlbums] = useState(false);
+  // Selector de foto: al pulsar una imagen de la web se elige de la galería o se sube una nueva.
+  const [picking, setPicking] = useState<string | null>(null);
 
   const publicUrl = (path: string) => supabase.storage.from(BUCKET).getPublicUrl(path).data.publicUrl;
   const flash = (msg: string) => {
@@ -89,7 +92,7 @@ export default function SiteLiveEditor({ siteUrl, companyId }: { siteUrl: string
         flash(error ? `Error: ${error.message}` : "✓ Texto guardado");
       } else if (d.type === "zz-img") {
         pendingImageKey.current = d.key;
-        fileInput.current?.click();
+        setPicking(d.key);
       } else if (d.type === "zz-album") {
         openAlbum(d.slug);
       } else if (d.type === "zz-static") {
@@ -117,7 +120,18 @@ export default function SiteLiveEditor({ siteUrl, companyId }: { siteUrl: string
     return () => window.removeEventListener("message", onMessage);
   }); // eslint-disable-line react-hooks/exhaustive-deps
 
+  // Foto elegida de la galería: se guarda su enlace directamente.
+  const pickGalleryImage = async (url: string) => {
+    const key = picking;
+    setPicking(null);
+    if (!key) return;
+    await supabase.from("web_texts").upsert({ company_id: companyId, key: `img:${key}`, value: url, updated_at: new Date().toISOString() });
+    flash("✓ Foto cambiada");
+    reload();
+  };
+
   const onImagePicked = async (file: File | undefined) => {
+    setPicking(null);
     const key = pendingImageKey.current;
     if (!file || !key) return;
     setBusy(true);
@@ -278,6 +292,25 @@ export default function SiteLiveEditor({ siteUrl, companyId }: { siteUrl: string
           </div>
         )}
       </div>
+
+      {picking && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" onClick={() => setPicking(null)}>
+          <div className="max-h-[85vh] w-full max-w-3xl overflow-y-auto rounded-2xl bg-surface p-5" onClick={(e) => e.stopPropagation()}>
+            <div className="mb-4 flex items-center justify-between">
+              <h2 className="text-base font-bold text-ink">Elige una foto</h2>
+              <div className="flex items-center gap-3">
+                <button onClick={() => fileInput.current?.click()} className="text-sm font-semibold text-brand hover:underline">
+                  Subir desde el ordenador
+                </button>
+                <button onClick={() => setPicking(null)} className="text-slate hover:text-ink" aria-label="Cerrar">
+                  ✕
+                </button>
+              </div>
+            </div>
+            <WebGallery companyId={companyId} onPick={pickGalleryImage} />
+          </div>
+        </div>
+      )}
 
       <input ref={fileInput} type="file" accept="image/*" className="hidden" onChange={(e) => onImagePicked(e.target.files?.[0])} />
     </div>

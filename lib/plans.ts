@@ -7,9 +7,10 @@ import { createClient } from "@/lib/supabase/server";
 import type { ModuleDef, ModuleKey } from "@/lib/modules";
 import type { WidgetKey } from "@/lib/widgets";
 
-export type PlanKey = "start" | "smart" | "pro";
+// "web" es un plan interno (no se vende en la web): solo "Mi web" y su galería.
+export type PlanKey = "start" | "smart" | "pro" | "web";
 
-export const PLAN_LABEL: Record<PlanKey, string> = { start: "Start", smart: "Smart", pro: "Pro" };
+export const PLAN_LABEL: Record<PlanKey, string> = { start: "Start", smart: "Smart", pro: "Pro", web: "Web" };
 
 // Límites mensuales (null = ilimitado). Se cuenta lo creado en el mes en curso.
 export type LimitKey = "contacts" | "invoices" | "quotes" | "proformas";
@@ -18,15 +19,17 @@ export const PLAN_LIMITS: Record<PlanKey, Record<LimitKey, number | null>> = {
   start: { contacts: 30, invoices: 30, quotes: 10, proformas: 10 },
   smart: { contacts: 150, invoices: 150, quotes: 50, proformas: 50 },
   pro: { contacts: null, invoices: null, quotes: null, proformas: null },
+  web: { contacts: 0, invoices: 0, quotes: 0, proformas: 0 },
 };
 
-export const PLAN_USERS: Record<PlanKey, number | null> = { start: 1, smart: 3, pro: null };
+export const PLAN_USERS: Record<PlanKey, number | null> = { start: 1, smart: 3, pro: null, web: 1 };
 
 // Start: solo dashboard, clientes, agenda, facturación y perfil. Smart y
 // Pro tienen todos los módulos que active su vertical (Mi Web, solo Pro).
 const START_MODULES: ModuleKey[] = ["agenda", "facturacion", "presupuestos"];
 
 export function planAllowsModule(plan: PlanKey, key: ModuleKey): boolean {
+  if (plan === "web") return key === "sitio_web";
   if (key === "sitio_web") return plan === "pro";
   return plan !== "start" || START_MODULES.includes(key);
 }
@@ -51,7 +54,7 @@ const FEATURE_MIN_PLAN: Record<PlanFeature, PlanKey> = {
   winback: "pro",
   portal: "pro",
 };
-const PLAN_RANK: Record<PlanKey, number> = { start: 0, smart: 1, pro: 2 };
+const PLAN_RANK: Record<PlanKey, number> = { start: 0, smart: 1, pro: 2, web: -1 };
 
 export function planHas(plan: PlanKey, feature: PlanFeature) {
   return PLAN_RANK[plan] >= PLAN_RANK[FEATURE_MIN_PLAN[feature]];
@@ -65,7 +68,7 @@ export function planAllowsWidget(plan: PlanKey, key: WidgetKey) {
 }
 
 export function toPlanKey(raw: unknown): PlanKey {
-  return raw === "smart" || raw === "pro" ? raw : "start";
+  return raw === "smart" || raw === "pro" || raw === "web" ? raw : "start";
 }
 
 const LIMIT_TABLE: Record<LimitKey, string> = {

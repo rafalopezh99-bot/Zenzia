@@ -6,6 +6,7 @@ import type { ModuleDef } from "@/lib/modules";
 import { getTerminology, showsAcademiaFields } from "@/lib/terminology";
 import ThemeToggle from "@/components/ThemeToggle";
 import ZenziaLogo from "@/components/ZenziaLogo";
+import { signOut } from "@/lib/actions/auth";
 
 // El sidebar no sabe nada de "fisio" ni "taller": solo pinta los módulos
 // que llegan activados. Añadir o quitar una ventana para un cliente es
@@ -24,6 +25,7 @@ export default function Sidebar({
   showStats = true,
   showNotifications = true,
   locked = [],
+  webOnly = false,
 }: {
   modules: ModuleDef[];
   notificationCount?: number;
@@ -33,6 +35,8 @@ export default function Sidebar({
   showStats?: boolean;
   showNotifications?: boolean;
   locked?: string[];
+  // Plan Web: el menú solo tiene "Mi web", "Galería" y cerrar sesión.
+  webOnly?: boolean;
 }) {
   const [open, setOpen] = useState(false);
   const terms = getTerminology(vertical);
@@ -96,6 +100,17 @@ export default function Sidebar({
             </svg>
           </button>
         </div>
+        {webOnly ? (
+          <>
+            <Link href="/mi-web" className={linkClass} onClick={close}>
+              Mi web
+            </Link>
+            <Link href="/galeria" className={linkClass} onClick={close}>
+              Galería
+            </Link>
+          </>
+        ) : (
+          <>
         <Link href="/dashboard" className={linkClass} onClick={close}>
           Dashboard
         </Link>
@@ -159,10 +174,19 @@ export default function Sidebar({
           </Link>
         )}
 
+          </>
+        )}
+
         <div className="mt-auto flex items-center justify-between gap-2 border-t border-line pt-3">
-          <Link href="/perfil" className={`${linkClass} flex-1 px-2`} onClick={close}>
-            Perfil del negocio
-          </Link>
+          {webOnly ? (
+            <form action={signOut} className="flex-1">
+              <button className={`${linkClass} w-full px-2 text-left`}>Cerrar sesión</button>
+            </form>
+          ) : (
+            <Link href="/perfil" className={`${linkClass} flex-1 px-2`} onClick={close}>
+              Perfil del negocio
+            </Link>
+          )}
           <ThemeToggle />
         </div>
       </nav>

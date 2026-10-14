@@ -21,6 +21,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
   if (!profile.onboarded) redirect("/onboarding");
 
   const isAdmin = profile.companyId === ZENZIA_ADMIN_COMPANY_ID;
+  const webOnly = profile.plan === "web";
 
   // Verificación en dos pasos: si la cuenta la tiene activada y esta sesión
   // aún no ha metido el código, al segundo paso del login.
@@ -30,7 +31,9 @@ export default async function DashboardLayout({ children }: { children: React.Re
   // Sin suscripción activa (Stripe configurado), solo se puede entrar a
   // /planes para pagar y a /perfil. La cuenta de Zenzia (admin) no paga.
   const currentPath = (await headers()).get("x-pathname") ?? "";
-  if (stripeEnabled() && !isAdmin && !["/planes", "/perfil"].some((p) => currentPath.startsWith(p))) {
+  // Plan Web (interno): solo "Mi web" y su galería.
+  if (webOnly && !["/mi-web", "/galeria"].some((p) => currentPath.startsWith(p))) redirect("/mi-web");
+  if (stripeEnabled() && !isAdmin && !webOnly && !["/planes", "/perfil"].some((p) => currentPath.startsWith(p))) {
     const { data: sub } = await (await createClient())
       .from("companies")
       .select("subscription_status")
@@ -93,6 +96,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
         showStats={profile.plan !== "start"}
         showNotifications={showNotifications}
         locked={locked}
+        webOnly={webOnly}
       />
       <main className="flex-1 overflow-x-hidden p-4 sm:p-8">{children}</main>
     </div>
