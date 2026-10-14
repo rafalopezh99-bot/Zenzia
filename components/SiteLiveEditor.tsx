@@ -41,6 +41,8 @@ export default function SiteLiveEditor({ siteUrl, companyId }: { siteUrl: string
   const [photos, setPhotos] = useState<Photo[]>([]);
   const [photoCount, setPhotoCount] = useState<number | null>(null);
   const [busy, setBusy] = useState(false);
+  // La web avisa al cargar si tiene álbumes de fotos (galerías gestionables).
+  const [hasAlbums, setHasAlbums] = useState(false);
 
   const publicUrl = (path: string) => supabase.storage.from(BUCKET).getPublicUrl(path).data.publicUrl;
   const flash = (msg: string) => {
@@ -80,7 +82,9 @@ export default function SiteLiveEditor({ siteUrl, companyId }: { siteUrl: string
     const onMessage = async (e: MessageEvent) => {
       if (e.origin !== origin || !e.data?.type) return;
       const d = e.data;
-      if (d.type === "zz-text") {
+      if (d.type === "zz-ready") {
+        setHasAlbums(d.albums !== false);
+      } else if (d.type === "zz-text") {
         const { error } = await supabase.from("web_texts").upsert({ company_id: companyId, key: d.key, value: d.value, updated_at: new Date().toISOString() });
         flash(error ? `Error: ${error.message}` : "✓ Texto guardado");
       } else if (d.type === "zz-img") {
@@ -192,16 +196,18 @@ export default function SiteLiveEditor({ siteUrl, companyId }: { siteUrl: string
     <div>
       <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
         <div className="text-sm text-slate">
-          {edit ? "Haz clic en un texto para cambiarlo, en una foto para sustituirla o en un álbum para gestionar sus fotos." : siteUrl.replace(/^https?:\/\//, "")}
+          {edit
+            ? "Haz clic en un texto para cambiarlo o en una foto para sustituirla. También puedes añadir o quitar elementos y ocultar secciones."
+            : siteUrl.replace(/^https?:\/\//, "")}
         </div>
         <div className="flex flex-wrap items-center gap-2">
           {status && <span className="text-xs font-medium text-green-700">{status}</span>}
-          {edit && photoCount === 0 && (
+          {edit && hasAlbums && photoCount === 0 && (
             <button onClick={importStatic} disabled={busy} className={btn}>
               Importar fotos actuales
             </button>
           )}
-          {edit && (
+          {edit && hasAlbums && (
             <button onClick={newAlbum} className={btn}>
               + Nuevo álbum
             </button>
