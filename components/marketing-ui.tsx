@@ -48,14 +48,14 @@ export function MarketingHeader({ minimal = false }: { minimal?: boolean }) {
               </a>
             </nav>
             <div className="flex items-center justify-self-end gap-4">
-              <a href="#contacto" className="hidden text-sm font-semibold text-mk-ink transition hover:text-mk-accent sm:block">
-                Pedir una demo
-              </a>
-              <Link
-                href="/login"
-                className="rounded-full bg-mk-accent px-5 py-2.5 text-sm font-semibold text-white transition hover:brightness-110"
-              >
+              <Link href="/login" className="text-sm font-semibold text-mk-ink transition hover:text-mk-accent">
                 Acceder
+              </Link>
+              <Link
+                href="/registro"
+                className="hidden rounded-full bg-mk-accent px-5 py-2.5 text-sm font-semibold text-white transition hover:brightness-110 sm:inline-block"
+              >
+                Pruébalo gratis
               </Link>
             </div>
           </>

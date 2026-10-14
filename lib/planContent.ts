@@ -36,7 +36,7 @@ export const PLANS: PlanContent[] = [
       "Importa tus pacientes desde Excel",
       "Exporta tus facturas para tu gestor",
     ],
-    cta: "Quiero Start",
+    cta: "Empezar prueba gratis",
     featured: false,
   },
   {
@@ -59,7 +59,7 @@ export const PLANS: PlanContent[] = [
       "Firma de consentimientos online",
       "Hasta 3 profesionales",
     ],
-    cta: "Quiero Smart",
+    cta: "Empezar prueba gratis",
     featured: true,
   },
   {
@@ -79,7 +79,7 @@ export const PLANS: PlanContent[] = [
       "Todo ilimitado",
       "Implantación y soporte prioritario",
     ],
-    cta: "Solicitar auditoría",
+    cta: "Empezar prueba gratis",
     featured: false,
   },
 ];

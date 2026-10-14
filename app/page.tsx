@@ -179,12 +179,17 @@ export default function LandingPage() {
 
               <div className="mt-8">
                 <a
-                  href="#contacto"
+                  href="/registro"
                   className="inline-block rounded-full bg-mk-accent px-7 py-3.5 text-sm font-semibold text-white transition hover:brightness-110"
                 >
-                  Pedir una demo
+                  Pruébalo gratis 14 días
                 </a>
-                <p className="mt-2.5 text-xs text-mk-muted">✦ Te la preparo yo mismo, sin compromiso</p>
+                <p className="mt-2.5 text-xs text-mk-muted">
+                  Sin tarjeta · o{" "}
+                  <a href="https://wa.me/34673895732?text=Hola%2C%20quiero%20una%20demo%20de%20Zenzia" target="_blank" rel="noopener noreferrer" className="underline hover:text-mk-ink">
+                    pide una demo por WhatsApp
+                  </a>
+                </p>
               </div>
             </div>
 
@@ -214,10 +219,10 @@ export default function LandingPage() {
             usar. Ajustas lo que quieras después, sin tocar código ni pedirle nada a nadie.
           </p>
           <a
-            href="#contacto"
+            href="/registro"
             className="mt-6 inline-block rounded-full border border-mk-ink px-6 py-2.5 text-sm font-semibold text-mk-ink transition hover:bg-mk-ink hover:text-white"
           >
-            Pedir una demo
+            Pruébalo gratis 14 días
           </a>
         </div>
       </section>
@@ -382,10 +387,10 @@ export default function LandingPage() {
             <DashboardMockup />
           </div>
           <a
-            href="#contacto"
+            href="/registro"
             className="mt-10 inline-block rounded-full bg-mk-accent px-7 py-3.5 text-sm font-semibold text-white transition hover:brightness-110"
           >
-            Pedir una demo
+            Pruébalo gratis 14 días
           </a>
         </div>
       </section>
