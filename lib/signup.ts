@@ -14,7 +14,7 @@ const fail = (msg: string): never => {
 // El plan elegido se guarda como "pendiente de pago" (subscription_status
 // null) y se paga en /planes al terminar el asistente inicial.
 // Devuelve la ruta a la que ir después (o lanza SignupError con el mensaje).
-async function doSignup(formData: FormData): Promise<string> {
+async function doSignup(formData: FormData, origin: string): Promise<string> {
   const full_name = String(formData.get("full_name") ?? "").trim();
   const business_name = String(formData.get("business_name") ?? "").trim();
   const vertical = String(formData.get("vertical") ?? "");
@@ -30,7 +30,7 @@ async function doSignup(formData: FormData): Promise<string> {
   const { data, error } = await supabase.auth.signUp({
     email,
     password,
-    options: { emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000"}/login` },
+    options: { emailRedirectTo: `${origin}/auth/callback?next=/dashboard` },
   });
   if (error && /sending/i.test(error.message)) {
     fail("No hemos podido enviarte el email de confirmación. Inténtalo en unos minutos o contacta con soporte (WhatsApp 673 895 732).");
@@ -64,9 +64,9 @@ async function doSignup(formData: FormData): Promise<string> {
   return data.session ? "/onboarding" : "/registro/enviado";
 }
 
-export async function signupRedirect(formData: FormData): Promise<string> {
+export async function signupRedirect(formData: FormData, origin: string): Promise<string> {
   try {
-    return await doSignup(formData);
+    return await doSignup(formData, origin);
   } catch (e) {
     const msg = e instanceof SignupError ? e.message : "No se pudo crear la cuenta. Inténtalo de nuevo.";
     return `/registro?error=${encodeURIComponent(msg)}`;
