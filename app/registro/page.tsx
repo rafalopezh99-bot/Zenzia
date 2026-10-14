@@ -17,7 +17,7 @@ export default async function RegistroPage(props: { searchParams: Promise<{ plan
         <div className="mb-1 flex items-center justify-center">
           <ZenziaLogo className="h-14 w-auto" />
         </div>
-        <p className="mb-6 text-center text-sm text-slate">Crea tu cuenta y empieza a organizar tu consulta.</p>
+        <p className="mb-6 text-center text-sm text-slate">Crea tu cuenta y pruébalo gratis 14 días, sin tarjeta.</p>
 
         {searchParams.error && (
           <p className="mb-4 rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700">{searchParams.error}</p>
@@ -26,6 +26,7 @@ export default async function RegistroPage(props: { searchParams: Promise<{ plan
         <form action="/api/registro" method="post" className="space-y-3">
           <Input name="full_name" placeholder="Tu nombre" required className="w-full" />
           <Input name="business_name" placeholder="Nombre de tu consulta o negocio" required className="w-full" />
+          <div className="group space-y-3">
           <Select name="vertical" required defaultValue="" className="w-full">
             <option value="" disabled>
               ¿A qué te dedicas?
@@ -40,6 +41,8 @@ export default async function RegistroPage(props: { searchParams: Promise<{ plan
               </optgroup>
             ))}
           </Select>
+          <Input name="sector_other" placeholder="Escribe a qué te dedicas" className="hidden group-has-[option[value=otros]:checked]:block w-full" />
+          </div>
           <Select name="plan" defaultValue={defaultPlan} className="w-full">
             {PLANS.map((p) => (
               <option key={p.key} value={p.key}>

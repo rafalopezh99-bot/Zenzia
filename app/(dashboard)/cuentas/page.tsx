@@ -24,12 +24,20 @@ export default async function CuentasPage() {
       <PageHeader moduleHeader title="Cuentas" />
       <div className="space-y-3">
         {rows.map((c) => (
-          <Card key={c.id} className={c.activated ? "" : "border-amber-400"}>
+          <Card key={c.id}>
             <form action={updateAccount.bind(null, c.id)} className="flex flex-wrap items-center justify-between gap-3">
               <div className="min-w-0">
                 <div className="flex flex-wrap items-center gap-2">
                   <span className="font-semibold text-ink">{c.name}</span>
-                  <Badge tone={c.activated ? "green" : "amber"}>{c.activated ? "Activa" : "Pendiente"}</Badge>
+                  <Badge tone={!c.activated ? "red" : c.trial_ends_at ? (new Date(c.trial_ends_at) < new Date() ? "red" : "amber") : "green"}>
+                    {!c.activated
+                      ? "Bloqueada"
+                      : c.trial_ends_at
+                        ? new Date(c.trial_ends_at) < new Date()
+                          ? "Prueba terminada"
+                          : `Prueba hasta ${new Date(c.trial_ends_at).toLocaleDateString("es-ES")}`
+                        : "Activa"}
+                  </Badge>
                 </div>
                 <div className="text-xs text-slate">
                   {c.owner_name ?? "—"} · {c.owner_email ?? "sin email"}
@@ -45,9 +53,18 @@ export default async function CuentasPage() {
                     </option>
                   ))}
                 </Select>
-                <label className="flex items-center gap-1 text-sm text-ink">
-                  <input type="checkbox" name="activated" defaultChecked={c.activated} /> Activa
-                </label>
+                <Select name="status" defaultValue={!c.activated ? "blocked" : c.trial_ends_at ? "trial" : "active"} className="!py-1.5">
+                  <option value="active">Activa (pagando)</option>
+                  <option value="trial">En prueba</option>
+                  <option value="blocked">Bloqueada</option>
+                </Select>
+                <input
+                  type="date"
+                  name="trial_ends"
+                  title="Fin de la prueba"
+                  defaultValue={c.trial_ends_at ? new Date(c.trial_ends_at).toISOString().slice(0, 10) : ""}
+                  className="rounded-xl border border-line bg-surface px-2 py-1.5 text-sm text-ink"
+                />
                 <PrimaryButton className="!px-4 !py-1.5">Guardar</PrimaryButton>
               </div>
             </form>

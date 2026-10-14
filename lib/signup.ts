@@ -1,7 +1,5 @@
-import { ZENZIA_ADMIN_COMPANY_ID } from "@/lib/company";
 import { sendEmail, escapeHtml } from "@/lib/messaging";
 import { createClient } from "@/lib/supabase/server";
-import { createAdminClient } from "@/lib/supabase/admin";
 import { VERTICAL_PACKS } from "@/lib/modules";
 import { toPlanKey } from "@/lib/plans";
 
@@ -41,34 +39,25 @@ async function doSignup(formData: FormData): Promise<string> {
   // Email ya registrado: Supabase devuelve un usuario sin identidades.
   if (data.user!.identities?.length === 0) fail("Ese email ya tiene cuenta. Inicia sesión.");
 
-  const db = createAdminClient();
-  const { data: company, error: companyError } = await db
-    .from("companies")
-    .insert({ name: business_name, vertical, business_type: "autonomo", plan, email, onboarded: false, activated: false })
-    .select("id")
-    .single();
-  if (companyError || !company) fail("No se pudo crear tu negocio");
-
-  await db.from("company_users").insert({ company_id: company!.id, user_id: data.user!.id, role: "owner", full_name });
-  await db
-    .from("company_modules")
-    .insert((VERTICAL_PACKS[vertical] ?? []).map((module_key) => ({ company_id: company!.id, module_key, enabled: true })));
-
-  // Aviso al admin de Zenzia (Notificaciones + email si Resend está configurado).
-  const planName = { start: "Start", smart: "Smart", pro: "Pro", web: "Web" }[plan];
-  await db.from("notifications").insert({
-    company_id: ZENZIA_ADMIN_COMPANY_ID,
-    source: "registro",
-    kind: "alta",
-    full_name,
-    email,
-    message: `Nueva cuenta pendiente de activar: ${business_name} (plan ${planName}). Actívala en Cuentas.`,
-    status: "nueva",
+  // Negocio + titular + módulos + aviso al admin, en la base de datos (sin service_role).
+  const { error: companyError } = await supabase.rpc("create_signup_company", {
+    p_user: data.user!.id,
+    p_email: email,
+    p_full_name: full_name,
+    p_business: business_name,
+    p_vertical: vertical,
+    p_plan: plan,
+    p_modules: VERTICAL_PACKS[vertical] ?? [],
+    p_sector_other: String(formData.get("sector_other") ?? "").trim() || null,
   });
+  if (companyError) fail("No se pudo crear tu negocio. Escríbenos por WhatsApp al 673 895 732.");
+
+  // Aviso por email al admin (la notificación en Zenzia la crea la función de la base de datos).
+  const planName = { start: "Start", smart: "Smart", pro: "Pro", web: "Web" }[plan];
   await sendEmail(
     process.env.ADMIN_EMAIL ?? "zenzia.co@gmail.com",
     `Nueva cuenta en Zenzia: ${business_name}`,
-    `<p><b>${escapeHtml(full_name)}</b> (${escapeHtml(email)}) ha creado la cuenta <b>${escapeHtml(business_name)}</b> con el plan <b>${planName}</b>.</p><p>Actívala desde Zenzia → Cuentas.</p>`
+    `<p><b>${escapeHtml(full_name)}</b> (${escapeHtml(email)}) ha creado la cuenta <b>${escapeHtml(business_name)}</b> con el plan <b>${planName}</b> (prueba gratuita de 14 días).</p><p>Gestiónala desde Zenzia → Cuentas.</p>`
   ).catch(() => false);
 
   // Con confirmación de email activada no hay sesión todavía.

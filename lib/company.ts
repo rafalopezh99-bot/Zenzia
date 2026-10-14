@@ -43,7 +43,7 @@ export const getCurrentCompanyProfile = cache(async () => {
   // viaje de red en vez de dos.
   const { data: membership } = await supabase
     .from("company_users")
-    .select("company_id, full_name, companies(name, onboarded, vertical, logo_path, dashboard_widgets, plan, activated)")
+    .select("company_id, full_name, companies(name, onboarded, vertical, logo_path, dashboard_widgets, plan, activated, trial_ends_at)")
     .eq("user_id", user.id)
     .limit(1)
     .single();
@@ -69,6 +69,7 @@ export const getCurrentCompanyProfile = cache(async () => {
     dashboardWidgets: (company?.dashboard_widgets as unknown) ?? null,
     plan: toPlanKey(company?.plan),
     activated: (company?.activated as boolean | undefined) ?? true,
+    trialEndsAt: (company?.trial_ends_at as string | null) ?? null,
   };
 });
 

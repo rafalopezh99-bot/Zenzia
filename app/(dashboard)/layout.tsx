@@ -23,23 +23,29 @@ export default async function DashboardLayout({ children }: { children: React.Re
   const isAdmin = profile.companyId === ZENZIA_ADMIN_COMPANY_ID;
   const webOnly = profile.plan === "web";
 
-  // Cuenta nueva pendiente de que Zenzia la active (alta manual).
-  if (!profile.activated && !isAdmin) {
+  // Prueba gratuita de 14 días: al terminar (o si la cuenta está desactivada)
+  // solo se ve el aviso para contactar con soporte.
+  const trialEnded = !!profile.trialEndsAt && new Date(profile.trialEndsAt).getTime() < Date.now();
+  if (!isAdmin && (!profile.activated || trialEnded)) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-paper px-4 text-ink">
         <div className="w-full max-w-md rounded-2xl border border-line bg-surface p-8 text-center">
-          <div className="text-4xl">⏳</div>
-          <h1 className="mt-3 text-xl font-bold">Tu cuenta está pendiente de activación</h1>
+          <div className="text-4xl">{trialEnded && profile.activated ? "⏳" : "🔒"}</div>
+          <h1 className="mt-3 text-xl font-bold">
+            {trialEnded && profile.activated ? "Se te ha acabado la prueba gratuita" : "Tu cuenta no está activa"}
+          </h1>
           <p className="mt-2 text-sm text-slate">
-            Gracias por registrarte en Zenzia, {profile.companyName}. Revisamos tu alta y te contactamos en breve para activarla.
+            {trialEnded && profile.activated
+              ? "Tus 14 días de prueba de Zenzia han terminado. Tus datos siguen guardados: contacta con soporte para activar tu plan y seguir usándolo."
+              : "Contacta con soporte para activar tu cuenta."}
           </p>
           <a
-            href="https://wa.me/34673895732?text=Hola%2C%20acabo%20de%20registrarme%20en%20Zenzia"
+            href="https://wa.me/34673895732?text=Hola%2C%20quiero%20activar%20mi%20plan%20de%20Zenzia"
             target="_blank"
             rel="noopener noreferrer"
             className="mt-6 inline-block rounded-xl bg-brand px-5 py-2.5 text-sm font-bold text-white"
           >
-            Escribir a soporte · 673 895 732
+            Contactar con soporte · 673 895 732
           </a>
           <div className="mt-4">
             <a href="/logout" className="text-xs text-slate hover:text-ink">
@@ -50,6 +56,9 @@ export default async function DashboardLayout({ children }: { children: React.Re
       </div>
     );
   }
+  const trialDaysLeft = profile.trialEndsAt
+    ? Math.max(0, Math.ceil((new Date(profile.trialEndsAt).getTime() - Date.now()) / 86400000))
+    : null;
 
   // Verificación en dos pasos: si la cuenta la tiene activada y esta sesión
   // aún no ha metido el código, al segundo paso del login.
@@ -126,7 +135,24 @@ export default async function DashboardLayout({ children }: { children: React.Re
         locked={locked}
         webOnly={webOnly}
       />
-      <main className="flex-1 overflow-x-hidden p-4 sm:p-8">{children}</main>
+      <main className="flex-1 overflow-x-hidden p-4 sm:p-8">
+        {trialDaysLeft !== null && !isAdmin && (
+          <div className="mb-4 flex flex-wrap items-center justify-between gap-2 rounded-xl border border-line bg-paper-deep px-4 py-2 text-sm text-ink">
+            <span>
+              Prueba gratuita: te {trialDaysLeft === 1 ? "queda 1 día" : `quedan ${trialDaysLeft} días`}.
+            </span>
+            <a
+              href="https://wa.me/34673895732?text=Hola%2C%20quiero%20activar%20mi%20plan%20de%20Zenzia"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-semibold text-brand hover:underline"
+            >
+              Activar mi plan
+            </a>
+          </div>
+        )}
+        {children}
+      </main>
     </div>
   );
 }

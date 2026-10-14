@@ -39,7 +39,13 @@ export async function completeOnboarding(formData: FormData) {
 
   const { error: companyError } = await supabase
     .from("companies")
-    .update({ name: company_name, vertical, business_type, onboarded: true })
+    .update({
+      name: company_name,
+      vertical,
+      business_type,
+      onboarded: true,
+      sector_other: vertical === "otros" ? String(formData.get("sector_other") ?? "").trim() || null : null,
+    })
     .eq("id", membership.company_id);
   if (companyError) throw new Error(companyError.message);
 

@@ -165,7 +165,7 @@ export default async function PerfilPage(props: { searchParams: Promise<{ tab?: 
           <input type="hidden" name="tab" value="negocio" />
           <Card className="mb-4">
             <h2 className={h2}>Datos básicos</h2>
-            <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+            <div className="group grid grid-cols-1 gap-2 sm:grid-cols-2">
               <Input name="name" placeholder="Nombre del negocio" required defaultValue={company?.name ?? ""} className="sm:col-span-2" />
               <Input name="manager_name" placeholder="Tu nombre" defaultValue={fullName ?? ""} />
               <Select name="business_type" defaultValue={company?.business_type ?? "autonomo"}>
@@ -185,9 +185,9 @@ export default async function PerfilPage(props: { searchParams: Promise<{ tab?: 
               </Select>
               <Input
                 name="sector_other"
-                placeholder="Si eliges «Otros», escribe a qué te dedicas"
+                placeholder="Escribe a qué te dedicas"
                 defaultValue={company?.sector_other ?? ""}
-                className="sm:col-span-2"
+                className="hidden group-has-[option[value=otros]:checked]:block sm:col-span-2"
               />
             </div>
           </Card>

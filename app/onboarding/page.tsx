@@ -60,7 +60,8 @@ export default async function OnboardingPage() {
             <label className="mb-1 block text-xs font-medium text-slate" htmlFor="vertical">
               ¿A qué se dedica tu negocio?
             </label>
-            <Select id="vertical" name="vertical" required defaultValue="" className="w-full">
+            <div className="group space-y-3">
+<Select id="vertical" name="vertical" required defaultValue="" className="w-full">
               <option value="" disabled>
                 Selecciona tu tipo de negocio
               </option>
@@ -74,6 +75,8 @@ export default async function OnboardingPage() {
                 </optgroup>
               ))}
             </Select>
+<Input name="sector_other" placeholder="Escribe a qué te dedicas" className="hidden group-has-[option[value=otros]:checked]:block w-full" />
+</div>
             <p className="mt-1 text-xs text-slate/70">
               Activamos automáticamente lo común para ese tipo de negocio — luego puedes ajustar los módulos.
             </p>
