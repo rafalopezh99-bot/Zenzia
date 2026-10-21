@@ -50,16 +50,18 @@ const config: Config = {
           amber: "var(--mk-amber)",
         },
       },
-      // Inter, IBM Plex Mono y JetBrains Mono ya se cargan en app/layout.tsx
-      // (vía <link>, ver comentario allí). font-sans/font-mono son las de
-      // siempre (panel, LiveClock). font-display quedó de la identidad
-      // anterior de la web pública (JetBrains Mono) — ya no se usa en
-      // app/page.tsx, pero se deja declarada por si una sección puntual la
-      // necesita (p. ej. una etiqueta tipo "código").
+      // Inter, IBM Plex Mono y JetBrains Mono se cargan con next/font/google
+      // en app/layout.tsx, que expone cada una como variable CSS (--font-*)
+      // en vez del nombre de familia a pelo — por eso var(--font-*) y no
+      // '"Inter"' aquí. font-sans/font-mono son las de siempre (panel,
+      // LiveClock). font-display quedó de la identidad anterior de la web
+      // pública (JetBrains Mono) — ya no se usa en app/page.tsx, pero se
+      // deja declarada por si una sección puntual la necesita (p. ej. una
+      // etiqueta tipo "código").
       fontFamily: {
-        sans: ['"Inter"', "-apple-system", "BlinkMacSystemFont", '"Segoe UI"', "Arial", "sans-serif"],
-        mono: ['"IBM Plex Mono"', "ui-monospace", '"SFMono-Regular"', "Menlo", "monospace"],
-        display: ['"JetBrains Mono"', "ui-monospace", '"SFMono-Regular"', "Menlo", "monospace"],
+        sans: ["var(--font-inter)", "-apple-system", "BlinkMacSystemFont", '"Segoe UI"', "Arial", "sans-serif"],
+        mono: ["var(--font-ibm-plex-mono)", "ui-monospace", '"SFMono-Regular"', "Menlo", "monospace"],
+        display: ["var(--font-jetbrains-mono)", "ui-monospace", '"SFMono-Regular"', "Menlo", "monospace"],
       },
     },
   },

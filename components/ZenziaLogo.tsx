@@ -1,6 +1,7 @@
 // Logotipo de Zenzia dibujado en SVG (antes era un PNG): "Zenz" en navy e
-// "ia" en el celeste del punto de la i, tipografía Outfit (cargada en
-// app/layout.tsx). En modo oscuro el navy pasa a un tono claro; con
+// "ia" en el celeste del punto de la i, tipografía Outfit (cargada con
+// next/font/google en app/layout.tsx, variable --font-outfit). En modo
+// oscuro el navy pasa a un tono claro; con
 // `light` se fuerza siempre la versión clara (web pública, sin modo oscuro).
 // El tamaño lo marca la altura que llegue en className (h-6, h-14...).
 export default function ZenziaLogo({ className, light = false }: { className: string; light?: boolean }) {
@@ -13,7 +14,12 @@ export default function ZenziaLogo({ className, light = false }: { className: st
         y="60"
         textLength="230"
         lengthAdjust="spacingAndGlyphs"
-        style={{ fontFamily: "Outfit, Inter, sans-serif", fontWeight: 600, fontSize: 76, letterSpacing: "-1px" }}
+        style={{
+          fontFamily: "var(--font-outfit), var(--font-inter), sans-serif",
+          fontWeight: 600,
+          fontSize: 76,
+          letterSpacing: "-1px",
+        }}
       >
         <tspan className={ink}>Zenz</tspan>
         <tspan className={accent}>ia</tspan>

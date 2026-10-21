@@ -25,6 +25,22 @@ export async function middleware(request: NextRequest) {
   return await updateSession(request);
 }
 
+// Antes el matcher solo excluía estáticos de Next (_next/*, favicon,
+// imágenes) y corría updateSession() — un viaje de ida y vuelta a
+// Supabase para refrescar la cookie de sesión — en TODO lo demás,
+// incluidos archivos sin sesión (robots.txt, sitemap.xml, el manifest),
+// páginas legales estáticas, y las páginas públicas que ven los CLIENTES
+// de un negocio (reservar cita, firmar un consentimiento, ver su portal o
+// su web, cancelar una cita desde el email) — ninguna de ellas usa el
+// login de Supabase, todas leen con la clave anónima vía RPC/policies "sin
+// sesión" (ver comentarios en esas páginas). Tampoco hace falta en el
+// webhook de Stripe ni en el cron de automatizaciones: ambos se
+// autentican con su propio secreto (ver esos route.ts), no con cookies.
+// Excluirlos del matcher les ahorra esa llamada a Supabase en cada visita
+// — justo las páginas que van a usar los clientes de los dos negocios que
+// entran ahora en el plan Web.
 export const config = {
-  matcher: ["/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)"],
+  matcher: [
+    "/((?!_next/static|_next/image|favicon\\.ico|robots\\.txt$|sitemap\\.xml$|manifest\\.webmanifest$|aviso-legal(?:/|$)|condiciones(?:/|$)|cookies(?:/|$)|privacidad(?:/|$)|encargado(?:/|$)|reservar(?:/|$)|cita(?:/|$)|consentimiento(?:/|$)|portal(?:/|$)|sitio(?:/|$)|api/stripe/webhook(?:/|$)|api/cron/automations(?:/|$)|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
+  ],
 };
