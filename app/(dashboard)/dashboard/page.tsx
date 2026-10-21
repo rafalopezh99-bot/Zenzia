@@ -26,8 +26,12 @@ export default async function DashboardPage() {
   const { fullName, vertical, logoUrl, dashboardWidgets, plan } = await getCurrentCompanyProfile();
   // Plan Web: el dashboard son las métricas de su web (visitas y clics).
   if (plan === "web") {
-    const { data: co } = await supabase.from("companies").select("site_url").eq("id", (await getCurrentCompanyProfile()).companyId).single();
-    return <WebAnalytics siteUrl={co?.site_url ?? null} fullName={fullName} />;
+    const { data: co } = await supabase
+      .from("companies")
+      .select("site_url, web_links")
+      .eq("id", (await getCurrentCompanyProfile()).companyId)
+      .single();
+    return <WebAnalytics siteUrl={co?.site_url ?? null} fullName={fullName} webLinks={co?.web_links ?? []} />;
   }
   const terms = getTerminology(vertical);
   const appointmentsLower = terms.appointments.toLowerCase();

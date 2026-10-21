@@ -1,6 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentCompanyProfile } from "@/lib/company";
-import { updateCompanyProfile, signVerifactuRepresentation } from "@/lib/actions/company";
+import { updateCompanyProfile, signVerifactuRepresentation, addWebLink, removeWebLink } from "@/lib/actions/company";
 import { Card, PageHeader, Input, Select, PrimaryButton, GhostButton } from "@/components/ui";
 import { VERTICAL_CATALOG, VERTICAL_CATEGORIES } from "@/lib/verticals";
 import { VAT_OPTIONS, IRPF_OPTIONS } from "@/lib/documents";
@@ -41,7 +41,7 @@ export default async function PerfilPage(props: { searchParams: Promise<{ tab?: 
   const { data: company } = await supabase
     .from("companies")
     .select(
-      "name, vertical, sector_other, business_type, phone, email, tax_id, address, postal_code, city, default_vat, default_irpf, logo_path, booking, google_review_url, verifactu_state, calendar_token"
+      "name, vertical, sector_other, business_type, phone, email, tax_id, address, postal_code, city, default_vat, default_irpf, logo_path, booking, google_review_url, verifactu_state, calendar_token, site_url, web_links"
     )
     .eq("id", companyId)
     .single();
@@ -211,8 +211,55 @@ export default async function PerfilPage(props: { searchParams: Promise<{ tab?: 
             </div>
             <p className="mt-2 text-xs text-slate/70">PNG o JPG, máximo 4 MB. Sale en tus facturas y en tu página de reservas.</p>
           </Card>
+          <Card className="mb-4">
+            <h2 className={h2}>Tu web</h2>
+            <Input
+              name="site_url"
+              type="text"
+              placeholder="tuacademia.es"
+              defaultValue={(company?.site_url ?? "").replace(/^https?:\/\//, "")}
+            />
+            <p className="mt-2 text-xs text-slate/70">
+              El enlace que sale arriba del todo en tu panel &quot;Así va tu web&quot; y el que se usa para medir las visitas.
+            </p>
+          </Card>
           <PrimaryButton>Guardar</PrimaryButton>
         </form>
+      )}
+
+      {tab === "negocio" && (
+        <>
+          <Card className="mt-4 mb-4">
+            <h2 className={h2}>Más enlaces</h2>
+            <p className="mb-3 text-xs text-slate/70">
+              Si tienes más de una web (una antigua, una landing aparte…), añádelas aquí — salen como accesos rápidos en
+              &quot;Así va tu web&quot;.
+            </p>
+            {(company?.web_links ?? []).length > 0 && (
+              <ul className="mb-3 divide-y divide-line text-sm">
+                {(company?.web_links as { id: string; label: string; url: string }[]).map((l) => (
+                  <li key={l.id} className="flex items-center justify-between gap-2 py-2">
+                    <span className="min-w-0 truncate text-ink">
+                      {l.label} <span className="text-slate">· {l.url.replace(/^https?:\/\//, "")}</span>
+                    </span>
+                    <form action={removeWebLink.bind(null, l.id)}>
+                      <button className="shrink-0 text-xs text-slate hover:text-red-600" title="Quitar">
+                        ✕
+                      </button>
+                    </form>
+                  </li>
+                ))}
+              </ul>
+            )}
+            {(company?.web_links ?? []).length < 6 && (
+              <form action={addWebLink} className="grid grid-cols-1 gap-2 sm:grid-cols-[1fr_1.5fr_auto]">
+                <Input name="label" placeholder="Nombre (ej. Web antigua)" required />
+                <Input name="url" placeholder="tuweb.es" required />
+                <PrimaryButton>Añadir</PrimaryButton>
+              </form>
+            )}
+          </Card>
+        </>
       )}
 
       {tab === "negocio" && plan !== "web" && optional.length > 0 && (

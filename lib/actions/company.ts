@@ -8,6 +8,18 @@ import { planAllowsModule } from "@/lib/plans";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
+// Normaliza una URL escrita a mano (con o sin "https://") para guardarla
+// siempre completa — así "laplacitalanguageschool.netlify.app" y
+// "https://laplacitalanguageschool.netlify.app" se guardan igual y
+// funcionan como enlace (<a href>).
+function normalizeUrl(raw: string): string | null {
+  const v = raw.trim();
+  if (!v) return null;
+  return /^https?:\/\//i.test(v) ? v : `https://${v}`;
+}
+
+type WebLink = { id: string; label: string; url: string };
+
 // Guarda todo el perfil del negocio de una vez: datos básicos (nombre,
 // vertical, cómo opera, quién lo gestiona), contacto/facturación, y el
 // logo si se ha elegido uno nuevo — un único formulario con un único botón
@@ -49,6 +61,9 @@ export async function updateCompanyProfile(formData: FormData) {
   }
   if (formData.has("google_review_url")) {
     companyUpdate.google_review_url = String(formData.get("google_review_url") ?? "").trim() || null;
+  }
+  if (formData.has("site_url")) {
+    companyUpdate.site_url = normalizeUrl(String(formData.get("site_url") ?? ""));
   }
   if (vertical) companyUpdate.vertical = vertical;
   if (business_type) companyUpdate.business_type = business_type;
@@ -129,4 +144,39 @@ export async function setCompanyModules(formData: FormData) {
   }
   revalidatePath("/", "layout");
   redirect("/perfil?tab=negocio&ok=1");
+}
+
+// Perfil > Negocio > "Más enlaces": añade un enlace extra (además de la
+// web principal) a companies.web_links. Pensado para negocios con más de
+// una web (p. ej. una antigua y una nueva) — se listan como enlaces
+// rápidos en el dashboard "Así va tu web" (ver WebAnalytics).
+export async function addWebLink(formData: FormData) {
+  const supabase = await createClient();
+  const companyId = await getCurrentCompanyId();
+  const label = String(formData.get("label") ?? "").trim();
+  const url = normalizeUrl(String(formData.get("url") ?? ""));
+  if (!label || !url) throw new Error("Pon un nombre y una dirección web");
+
+  const { data } = await supabase.from("companies").select("web_links").eq("id", companyId).single();
+  const current = (data?.web_links ?? []) as WebLink[];
+  if (current.length >= 6) throw new Error("Máximo 6 enlaces");
+  const next: WebLink[] = [...current, { id: crypto.randomUUID(), label, url }];
+
+  const { error } = await supabase.from("companies").update({ web_links: next }).eq("id", companyId);
+  if (error) throw new Error(error.message);
+  revalidatePath("/perfil");
+  revalidatePath("/dashboard");
+  redirect("/perfil?tab=negocio&ok=1");
+}
+
+// Quita un enlace de companies.web_links por id.
+export async function removeWebLink(linkId: string) {
+  const supabase = await createClient();
+  const companyId = await getCurrentCompanyId();
+  const { data } = await supabase.from("companies").select("web_links").eq("id", companyId).single();
+  const current = (data?.web_links ?? []) as WebLink[];
+  const next = current.filter((l) => l.id !== linkId);
+  await supabase.from("companies").update({ web_links: next }).eq("id", companyId);
+  revalidatePath("/perfil");
+  revalidatePath("/dashboard");
 }

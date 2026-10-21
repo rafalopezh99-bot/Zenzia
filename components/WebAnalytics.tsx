@@ -6,7 +6,17 @@ import { createClient } from "@/lib/supabase/server";
 // web_events, la rellena el script de su web). Últimos 30 días.
 const DAY = 86400000;
 
-export default async function WebAnalytics({ siteUrl, fullName }: { siteUrl: string | null; fullName?: string | null }) {
+type WebLink = { id: string; label: string; url: string };
+
+export default async function WebAnalytics({
+  siteUrl,
+  fullName,
+  webLinks = [],
+}: {
+  siteUrl: string | null;
+  fullName?: string | null;
+  webLinks?: WebLink[];
+}) {
   const supabase = await createClient();
   const since = new Date(Date.now() - 30 * DAY);
   const { data } = await supabase
@@ -96,6 +106,21 @@ export default async function WebAnalytics({ siteUrl, fullName }: { siteUrl: str
           </a>
         )}
       </div>
+      {webLinks.length > 0 && (
+        <div className="mb-4 flex flex-wrap gap-2">
+          {webLinks.map((l) => (
+            <a
+              key={l.id}
+              href={l.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="rounded-full border border-line bg-surface px-3 py-1 text-xs font-medium text-ink transition hover:border-brand hover:text-brand"
+            >
+              {l.label} ↗
+            </a>
+          ))}
+        </div>
+      )}
       <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-slate">Últimos 30 días</p>
       <div className="mb-6 grid grid-cols-2 gap-3 lg:grid-cols-4">
         {kpi(
@@ -128,7 +153,13 @@ export default async function WebAnalytics({ siteUrl, fullName }: { siteUrl: str
           {perDay.map((n, i) => (
             <div key={i} className="flex flex-1 flex-col items-center gap-1" title={`${key(days[i])}: ${n}`}>
               <span className="text-[10px] text-slate">{n || ""}</span>
-              <div className="w-full rounded-t bg-brand" style={{ height: `${(n / maxDay) * 100}%`, minHeight: 3 }} />
+              {/* Pista de altura fija: un % de altura en CSS solo funciona si el
+                  padre tiene una altura concreta — sin esto, el div de arriba
+                  (sin h-*) hacía que la barra cayera siempre al minHeight de
+                  respaldo, da igual cuántas visitas hubiera ese día. */}
+              <div className="flex h-24 w-full flex-col justify-end">
+                <div className="w-full rounded-t bg-brand" style={{ height: `${(n / maxDay) * 100}%`, minHeight: 3 }} />
+              </div>
               <span className="text-[10px] text-slate">{days[i].getDate()}</span>
             </div>
           ))}
