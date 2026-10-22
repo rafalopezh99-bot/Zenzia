@@ -20,9 +20,14 @@
 
   // ---- Métricas (visitas y clics) para el dashboard de Zenzia ----
   // No cuenta lo que se ve dentro de Zenzia (vista previa / edición).
-  if (!EDIT && window.parent === window) {
+  // Abrir la web con ?zz_me=1 marca este navegador como del dueño y deja de contar sus visitas.
+  try { if (/[?&]zz_me=1/.test(location.search)) localStorage.setItem('zz_me', '1'); } catch (e) {}
+  var ME = false;
+  try { ME = localStorage.getItem('zz_me') === '1'; } catch (e) {}
+  if (!EDIT && !ME && window.parent === window) {
+    // Id por navegador (no por pestaña) para contar personas distintas.
     var sid = '';
-    try { sid = sessionStorage.getItem('zz_sid') || Math.random().toString(36).slice(2); sessionStorage.setItem('zz_sid', sid); } catch (e) {}
+    try { sid = localStorage.getItem('zz_vid') || Math.random().toString(36).slice(2); localStorage.setItem('zz_vid', sid); } catch (e) {}
     var device = /Mobi|Android|iPhone/i.test(navigator.userAgent) ? 'movil' : 'ordenador';
     var track = function (type, extra) {
       var body = { company_id: CID, type: type, path: location.pathname.slice(0, 250), device: device, session_id: sid };
