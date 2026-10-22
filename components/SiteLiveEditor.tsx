@@ -212,14 +212,7 @@ export default function SiteLiveEditor({ siteUrl, companyId }: { siteUrl: string
         <div className="text-sm text-slate">
           {edit
             ? "Haz clic en un texto para cambiarlo o en una foto para sustituirla. También puedes añadir o quitar elementos y ocultar secciones."
-            : (
-              <>
-                {siteUrl.replace(/^https?:\/\//, "")} ·{" "}
-                <a href={`${siteUrl}/?zz_me=1`} target="_blank" rel="noopener noreferrer" className="text-brand hover:underline" title="Abre tu web en una pestaña nueva y, desde ese navegador, tus visitas ya no cuentan en las estadísticas.">
-                  Abrir mi web sin contar mis visitas
-                </a>
-              </>
-            )}
+            : siteUrl.replace(/^https?:\/\//, "")}
         </div>
         <div className="flex flex-wrap items-center gap-2">
           {status && <span className="text-xs font-medium text-green-700">{status}</span>}
