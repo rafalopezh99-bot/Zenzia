@@ -5,7 +5,11 @@
  * - Con ?zz_edit=1 (dentro de "Mi web" en Zenzia): todo texto e imagen se
  *   edita encima, las listas marcadas con data-zz-list (p. ej. noticias) permiten
  *   añadir/quitar elementos y cada sección se puede ocultar o mostrar.
- *   No se puede mover nada. Los cambios se mandan a Zenzia por postMessage.
+ *   También se pueden añadir secciones nuevas (texto, texto con foto o galería)
+ *   entre las existentes. No se puede mover nada. Los cambios se mandan a Zenzia
+ *   por postMessage.
+ * - Los elementos que ya traen data-zz / data-zz-img / data-zz-href en el HTML
+ *   conservan su clave; el resto se numera automáticamente por sección.
  */
 (function () {
   var me = document.currentScript;
@@ -15,6 +19,9 @@
   var KEY = 'sb_publishable_xP24V2ahFJDonoeqoC2wiw_0Ina4oUO';
   var EDIT = /[?&]zz_edit=1/.test(location.search);
   var INLINE = { B: 1, STRONG: 1, EM: 1, I: 1, BR: 1, SMALL: 1, U: 1 };
+  // Tarjetas que abren un álbum de fotos gestionado desde Zenzia.
+  var ALBUM = '[data-zz-album], .work-card[data-category]';
+  var PH = 'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="800" height="600"><rect width="100%" height="100%" fill="#e8edf3"/><text x="50%" y="50%" font-family="sans-serif" font-size="30" fill="#6b7a8c" text-anchor="middle">Pulsa para poner una foto</text></svg>');
 
   function post(msg) { if (window.parent !== window) window.parent.postMessage(msg, '*'); }
 
@@ -120,10 +127,11 @@
   function assignKeys() {
     blocks().forEach(function (b) {
       b.el.setAttribute('data-zz-block', b.key);
-      leaves(b.el, '[data-zz-list]').forEach(function (el, n) { el.setAttribute('data-zz', b.key + '.' + n); });
-      var imgs = Array.prototype.filter.call(b.el.querySelectorAll('img'), function (img) { return !img.closest('[data-zz-list]'); });
+      leaves(b.el, '[data-zz-list]').filter(function (el) { return !el.closest('[data-zz]'); })
+        .forEach(function (el, n) { el.setAttribute('data-zz', b.key + '.' + n); });
+      var imgs = Array.prototype.filter.call(b.el.querySelectorAll('img'), function (img) { return !img.closest('[data-zz-list]') && !img.closest(ALBUM) && !img.hasAttribute('data-zz-img'); });
       imgs.forEach(function (img, n) { img.setAttribute('data-zz-img', b.key + '.img' + n); });
-      var links = Array.prototype.filter.call(b.el.querySelectorAll('a[href^="http"]'), function (a) { return !a.closest('[data-zz-list]'); });
+      var links = Array.prototype.filter.call(b.el.querySelectorAll('a[href^="http"]'), function (a) { return !a.closest('[data-zz-list]') && !a.hasAttribute('data-zz-href'); });
       links.forEach(function (a, n) { a.setAttribute('data-zz-href', b.key + '.a' + n); });
     });
     document.querySelectorAll('[data-zz-list]').forEach(keyItems);
@@ -134,19 +142,97 @@
       var v = map[k];
       if (k.indexOf('img:') === 0) {
         var img = document.querySelector('[data-zz-img="' + k.slice(4) + '"]');
-        if (img && v) { img.src = v; img.removeAttribute('srcset'); }
+        if (img && v) { img.src = v; img.removeAttribute('srcset'); img.removeAttribute('data-zz-ph'); }
       } else if (k.indexOf('href:') === 0) {
         var a = document.querySelector('[data-zz-href="' + k.slice(5) + '"]');
         if (a && v) a.href = v;
       } else if (k.indexOf('hide:') === 0) {
         var bl = document.querySelector('[data-zz-block="' + k.slice(5) + '"]');
         if (bl) bl.setAttribute('data-zz-hidden', v === '1' ? '1' : '');
-      } else if (k.indexOf('list:') !== 0) {
+      } else if (k.indexOf('list:') !== 0 && k !== 'sections') {
         var el = document.querySelector('[data-zz="' + k + '"]');
-        if (el) el.textContent = v;
+        if (el) { el.textContent = v; syncLink(el, v); }
       }
     });
   }
+
+  // Email y WhatsApp: al cambiar el texto del enlace se actualiza también su dirección.
+  function syncLink(el, v) {
+    var a = el.closest('a[href]');
+    if (!a) return;
+    if (/^mailto:/i.test(a.getAttribute('href')) && /@/.test(v)) a.href = 'mailto:' + v.trim();
+    else if (/wa\.me\//.test(a.href)) {
+      var d = v.replace(/\D/g, '');
+      if (d.length === 9) d = '34' + d;
+      if (d.length >= 10) document.querySelectorAll('a[href*="wa.me/"]').forEach(function (w) { w.href = w.href.replace(/wa\.me\/\d*/, 'wa.me/' + d); });
+    }
+  }
+
+  // ---- Secciones añadidas desde Zenzia: JSON en "sections" ----
+  // [{ id, after: <clave de la sección anterior>, type: 'texto'|'foto'|'galeria', photos: [ids] }]
+  var EXTRA = [];
+  function extraEl(sec) {
+    var w = document.createElement('div');
+    w.className = 'zz-x zz-x-' + sec.type;
+    w.setAttribute('data-zz-extra', sec.id);
+    w.style.cssText = 'position:relative;max-width:1100px;margin:0 auto;padding:64px 20px';
+    var k = 'x' + sec.id;
+    var h = document.createElement('h2');
+    h.setAttribute('data-zz', k + '.0');
+    h.textContent = 'Título de la sección';
+    var p = document.createElement('p');
+    p.setAttribute('data-zz', k + '.1');
+    p.textContent = 'Escribe aquí el texto de la sección.';
+    p.style.whiteSpace = 'pre-line';
+    var img = function (key) {
+      var i = document.createElement('img');
+      i.src = PH;
+      i.alt = '';
+      i.setAttribute('data-zz-img', key);
+      i.setAttribute('data-zz-ph', '1');
+      i.style.cssText = 'width:100%;height:100%;object-fit:cover;border-radius:12px;display:block';
+      return i;
+    };
+    if (sec.type === 'foto') {
+      var row = document.createElement('div');
+      row.style.cssText = 'display:flex;flex-wrap:wrap;gap:32px;align-items:center';
+      var txt = document.createElement('div');
+      txt.style.cssText = 'flex:1 1 320px';
+      txt.appendChild(h); txt.appendChild(p);
+      var fig = document.createElement('div');
+      fig.style.cssText = 'flex:1 1 320px;aspect-ratio:4/3';
+      fig.appendChild(img(k + '.img0'));
+      row.appendChild(txt); row.appendChild(fig);
+      w.appendChild(row);
+    } else {
+      w.appendChild(h); w.appendChild(p);
+      if (sec.type === 'galeria') {
+        var grid = document.createElement('div');
+        grid.className = 'zz-grid';
+        grid.style.cssText = 'display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;margin-top:24px';
+        (sec.photos || []).forEach(function (pid) {
+          var c = document.createElement('div');
+          c.setAttribute('data-zz-photo', pid);
+          c.style.cssText = 'position:relative;aspect-ratio:1';
+          c.appendChild(img(k + '.' + pid));
+          grid.appendChild(c);
+        });
+        w.appendChild(grid);
+      }
+    }
+    return w;
+  }
+  function renderExtras(saved) {
+    try { EXTRA = JSON.parse(saved || '[]'); } catch (e) { EXTRA = []; }
+    if (!Array.isArray(EXTRA)) EXTRA = [];
+    EXTRA.forEach(function (sec) {
+      var a = document.querySelector('[data-zz-block="' + sec.after + '"], [data-zz-extra="' + sec.after + '"]');
+      var el = extraEl(sec);
+      if (a) a.insertAdjacentElement('afterend', el);
+      else { var f = document.querySelector('footer'); if (f) f.parentNode.insertBefore(el, f); else document.body.appendChild(el); }
+    });
+  }
+  function saveExtras() { post({ type: 'zz-text', key: 'sections', value: JSON.stringify(EXTRA) }); }
 
   var hideCss = document.createElement('style');
   hideCss.textContent = EDIT
@@ -161,7 +247,10 @@
       setupList(list, map['list:' + list.getAttribute('data-zz-list')]);
     });
     assignKeys();
+    renderExtras(map.sections);
     apply(map);
+    // Fuera del editor, las fotos que aún no se han puesto no se muestran.
+    if (!EDIT) document.querySelectorAll('img[data-zz-ph]').forEach(function (i) { (i.closest('[data-zz-photo]') || i).remove(); });
     if (EDIT) enableEditing();
   }
 
@@ -201,6 +290,7 @@
       var v = el.textContent.replace(/\s+/g, ' ').trim();
       if (!v || v === before) return;
       before = v;
+      syncLink(el, v);
       post({ type: 'zz-text', key: el.getAttribute('data-zz'), value: v });
     }
     el.addEventListener('input', function () { clearTimeout(timer); timer = setTimeout(send, 400); });
@@ -233,7 +323,9 @@
       '[data-zz]:focus{outline:2px solid #2f9ce0;background:rgba(47,156,224,.08)}' +
       '[data-zz-img]{outline:3px dashed rgba(47,156,224,.9);outline-offset:-3px;cursor:pointer}' +
       '[data-zz-block]{position:relative}' +
-      '*{animation-play-state:paused}';
+      '*{animation-play-state:paused}' +
+      '.reveal,[class*="reveal"]{opacity:1!important;transform:none!important}' +
+      '.zz-add{display:flex;justify-content:center;gap:8px;flex-wrap:wrap;padding:10px 0;position:relative;z-index:40}';
     document.head.appendChild(css);
 
     document.querySelectorAll('[data-zz]').forEach(makeEditable);
@@ -274,6 +366,88 @@
       b.el.appendChild(t);
     });
 
+    // Añadir sección después de cada sección (y de las añadidas).
+    function addBar(afterKey, anchor) {
+      var bar = document.createElement('div');
+      bar.className = 'zz-add';
+      bar.setAttribute('data-zz-ui', '1');
+      var plus = smallBtn('+ Añadir sección aquí', 'Añadir una sección nueva debajo', 'opacity:.85');
+      plus.addEventListener('click', function (e) {
+        e.preventDefault(); e.stopPropagation();
+        bar.textContent = '';
+        [['texto', 'Texto'], ['foto', 'Texto y foto'], ['galeria', 'Galería de fotos']].forEach(function (t) {
+          var b = smallBtn(t[1], 'Añadir sección de ' + t[1].toLowerCase());
+          b.addEventListener('click', function (ev) {
+            ev.preventDefault(); ev.stopPropagation();
+            var sec = { id: Date.now().toString(36), after: afterKey, type: t[0], photos: [] };
+            EXTRA.push(sec);
+            saveExtras();
+            var el = extraEl(sec);
+            bar.insertAdjacentElement('afterend', el);
+            decorateExtra(sec, el);
+            bar.replaceWith(addBar(afterKey));
+            el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }, true);
+          bar.appendChild(b);
+        });
+        var cancel = smallBtn('Cancelar', 'Cancelar', 'background:#8a94a3');
+        cancel.addEventListener('click', function (ev) { ev.preventDefault(); ev.stopPropagation(); bar.replaceWith(addBar(afterKey)); }, true);
+        bar.appendChild(cancel);
+      }, true);
+      bar.appendChild(plus);
+      if (anchor) anchor.insertAdjacentElement('afterend', bar);
+      return bar;
+    }
+    function decorateExtra(sec, el) {
+      el.querySelectorAll('[data-zz]').forEach(makeEditable);
+      var del = smallBtn('🗑 Borrar sección', 'Borrar esta sección', 'position:absolute;top:10px;left:10px;background:#e5484d');
+      del.addEventListener('click', function (e) {
+        e.preventDefault(); e.stopPropagation();
+        if (!confirm('¿Borrar esta sección de la web?')) return;
+        EXTRA = EXTRA.filter(function (s) { return s.id !== sec.id; });
+        // Las que iban detrás de esta pasan a ir detrás de la anterior.
+        EXTRA.forEach(function (s) { if (s.after === sec.id) s.after = sec.after; });
+        saveExtras();
+        var bar = el.nextElementSibling;
+        if (bar && bar.classList.contains('zz-add')) bar.remove();
+        el.remove();
+      }, true);
+      el.appendChild(del);
+      if (sec.type === 'galeria') {
+        var grid = el.querySelector('.zz-grid');
+        var photoDel = function (c) {
+          var x = smallBtn('✕', 'Quitar foto', 'position:absolute;top:6px;right:6px;background:#e5484d;padding:2px 8px');
+          x.addEventListener('click', function (e) {
+            e.preventDefault(); e.stopPropagation();
+            var pid = c.getAttribute('data-zz-photo');
+            sec.photos = sec.photos.filter(function (q) { return q !== pid; });
+            saveExtras();
+            c.remove();
+          }, true);
+          c.appendChild(x);
+        };
+        grid.querySelectorAll('[data-zz-photo]').forEach(photoDel);
+        var add = smallBtn('+ Añadir foto', 'Añadir una foto a la galería', 'display:block;margin:16px auto 0;padding:8px 18px;font-size:14px');
+        add.addEventListener('click', function (e) {
+          e.preventDefault(); e.stopPropagation();
+          var pid = 'p' + Date.now().toString(36);
+          sec.photos.push(pid);
+          saveExtras();
+          var c = extraEl({ id: sec.id, type: 'galeria', photos: [pid] }).querySelector('[data-zz-photo]');
+          grid.appendChild(c);
+          photoDel(c);
+          post({ type: 'zz-img', key: 'x' + sec.id + '.' + pid });
+        }, true);
+        grid.insertAdjacentElement('afterend', add);
+      }
+      addBar(sec.id, el);
+    }
+    blocks().forEach(function (b) { if (b.el.tagName !== 'FOOTER') addBar(b.key, b.el); });
+    EXTRA.forEach(function (sec) {
+      var el = document.querySelector('[data-zz-extra="' + sec.id + '"]');
+      if (el) decorateExtra(sec, el);
+    });
+
     // Enlaces externos: cambiar la dirección con 🔗.
     document.querySelectorAll('[data-zz-href]').forEach(function (a) {
       var b = smallBtn('🔗', 'Cambiar enlace', 'margin-left:4px;padding:1px 6px');
@@ -291,12 +465,36 @@
     // Nada navega: los clics editan. Las imágenes se sustituyen desde Zenzia.
     document.addEventListener('click', function (e) {
       if (e.target.closest('[data-zz-ui]')) return;
+      var card = e.target.closest(ALBUM);
+      if (card) { e.preventDefault(); e.stopPropagation(); post({ type: 'zz-album', slug: card.getAttribute('data-zz-album') || card.getAttribute('data-category') }); return; }
       var img = e.target.closest('[data-zz-img]');
       if (img) { e.preventDefault(); e.stopPropagation(); post({ type: 'zz-img', key: img.getAttribute('data-zz-img') }); return; }
       if (e.target.closest('a, button')) e.preventDefault();
     }, true);
     document.addEventListener('submit', function (e) { e.preventDefault(); }, true);
 
-    post({ type: 'zz-ready', albums: false });
+    var hasAlbums = !!document.querySelector(ALBUM);
+    document.querySelectorAll(ALBUM).forEach(function (c) { c.style.outline = '3px dashed rgba(47,156,224,.9)'; c.style.outlineOffset = '-3px'; });
+
+    // Zenzia pide las fotos actuales (estáticas) de los álbumes para importarlas.
+    window.addEventListener('message', function (e) {
+      if (!e.data || e.data.type !== 'zz-export-static') return;
+      var data = (typeof workCategoriesData !== 'undefined' && workCategoriesData) || {};
+      var slugs = Object.keys(data);
+      (function next(i) {
+        if (i >= slugs.length) return post({ type: 'zz-static-done' });
+        var slug = slugs[i], cat = data[slug];
+        var subEl = document.querySelector('[data-category="' + slug + '"] .work-card-sub');
+        var items = (cat.items || []).filter(function (it) { return it.type !== 'video'; });
+        Promise.all(items.map(function (it) {
+          return fetch(it.src).then(function (r) { return r.blob(); }).then(function (b) { return { blob: b, caption: it.caption || '' }; }).catch(function () { return null; });
+        })).then(function (files) {
+          post({ type: 'zz-static', slug: slug, title: cat.label, subtitle: subEl ? subEl.textContent : '', files: files.filter(Boolean) });
+          next(i + 1);
+        });
+      })(0);
+    });
+
+    post({ type: 'zz-ready', albums: hasAlbums });
   }
 })();
