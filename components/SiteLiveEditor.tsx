@@ -54,6 +54,34 @@ export default function SiteLiveEditor({ siteUrl, companyId }: { siteUrl: string
   };
   const reload = () => setVersion((v) => v + 1);
 
+  // Copia de los textos y fotos al entrar en edición, para poder descartar los cambios.
+  const snapshot = useRef<{ key: string; value: string }[] | null>(null);
+  const takeSnapshot = async () => {
+    const { data } = await supabase.from("web_texts").select("key, value").eq("company_id", companyId);
+    snapshot.current = (data ?? []) as { key: string; value: string }[];
+  };
+  const discard = async () => {
+    const snap = snapshot.current;
+    if (!snap || !confirm("¿Descartar los cambios de textos y fotos que has hecho desde que pulsaste «Editar»?")) return;
+    setBusy(true);
+    // Se espera a que lleguen los textos que se estaban escribiendo, para deshacerlos también.
+    (document.activeElement as HTMLElement | null)?.blur();
+    await new Promise((r) => setTimeout(r, 1200));
+    const { data: now } = await supabase.from("web_texts").select("key, value").eq("company_id", companyId);
+    const before = new Map(snap.map((r) => [r.key, r.value]));
+    const added = (now ?? []).filter((r) => !before.has(r.key)).map((r) => r.key as string);
+    const changed = snap.filter((r) => (now ?? []).find((n) => n.key === r.key)?.value !== r.value);
+    if (added.length) await supabase.from("web_texts").delete().eq("company_id", companyId).in("key", added);
+    if (changed.length)
+      await supabase.from("web_texts").upsert(changed.map((r) => ({ company_id: companyId, key: r.key, value: r.value, updated_at: new Date().toISOString() })));
+    snapshot.current = null;
+    setEdit(false);
+    setAlbum(null);
+    setBusy(false);
+    flash("Cambios descartados");
+    reload();
+  };
+
   const countPhotos = useCallback(async () => {
     const { count } = await supabase.from("web_photos").select("id", { count: "exact", head: true }).eq("company_id", companyId);
     setPhotoCount(count ?? 0);
@@ -226,6 +254,11 @@ export default function SiteLiveEditor({ siteUrl, companyId }: { siteUrl: string
               + Nuevo álbum
             </button>
           )}
+          {edit && (
+            <button onClick={discard} disabled={busy} className={btn}>
+              Descartar cambios
+            </button>
+          )}
           <button
             onClick={() => {
               // Al guardar, se espera un momento a que lleguen los últimos textos escritos.
@@ -235,7 +268,10 @@ export default function SiteLiveEditor({ siteUrl, companyId }: { siteUrl: string
                 setBusy(false);
                 reload();
               };
-              if (!edit) return done();
+              if (!edit) {
+                takeSnapshot();
+                return done();
+              }
               (document.activeElement as HTMLElement | null)?.blur();
               setBusy(true);
               setTimeout(done, 1200);
