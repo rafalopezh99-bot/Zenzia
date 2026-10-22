@@ -188,11 +188,20 @@
     var before = el.textContent;
     el.addEventListener('focus', function () { before = el.textContent.replace(/\s+/g, ' ').trim(); });
     el.addEventListener('keydown', function (e) { if (e.key === 'Enter' && !/^(P|LI|BLOCKQUOTE)$/.test(el.tagName)) { e.preventDefault(); el.blur(); } });
-    el.addEventListener('blur', function () {
+    // Se guarda mientras se escribe (no solo al salir) para que no se pierda si se
+    // pulsa «Guardar» directamente. Un texto vacío no se guarda: se recupera el anterior.
+    var timer;
+    function send() {
+      clearTimeout(timer);
       var v = el.textContent.replace(/\s+/g, ' ').trim();
-      if (v === before) return;
+      if (!v || v === before) return;
       before = v;
       post({ type: 'zz-text', key: el.getAttribute('data-zz'), value: v });
+    }
+    el.addEventListener('input', function () { clearTimeout(timer); timer = setTimeout(send, 400); });
+    el.addEventListener('blur', function () {
+      send();
+      if (!el.textContent.trim()) el.textContent = before;
     });
   }
 

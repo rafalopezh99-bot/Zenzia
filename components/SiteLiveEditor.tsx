@@ -228,9 +228,17 @@ export default function SiteLiveEditor({ siteUrl, companyId }: { siteUrl: string
           )}
           <button
             onClick={() => {
-              setEdit(!edit);
-              setAlbum(null);
-              reload();
+              // Al guardar, se espera un momento a que lleguen los últimos textos escritos.
+              const done = () => {
+                setEdit(!edit);
+                setAlbum(null);
+                setBusy(false);
+                reload();
+              };
+              if (!edit) return done();
+              (document.activeElement as HTMLElement | null)?.blur();
+              setBusy(true);
+              setTimeout(done, 1200);
             }}
             className="rounded-full bg-brand px-5 py-2 text-sm font-bold text-white"
           >
