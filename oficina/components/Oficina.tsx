@@ -3,10 +3,12 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { DEPARTAMENTOS, type Departamento } from "@/lib/departamentos";
 import { cargarTareas, guardarTareas, nuevoId, tituloDe, type Tarea, type Turno } from "@/lib/tareas";
-import { Muneco, type Animo } from "./Muneco";
+import { crearEdificio } from "@/lib/edificio";
 import { Panel } from "./Panel";
 
 const FRASES_TRABAJO = ["Manos a la obra", "Dame un segundo…", "Interesante…", "¡Ya casi!", "Revisando…"];
+
+type EstadoSala = { animo: "libre" | "trabajando" | "aviso"; bocadillo?: string; estado: string; avisos: number };
 
 export function Oficina() {
   const [tareas, setTareas] = useState<Tarea[]>([]);
@@ -170,16 +172,8 @@ export function Oficina() {
         <Reloj enCurso={enCurso} />
       </header>
 
-      <main className="planta">
-        {DEPARTAMENTOS.map((d) => (
-          <Sala
-            key={d.id}
-            depto={d}
-            tareas={tareas.filter((t) => t.depto === d.id)}
-            onAbrir={() => setAbierto(d.id)}
-          />
-        ))}
-        <SalaDescanso />
+      <main>
+        <Edificio tareas={tareas} onAbrir={setAbierto} />
       </main>
 
       {deptoAbierto && (
@@ -214,85 +208,45 @@ function Reloj({ enCurso }: { enCurso: number }) {
   );
 }
 
-function Sala({ depto, tareas, onAbrir }: { depto: Departamento; tareas: Tarea[]; onAbrir: () => void }) {
-  const activa = tareas.find((t) => t.estado === "trabajando");
-  const avisos = tareas.filter((t) => !t.vista).length;
-  const [frase] = useState(() => Math.floor(Math.random() * FRASES_TRABAJO.length));
+// El edificio se dibuja con lib/edificio.js (mismo código que la versión de
+// una sola página); aquí solo se le pasa el estado de cada departamento.
+function Edificio({ tareas, onAbrir }: { tareas: Tarea[]; onAbrir: (id: string) => void }) {
+  const contenedor = useRef<HTMLDivElement>(null);
+  const escena = useRef<ReturnType<typeof crearEdificio> | null>(null);
+  const onAbrirRef = useRef(onAbrir);
+  onAbrirRef.current = onAbrir;
 
-  const animo: Animo = activa ? "trabajando" : avisos ? "aviso" : "libre";
+  useEffect(() => {
+    if (!contenedor.current) return;
+    escena.current = crearEdificio(contenedor.current, {
+      deptos: DEPARTAMENTOS,
+      onAbrir: (id: string) => onAbrirRef.current(id),
+    });
+    return () => {
+      escena.current?.destruir();
+      escena.current = null;
+    };
+  }, []);
 
-  return (
-    <button
-      type="button"
-      className={`sala ${activa ? "sala-activa" : ""}`}
-      style={{ ["--c" as string]: depto.color, ["--suelo" as string]: depto.suelo }}
-      onClick={onAbrir}
-      aria-label={`Abrir ${depto.nombre}`}
-    >
-      <div className="pared">
-        <div className="cartel">
-          <span className="cartel-nombre">{depto.nombre}</span>
-          <span className="cartel-lema">{depto.lema}</span>
-        </div>
-        {avisos > 0 && <span className="globo-aviso">{avisos}</span>}
-        <div className="cuadro" />
-      </div>
-      <div className="suelo">
-        {depto.empleados.map((e, i) => (
-          <Muneco
-            key={e.nombre}
-            empleado={e}
-            animo={animo}
-            colorDepto={depto.color}
-            bocadillo={activa && i === 0 ? activa.actividad ?? FRASES_TRABAJO[frase] : undefined}
-          />
-        ))}
-        <div className="planta-maceta" />
-      </div>
-      <div className="pie-sala">
-        {activa ? (
-          <span className="estado-sala trabajando">Trabajando: {activa.titulo}</span>
-        ) : avisos ? (
-          <span className="estado-sala aviso">¡Tienen {avisos === 1 ? "algo listo" : `${avisos} cosas listas`} para ti!</span>
-        ) : (
-          <span className="estado-sala">Libres · {tareas.length} {tareas.length === 1 ? "tarea" : "tareas"} hechas</span>
-        )}
-      </div>
-    </button>
-  );
-}
+  useEffect(() => {
+    const estados: Record<string, EstadoSala> = {};
+    for (const d of DEPARTAMENTOS) {
+      const suyas = tareas.filter((t) => t.depto === d.id);
+      const activa = suyas.find((t) => t.estado === "trabajando");
+      const avisos = suyas.filter((t) => !t.vista).length;
+      estados[d.id] = {
+        animo: activa ? "trabajando" : avisos ? "aviso" : "libre",
+        bocadillo: activa ? activa.actividad ?? FRASES_TRABAJO[d.id.length % FRASES_TRABAJO.length] : undefined,
+        avisos,
+        estado: activa
+          ? `Trabajando: ${activa.titulo}`
+          : avisos
+            ? `¡Tienen ${avisos === 1 ? "algo listo" : `${avisos} cosas listas`} para ti!`
+            : `Libres · ${suyas.length} ${suyas.length === 1 ? "tarea hecha" : "tareas hechas"}`,
+      };
+    }
+    escena.current?.actualizar(estados);
+  }, [tareas]);
 
-function SalaDescanso() {
-  return (
-    <div className="sala sala-descanso" style={{ ["--c" as string]: "#7a8699", ["--suelo" as string]: "#efe9e1" }}>
-      <div className="pared">
-        <div className="cartel">
-          <span className="cartel-nombre">Office</span>
-          <span className="cartel-lema">Café y descanso</span>
-        </div>
-        <div className="ventana" />
-      </div>
-      <div className="suelo suelo-descanso">
-        <div className="cafetera">
-          <div className="vapor" />
-        </div>
-        <div className="sofa" />
-        <div className="paseante">
-          <svg viewBox="0 0 40 70" aria-hidden>
-            <circle cx="20" cy="14" r="10" fill="#f1c7a3" />
-            <path d="M10 13 q0 -11 10 -11 q10 0 10 11 q-3 -5 -10 -5 q-7 0 -10 5z" fill="#2b2b2b" />
-            <circle cx="16.5" cy="15" r="1.3" fill="#1b1b1b" />
-            <circle cx="23.5" cy="15" r="1.3" fill="#1b1b1b" />
-            <rect x="11" y="25" width="18" height="22" rx="7" fill="#163e6e" />
-            <rect className="pierna pierna-i" x="13" y="45" width="6" height="18" rx="3" fill="#2f3542" />
-            <rect className="pierna pierna-d" x="21" y="45" width="6" height="18" rx="3" fill="#2f3542" />
-          </svg>
-        </div>
-        <div className="planta-maceta" />
-      </div>
-      <div className="pie-sala">
-        <span className="estado-sala">Aquí se recargan pilas</span>
-      </div>
-    </div>
-  );
+  return <div ref={contenedor} />;
 }
