@@ -12,18 +12,19 @@
 // el sexto hueco es la sala de reuniones.
 
 const T = 16; // píxeles por baldosa
-const W = 28; // baldosas de ancho
-const H = 30; // baldosas de alto
+const W = 20; // baldosas de ancho
+const H = 39; // baldosas de alto (rectángulo vertical, pensado para el móvil)
 const PX_W = W * T;
 const PX_H = H * T;
 
+// Dos zonas por fila, tres filas; debajo, el office y los sofás.
 const HUECOS = [
   { x: 1, y: 3, w: 8, h: 7 },
-  { x: 10, y: 3, w: 8, h: 7 },
-  { x: 19, y: 3, w: 8, h: 7 },
+  { x: 11, y: 3, w: 8, h: 7 },
   { x: 1, y: 12, w: 8, h: 7 },
-  { x: 10, y: 12, w: 8, h: 7 },
-  { x: 19, y: 12, w: 8, h: 7 },
+  { x: 11, y: 12, w: 8, h: 7 },
+  { x: 1, y: 21, w: 8, h: 7 },
+  { x: 11, y: 21, w: 8, h: 7 },
 ];
 
 // Muebles de cada departamento, relativos a su zona: [tipo, x, y, ancho, alto].
@@ -36,9 +37,9 @@ const ATREZZO = {
 };
 
 const TU = { nombre: "Tú", piel: "#f1c7a3", pelo: "#3b2a1e", camisa: "#2f6fd0" };
-const PUERTA = { x: 12, y: 28 };
-const CAFE = [{ x: 2, y: 22 }, { x: 5, y: 22 }, { x: 7, y: 23 }];
-const SOFA = [{ x: 17, y: 22 }, { x: 19, y: 22 }];
+const PUERTA = { x: 9, y: 37 };
+const CAFE = [{ x: 2, y: 31 }, { x: 5, y: 31 }, { x: 7, y: 32 }];
+const SOFA = [{ x: 13, y: 31 }, { x: 15, y: 31 }];
 
 const ESC = (s) =>
   String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
@@ -104,22 +105,21 @@ export function crearOficina(contenedor, { deptos, onAbrir }) {
   }
 
   // Office y zona de sofás.
-  mueble("encimera", 1, 21, 4, 1);
-  mueble("fuente", 5, 21);
-  mueble("maquina", 7, 21, 1, 1);
-  mueble("libreria", 1, 28, 3, 1);
-  mueble("planta", 9, 21);
-  mueble("planta", 26, 21);
-  mueble("planta", 26, 28);
-  mueble("planta", 14, 28);
-  mueble("sofa-h", 16, 22, 5, 1, { pisable: true });
-  bloquear(16, 22, 1, 1);
-  bloquear(20, 22, 1, 1);
-  bloquear(18, 22, 1, 1);
-  mueble("sofa-v", 25, 23, 1, 4);
-  mueble("mesita", 18, 24, 2, 1);
-  mueble("butaca", 16, 25);
-  mueble("lampara", 25, 22);
+  mueble("encimera", 1, 30, 4, 1);
+  mueble("fuente", 5, 30);
+  mueble("maquina", 7, 30, 1, 1);
+  mueble("libreria", 1, 37, 3, 1);
+  mueble("planta", 1, 34);
+  mueble("planta", 18, 37);
+  mueble("planta", 11, 37);
+  mueble("sofa-h", 12, 31, 5, 1, { pisable: true });
+  bloquear(12, 31, 1, 1);
+  bloquear(14, 31, 1, 1);
+  bloquear(16, 31, 1, 1);
+  mueble("sofa-v", 18, 32, 1, 4);
+  mueble("mesita", 14, 33, 2, 1);
+  mueble("butaca", 12, 34);
+  mueble("lampara", 18, 31);
 
   // ---------- Búsqueda de caminos (BFS sobre baldosas) ----------
   function camino(desde, hasta) {
@@ -184,7 +184,7 @@ export function crearOficina(contenedor, { deptos, onAbrir }) {
       <div class="ofi-escena">
         <canvas class="ofi-lienzo" aria-label="Plano de la oficina. Toca el suelo para moverte o una zona para hablar con su departamento."></canvas>
         <div class="ofi-capa">
-          <div class="ofi-rotulo" style="left:${(10 / W) * 100}%;top:${(0.45 / H) * 100}%;width:${(8 / W) * 100}%;height:${(1.7 / H) * 100}%">OFICINA ZENZIA</div>
+          <div class="ofi-rotulo" style="left:${(6 / W) * 100}%;top:${(0.45 / H) * 100}%;width:${(8 / W) * 100}%;height:${(1.7 / H) * 100}%">OFICINA ZENZIA</div>
           ${zonas
             .map(
               (z) => `<button type="button" class="ofi-zona" data-depto="${z.d.id}" style="left:${((z.x + 0.15) / W) * 100}%;top:${((z.y + 0.1) / H) * 100}%;--c:${z.d.color}">
@@ -193,7 +193,7 @@ export function crearOficina(contenedor, { deptos, onAbrir }) {
             )
             .join("")}
           ${reunion ? `<div class="ofi-cartelito" style="left:${((reunion.x + 1.3) / W) * 100}%;top:${((reunion.y + 0.15) / H) * 100}%">Reuniones</div>` : ""}
-          <div class="ofi-cartelito" style="left:${(1.2 / W) * 100}%;top:${(25.3 / H) * 100}%">Office</div>
+          <div class="ofi-cartelito" style="left:${(3.2 / W) * 100}%;top:${(34.3 / H) * 100}%">Office</div>
           ${gente.map((_, i) => `<div class="ofi-bocadillo" data-boc="${i}" hidden></div>`).join("")}
           <div class="ofi-tu">TÚ</div>
         </div>
@@ -301,11 +301,11 @@ export function crearOficina(contenedor, { deptos, onAbrir }) {
           r(c, i * T, j * T, T, T, (i + j) % 2 ? "#a9bccd" : "#b6c7d6");
     }
     // Office: baldosa de cocina
-    for (let j = 21; j < 25; j++) for (let i = 1; i < 10; i++) r(c, i * T, j * T, T, T, (i + j) % 2 ? "#e9e3d7" : "#dcd3c3");
+    for (let j = 30; j < 34; j++) for (let i = 1; i < 9; i++) r(c, i * T, j * T, T, T, (i + j) % 2 ? "#e9e3d7" : "#dcd3c3");
     // Alfombra de la zona de sofás
-    r(c, 15 * T, 22 * T - 4, 11 * T, 6 * T + 4, "#c9b48a");
-    r(c, 15 * T + 3, 22 * T - 1, 11 * T - 6, 6 * T - 2, "#efe3c8");
-    r(c, 15 * T + 6, 22 * T + 2, 11 * T - 12, 1, "#d9c8a4");
+    r(c, 11 * T, 31 * T - 4, 8 * T, 6 * T + 4, "#c9b48a");
+    r(c, 11 * T + 3, 31 * T - 1, 8 * T - 6, 6 * T - 2, "#efe3c8");
+    r(c, 11 * T + 6, 31 * T + 2, 8 * T - 12, 1, "#d9c8a4");
     // Felpudo de la entrada
     r(c, PUERTA.x * T, PUERTA.y * T + 2, 2 * T, T - 2, "#2f9ce0");
     r(c, PUERTA.x * T + 3, PUERTA.y * T + 5, 2 * T - 6, T - 8, "#7cc4f0");
@@ -315,10 +315,10 @@ export function crearOficina(contenedor, { deptos, onAbrir }) {
     r(c, 0, 0, PX_W, 5, "#2a313c");
     r(c, 0, 2 * T + 4, PX_W, 8, "#dccbb2");
     r(c, 0, 3 * T - 3, PX_W, 3, "#8e6641");
-    for (const vx of [2, 6, 20, 24]) ventana(c, vx * T, 8, 3 * T - 4, 22);
+    for (const vx of [1.5, 15.5]) ventana(c, vx * T, 8, 3 * T - 4, 22);
     // Rótulo
-    r(c, 10 * T, 6, 8 * T, 28, "#163e6e");
-    r(c, 10 * T + 2, 8, 8 * T - 4, 24, "#1d4f8a");
+    r(c, 6 * T, 6, 8 * T, 28, "#163e6e");
+    r(c, 6 * T + 2, 8, 8 * T - 4, 24, "#1d4f8a");
     // Paredes laterales y de abajo
     r(c, 0, 0, T - 6, PX_H, "#2a313c");
     r(c, T - 6, 3 * T, 2, PX_H - 4 * T, "#59616e");
