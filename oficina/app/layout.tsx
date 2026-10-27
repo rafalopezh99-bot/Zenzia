@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Oficina RL Digital Studios",
+  title: "Oficina ZENZIA",
   description: "Oficina virtual con departamentos de Claude a los que encargar tareas.",
 };
 

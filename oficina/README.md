@@ -1,4 +1,4 @@
-# Oficina RL Digital Studios
+# Oficina ZENZIA
 
 Oficina virtual con muñequitos (estilo Los Sims) en la que cada departamento es
 un equipo de Claude al que le puedes encargar tareas:

@@ -1,6 +1,6 @@
 @echo off
 chcp 65001 >nul
-title Oficina RL Digital Studios
+title Oficina ZENZIA
 cd /d "%~dp0"
 
 where node >nul 2>nul

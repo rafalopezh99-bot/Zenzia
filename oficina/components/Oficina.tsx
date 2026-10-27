@@ -164,7 +164,7 @@ export function Oficina() {
     <div className="app">
       <header className="cabecera">
         <div>
-          <h1>Oficina RL Digital Studios</h1>
+          <h1>Oficina ZENZIA</h1>
           <p>Pulsa un departamento para encargarle una tarea.</p>
         </div>
         <Reloj enCurso={enCurso} />
