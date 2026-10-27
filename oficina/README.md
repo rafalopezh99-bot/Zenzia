@@ -1,7 +1,9 @@
 # Oficina ZENZIA
 
-Oficina virtual con muñequitos (estilo Los Sims) en la que cada departamento es
-un equipo de Claude al que le puedes encargar tareas:
+Oficina virtual en pixel art, vista desde arriba, en la que cada departamento es
+un equipo de Claude al que le puedes encargar tareas. Tú eres el muñeco «TÚ»:
+toca el suelo para moverte (o usa las flechas) y toca una zona para hablar con
+ese departamento.
 
 | Departamento | Para qué |
 |---|---|
@@ -12,7 +14,7 @@ un equipo de Claude al que le puedes encargar tareas:
 | Marketing | Redes, SEO, emails, competencia (busca en internet) |
 
 Cuando un departamento trabaja, sus muñecos teclean y el rombo de encima se
-pone amarillo; al terminar se pone azul y aparece un aviso en la sala. Pueden
+pone amarillo; al terminar uno viene a buscarte con el rombo azul. Pueden
 trabajar varios departamentos a la vez. Dentro de cada tarea puedes pedir
 cambios y seguir la conversación. El historial se guarda en el navegador del PC.
 

@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { DEPARTAMENTOS, type Departamento } from "@/lib/departamentos";
 import { cargarTareas, guardarTareas, nuevoId, tituloDe, type Tarea, type Turno } from "@/lib/tareas";
-import { crearEdificio } from "@/lib/edificio";
+import { crearOficina } from "@/lib/oficina-pixel";
 import { Panel } from "./Panel";
 
 const FRASES_TRABAJO = ["Manos a la obra", "Dame un segundo…", "Interesante…", "¡Ya casi!", "Revisando…"];
@@ -173,7 +173,7 @@ export function Oficina() {
       </header>
 
       <main>
-        <Edificio tareas={tareas} onAbrir={setAbierto} />
+        <PlanoOficina tareas={tareas} onAbrir={setAbierto} />
       </main>
 
       {deptoAbierto && (
@@ -208,17 +208,17 @@ function Reloj({ enCurso }: { enCurso: number }) {
   );
 }
 
-// El edificio se dibuja con lib/edificio.js (mismo código que la versión de
+// La oficina se dibuja con lib/oficina-pixel.js (mismo código que la versión de
 // una sola página); aquí solo se le pasa el estado de cada departamento.
-function Edificio({ tareas, onAbrir }: { tareas: Tarea[]; onAbrir: (id: string) => void }) {
+function PlanoOficina({ tareas, onAbrir }: { tareas: Tarea[]; onAbrir: (id: string) => void }) {
   const contenedor = useRef<HTMLDivElement>(null);
-  const escena = useRef<ReturnType<typeof crearEdificio> | null>(null);
+  const escena = useRef<ReturnType<typeof crearOficina> | null>(null);
   const onAbrirRef = useRef(onAbrir);
   onAbrirRef.current = onAbrir;
 
   useEffect(() => {
     if (!contenedor.current) return;
-    escena.current = crearEdificio(contenedor.current, {
+    escena.current = crearOficina(contenedor.current, {
       deptos: DEPARTAMENTOS,
       onAbrir: (id: string) => onAbrirRef.current(id),
     });
