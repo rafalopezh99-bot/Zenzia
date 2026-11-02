@@ -1,7 +1,7 @@
 import { VERTICAL_CATEGORIES, VERTICAL_CATALOG } from "@/lib/verticals";
 import { MarketingHeader, MarketingFooter } from "@/components/marketing-ui";
 import LandingContactForm from "@/components/LandingContactForm";
-import DashboardMockup from "@/components/DashboardMockup";
+import ProAppPreview from "@/components/ProAppPreview";
 import FeatureTabs, { type TabDef } from "@/components/FeatureTabs";
 import { formatPlanPrice, PLANS } from "@/lib/planContent";
 
@@ -159,12 +159,12 @@ export default function LandingPage() {
       {/* ============ HERO ============ */}
       <section className="border-b border-mk-line">
         <div className="mx-auto max-w-6xl px-6 pb-16 pt-14 sm:pt-20">
-          <div className="grid items-center gap-14 lg:grid-cols-[1.05fr_1fr]">
+          <div>
             <div>
-              <h1 className="max-w-xl text-4xl font-black leading-[1.08] tracking-tight text-mk-ink sm:text-5xl">
+              <h1 className="max-w-3xl text-4xl font-black leading-[1.08] tracking-tight text-mk-ink sm:text-5xl">
                 Tu negocio en orden y bien visible en internet
               </h1>
-              <p className="mt-6 max-w-lg text-base leading-relaxed text-mk-muted">
+              <p className="mt-6 max-w-2xl text-base leading-relaxed text-mk-muted">
                 Zenzia es el CRM para gestionar citas, clientes y cobros desde un solo panel. Y si necesitas web, te la
                 diseño a medida para que puedas editarla tú.
               </p>
@@ -214,7 +214,9 @@ export default function LandingPage() {
               </div>
             </div>
 
-            <DashboardMockup />
+            <div className="mt-12">
+              <ProAppPreview />
+            </div>
           </div>
         </div>
       </section>
@@ -412,13 +414,10 @@ export default function LandingPage() {
       {/* ============ ZENZIA EN ACCIÓN (posición "vídeo/demo" de monday) ============ */}
       <section className="bg-mk-ink">
         <div className="mx-auto max-w-5xl px-6 py-20 text-center">
-          <span className="text-xs font-bold uppercase tracking-widest text-mk-amber">Zenzia en acción</span>
+          <span className="text-xs font-bold uppercase tracking-widest text-mk-amber">14 días gratis</span>
           <h2 className="mx-auto mt-2 max-w-xl text-2xl font-black tracking-tight text-white sm:text-3xl">
-            Así se ve tu negocio con Zenzia dentro
+            Pruébalo con tu propio negocio
           </h2>
-          <div className="mx-auto mt-10 max-w-xl text-left">
-            <DashboardMockup />
-          </div>
           <a
             href="/registro"
             className="mt-10 inline-block rounded-full bg-mk-accent px-7 py-3.5 text-sm font-semibold text-white transition hover:brightness-110"
