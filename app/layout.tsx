@@ -3,7 +3,7 @@ import type { Metadata, Viewport } from "next";
 import { IBM_Plex_Mono, Inter, JetBrains_Mono, Outfit } from "next/font/google";
 
 const DESCRIPTION =
-  "CRM para negocios locales — contactos, agenda, facturación y presupuestos en un solo sitio.";
+  "CRM para gestionar citas, clientes y cobros, y desarrollo web a medida para tu negocio.";
 
 // metadataBase resuelve las rutas relativas de abajo (og-image.png) a URL
 // absoluta, que es lo que exigen WhatsApp/Twitter/Facebook para mostrar la
@@ -11,7 +11,7 @@ const DESCRIPTION =
 export const metadata: Metadata = {
   metadataBase: new URL("https://zenzia.es"),
   title: {
-    default: "Zenzia · CRM para tu negocio: agenda, clientes y facturación con VeriFactu",
+    default: "Zenzia · CRM y desarrollo web para tu negocio",
     template: "%s · Zenzia",
   },
   description: DESCRIPTION,

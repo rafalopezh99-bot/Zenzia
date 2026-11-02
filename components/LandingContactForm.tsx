@@ -65,11 +65,11 @@ export default function LandingContactForm() {
       </div>
 
       <div>
-        <label className={labelClass}>Cuéntanos tu negocio</label>
+        <label className={labelClass}>Cuéntame tu negocio</label>
         <textarea
           name="message"
           rows={4}
-          placeholder="A qué te dedicas y qué te gustaría gestionar con Zenzia"
+          placeholder="A qué te dedicas y qué necesitas: CRM, web o las dos cosas"
           className={fieldClass}
         />
       </div>
