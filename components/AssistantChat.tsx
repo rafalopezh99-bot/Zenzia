@@ -47,14 +47,14 @@ export default function AssistantChat({ name }: { name?: string | null }) {
     <>
       <button
         onClick={() => setOpen(!open)}
-        className="fixed bottom-5 right-5 z-40 flex h-14 w-14 items-center justify-center rounded-full bg-brand text-2xl text-white shadow-lg transition hover:scale-105"
+        className="fixed bottom-36 right-4 z-30 flex h-14 w-14 sm:bottom-5 sm:right-5 sm:z-40 items-center justify-center rounded-full bg-brand text-2xl text-white shadow-lg transition hover:scale-105"
         aria-label="Asistente virtual"
         title="Asistente virtual"
       >
         {open ? "✕" : "✦"}
       </button>
       {open && (
-        <div className="fixed bottom-24 right-4 z-40 flex h-[min(560px,75vh)] w-[min(380px,calc(100vw-2rem))] flex-col overflow-hidden rounded-2xl border border-line bg-surface shadow-2xl">
+        <div className="fixed bottom-20 right-4 z-50 flex h-[min(560px,70vh)] sm:bottom-24 w-[min(380px,calc(100vw-2rem))] flex-col overflow-hidden rounded-2xl border border-line bg-surface shadow-2xl">
           <div className="border-b border-line bg-brand px-4 py-3 text-white">
             <div className="text-sm font-bold">Asistente Zenzia</div>
             <div className="text-xs opacity-80">Pregúntame por tu agenda, clientes o facturación</div>

@@ -79,8 +79,10 @@ export default async function ContactosPage(props: { searchParams: Promise<{ q?:
       if (!nextByContact.has(a.contact_id)) nextByContact.set(a.contact_id, a);
     }
     const pad = (n: number) => String(n).padStart(2, "0");
-    const actionClass =
-      "inline-flex min-h-9 items-center gap-1.5 whitespace-nowrap rounded-lg border border-line bg-surface px-3 text-xs font-semibold text-brand transition hover:border-brand";
+    const actionBase =
+      "inline-flex min-h-11 items-center justify-center gap-1 rounded-lg border bg-surface px-1.5 py-1 text-center text-xs leading-tight sm:min-h-9 sm:gap-1.5 sm:px-3";
+    const actionClass = `${actionBase} border-line font-semibold text-brand transition hover:border-brand`;
+    const disabledClass = `${actionBase} border-dashed border-line text-slate`;
 
     return (
       <div>
@@ -112,77 +114,63 @@ export default async function ContactosPage(props: { searchParams: Promise<{ q?:
           />
         </form>
 
-        <div className={tableWrap}>
-          <table className={tableEl}>
-            <thead className={theadEl}>
-              <tr>
-                <th className={thEl}>Nombre</th>
-                <th className={thEl}>Teléfono</th>
-                <th className={thEl}>Contactar</th>
-                <th className={thEl}></th>
-              </tr>
-            </thead>
-            <tbody>
-              {(contacts ?? []).map((c: any) => {
-                const whatsapp = whatsappUrl(c.phone);
-                const next = nextByContact.get(c.id);
-                const nextParts = next ? appLocalParts(next.starts_at) : null;
-                return (
-                  <tr key={c.id} className={trEl}>
-                    <td className={tdEl}>
-                      <Link href={`/contactos/${c.id}`} className="font-medium text-ink hover:text-brand">
-                        {c.full_name}
-                      </Link>
-                    </td>
-                    <td className={tdEl}>
-                      {c.phone ? (
-                        <a href={`tel:${c.phone}`} className="text-ink hover:text-brand">
-                          {c.phone}
-                        </a>
-                      ) : (
-                        <span className="text-slate/50">—</span>
-                      )}
-                    </td>
-                    <td className={tdEl}>
-                      <div className="flex flex-wrap gap-1.5">
-                        {whatsapp && (
-                          <a href={whatsapp} target="_blank" rel="noopener noreferrer" className={actionClass}>
-                            <WhatsAppIcon /> WhatsApp
-                          </a>
-                        )}
-                        {next && nextParts ? (
-                          <Link
-                            href={`/citas?view=day&day=${nextParts.year}-${pad(nextParts.month)}-${pad(nextParts.day)}&cita=${next.id}`}
-                            className={actionClass}
-                          >
-                            Próxima cita · {pad(nextParts.day)}/{pad(nextParts.month)}, {formatAppTime(next.starts_at)}
-                          </Link>
-                        ) : (
-                          <span className={`${actionClass} cursor-default border-dashed font-normal text-slate hover:border-line`}>Sin próxima cita</span>
-                        )}
-                        {c.email && (
-                          <a href={`mailto:${c.email}`} className={actionClass}>
-                            <EmailIcon /> Email
-                          </a>
-                        )}
-                      </div>
-                    </td>
-                    <td className={tdEl}>
-                      <DeleteContactButton contactId={c.id} contactName={c.full_name} deleteContact={deleteContact} />
-                    </td>
-                  </tr>
-                );
-              })}
-              {(contacts ?? []).length === 0 && (
-                <tr>
-                  <td colSpan={4} className={`${tdEl} text-center text-slate`}>
-                    {q ? "Ningún cliente coincide con la búsqueda." : "Todavía no tienes clientes."}
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
+        <ul className="space-y-3">
+          {(contacts ?? []).map((c: any) => {
+            const whatsapp = whatsappUrl(c.phone);
+            const next = nextByContact.get(c.id);
+            const nextParts = next ? appLocalParts(next.starts_at) : null;
+            return (
+              <li key={c.id} className="rounded-2xl border border-line bg-surface p-4">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <Link href={`/contactos/${c.id}`} className="block truncate font-semibold text-ink hover:text-brand">
+                      {c.full_name}
+                    </Link>
+                    {c.phone ? (
+                      <a href={`tel:${c.phone}`} className="text-sm text-slate hover:text-brand">
+                        {c.phone}
+                      </a>
+                    ) : (
+                      <span className="text-sm text-slate">Sin teléfono</span>
+                    )}
+                  </div>
+                  <DeleteContactButton contactId={c.id} contactName={c.full_name} deleteContact={deleteContact} />
+                </div>
+                <div className="mt-3 grid grid-cols-3 gap-1.5 sm:flex sm:flex-wrap">
+                  {whatsapp ? (
+                    <a href={whatsapp} target="_blank" rel="noopener noreferrer" className={actionClass}>
+                      <WhatsAppIcon /> WhatsApp
+                    </a>
+                  ) : (
+                    <span className={disabledClass}>Sin WhatsApp</span>
+                  )}
+                  {next && nextParts ? (
+                    <Link
+                      href={`/citas?view=day&day=${nextParts.year}-${pad(nextParts.month)}-${pad(nextParts.day)}&cita=${next.id}`}
+                      className={actionClass}
+                    >
+                      Próxima cita {pad(nextParts.day)}/{pad(nextParts.month)}, {formatAppTime(next.starts_at)}
+                    </Link>
+                  ) : (
+                    <span className={disabledClass}>Sin próxima cita</span>
+                  )}
+                  {c.email ? (
+                    <a href={`mailto:${c.email}`} className={actionClass}>
+                      <EmailIcon /> Email
+                    </a>
+                  ) : (
+                    <span className={disabledClass}>Sin email</span>
+                  )}
+                </div>
+              </li>
+            );
+          })}
+          {(contacts ?? []).length === 0 && (
+            <li className="rounded-2xl border border-line bg-surface p-4 text-center text-sm text-slate">
+              {q ? "Ningún cliente coincide con la búsqueda." : "Todavía no tienes clientes."}
+            </li>
+          )}
+        </ul>
       </div>
     );
   }

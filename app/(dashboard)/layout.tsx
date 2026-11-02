@@ -136,7 +136,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
         locked={locked}
         webOnly={webOnly}
       />
-      <main className="flex-1 overflow-x-hidden p-4 sm:p-8">
+      <main className="min-w-0 flex-1 overflow-x-hidden p-4 pb-28 sm:p-8">
         {trialDaysLeft !== null && !isAdmin && (
           <div className="mb-4 flex flex-wrap items-center justify-between gap-2 rounded-xl border border-line bg-paper-deep px-4 py-2 text-sm text-ink">
             <span>

@@ -138,7 +138,7 @@ export default async function PagosPage(
     ) : null;
   };
   const whatsappBtn =
-    "inline-flex min-h-9 items-center rounded-lg border border-green-300 bg-surface px-3 text-xs font-semibold text-green-800 transition hover:bg-green-50 dark:border-green-700 dark:text-green-300 dark:hover:bg-green-950";
+    "inline-flex min-h-11 sm:min-h-9 items-center rounded-lg border border-green-300 bg-surface px-3 text-xs font-semibold text-green-800 transition hover:bg-green-50 dark:border-green-700 dark:text-green-300 dark:hover:bg-green-950";
   const showPending = estado !== "cobrados";
   const showPaid = estado !== "pendientes";
 
@@ -262,16 +262,16 @@ export default async function PagosPage(
                   <span className="text-xs font-semibold text-amber-800 dark:text-amber-200">{p.days >= 1 ? `Hace ${elapsed(p.days)}` : "Sin cobrar"}</span>
                   {p.invoiceId ? (
                     <form action={markInvoicePaid.bind(null, p.invoiceId)} className="flex items-center gap-1">
-                      <select name="payment_method" aria-label="Método de pago" required defaultValue="" className="min-h-9 rounded-lg border border-line bg-surface px-2 text-xs text-ink">
+                      <select name="payment_method" aria-label="Método de pago" required defaultValue="" className="min-h-11 sm:min-h-9 rounded-lg border border-line bg-surface px-2 text-xs text-ink">
                         <option value="" disabled>Método</option>
                         {PAYMENT_METHODS.map((m) => (
                           <option key={m} value={m}>{PAYMENT_METHOD_LABEL[m]}</option>
                         ))}
                       </select>
-                      <button className="min-h-9 rounded-lg border border-line bg-surface px-3 text-xs font-semibold text-brand transition hover:bg-paper-deep">Marcar cobrado</button>
+                      <button className="min-h-11 sm:min-h-9 rounded-lg border border-line bg-surface px-3 text-xs font-semibold text-brand transition hover:bg-paper-deep">Marcar cobrado</button>
                     </form>
                   ) : (
-                    <Link href={`/citas/${p.appointmentId}/editar`} className="inline-flex min-h-9 items-center rounded-lg border border-line bg-surface px-3 text-xs font-semibold text-brand transition hover:bg-paper-deep">
+                    <Link href={`/citas/${p.appointmentId}/editar`} className="inline-flex min-h-11 sm:min-h-9 items-center rounded-lg border border-line bg-surface px-3 text-xs font-semibold text-brand transition hover:bg-paper-deep">
                       Cobrar
                     </Link>
                   )}

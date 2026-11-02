@@ -2,6 +2,7 @@ import WebAnalytics from "@/components/WebAnalytics";
 import { UsersIcon, CalendarClockIcon, BellIcon, WalletIcon, TruckIcon } from "@/components/icons";
 import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
+import { whatsappUrl } from "@/lib/whatsapp";
 import { Card, Badge } from "@/components/ui";
 import { getCurrentCompanyProfile } from "@/lib/company";
 import { getTerminology, showsAcademiaFields, isConsultaVertical } from "@/lib/terminology";
@@ -119,7 +120,7 @@ export default async function DashboardPage() {
       supabase.from("notifications").select("*", { count: "exact", head: true }).eq("status", "nueva"),
       supabase
         .from("appointments")
-        .select("id, starts_at, contacts(full_name)")
+        .select("id, starts_at, contacts(id, full_name, phone), services(name)")
         .eq("status", "scheduled")
         .gte("starts_at", new Date().toISOString())
         .order("starts_at", { ascending: true })
@@ -322,6 +323,35 @@ export default async function DashboardPage() {
           <DashboardWidgetsEditor catalog={widgetCatalog} enabledKeys={Array.from(enabledWidgets)} />
         </div>
       </div>
+
+      {consulta && !isAcademia && upcoming[0] && (
+        <section className="mb-4 rounded-2xl bg-[#0b2a4a] p-4 text-[#dce7f1] sm:max-w-xl">
+          <div className="text-xs text-[#c5d6e6]">
+            Tu próxima {terms.appointment.toLowerCase()} ·{" "}
+            {new Date(upcoming[0].starts_at).toLocaleDateString("es-ES", { timeZone: "Europe/Madrid", weekday: "short", day: "numeric", month: "short" })},{" "}
+            {formatAppTime(upcoming[0].starts_at)}
+          </div>
+          <div className="mt-0.5 text-xl font-semibold text-white">{upcoming[0].contacts?.full_name}</div>
+          {upcoming[0].services?.name && <div className="text-sm">{upcoming[0].services.name}</div>}
+          <div className="mt-3 flex gap-2">
+            {upcoming[0].contacts?.id && (
+              <Link href={`/contactos/${upcoming[0].contacts.id}`} className="flex min-h-11 flex-1 items-center justify-center rounded-xl bg-white px-3 text-sm font-semibold text-[#0b2a4a]">
+                Ver ficha
+              </Link>
+            )}
+            {whatsappUrl(upcoming[0].contacts?.phone) && (
+              <a
+                href={whatsappUrl(upcoming[0].contacts?.phone)!}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex min-h-11 flex-1 items-center justify-center rounded-xl border border-[#5f7f9e] px-3 text-sm font-semibold text-white"
+              >
+                WhatsApp
+              </a>
+            )}
+          </div>
+        </section>
+      )}
 
       <PlanUsageCard plan={plan} monthStart={monthStart} />
       {planHas(plan, "winback") && <InactiveClientsCard />}

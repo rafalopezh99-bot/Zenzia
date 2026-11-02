@@ -81,40 +81,69 @@ export default function Sidebar({
   const close = () => setOpen(false);
   const linkClass = "flex items-center gap-2.5 rounded-lg px-3 py-2 font-medium text-[#dce7f1] transition hover:bg-[#12365c] hover:text-white";
   const item = (href: string) => `${linkClass}${pathname === href || pathname.startsWith(`${href}/`) ? " bg-[#163e6e] text-white" : ""}`;
+  // Lo que ya está en la barra inferior del móvil solo se ve en la lateral de escritorio.
+  const deskOnly = (href: string) => item(href).replace("flex items-center", "hidden items-center sm:flex");
+  const hasAgenda = modules.some((m) => m.key === "agenda");
+  const agendaModule = modules.find((m) => m.key === "agenda");
+  const tabs = webOnly
+    ? [
+        { href: "/dashboard", label: "Dashboard" },
+        { href: "/mi-web", label: "Mi web" },
+        { href: "/galeria", label: "Galería" },
+        { href: "/perfil", label: "Perfil" },
+      ]
+    : [
+        { href: "/dashboard", label: "Inicio" },
+        ...(hasAgenda && agendaModule ? [{ href: agendaModule.href, label: terms.agendaLabel }] : []),
+        { href: "/contactos", label: terms.contacts },
+        { href: "/pagos", label: "Cobros" },
+        { href: "/perfil", label: "Perfil" },
+      ];
+  const showFab = hasAgenda && !webOnly && (pathname === "/dashboard" || pathname === "/citas");
   const countBadge = "ml-auto rounded-full bg-[#2f7fc0] px-2 py-0.5 text-xs font-semibold text-white";
 
   return (
     <>
-      {/* Barra superior: solo en móvil */}
-      <div className="flex items-center justify-between border-b border-line bg-surface px-4 py-3 sm:hidden">
+      {/* Móvil: barra superior oscura con campana y menú desplegable */}
+      <div className="sticky top-0 z-30 flex h-14 items-center justify-between bg-[#0b2a4a] px-4 sm:hidden">
         <Link href="/dashboard" className="flex items-center" onClick={close}>
-          <ZenziaLogo className="h-7 w-auto" />
+          <ZenziaLogo onDark className="h-7 w-auto" />
         </Link>
-        <button
-          type="button"
-          onClick={() => setOpen(true)}
-          aria-label="Abrir menú"
-          className="rounded-lg border border-line p-2 text-ink"
-        >
-          <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
-            <path d="M2 4.5h14M2 9h14M2 13.5h14" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
-          </svg>
-        </button>
+        <div className="-mr-2 flex items-center">
+          {showNotifications && !webOnly && (
+            <Link
+              href="/notificaciones"
+              aria-label={notificationCount > 0 ? `Notificaciones, ${notificationCount} nuevas` : "Notificaciones"}
+              className="relative flex h-11 w-11 items-center justify-center text-white"
+              onClick={close}
+            >
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <path d={ICONS["/notificaciones"]} />
+              </svg>
+              {notificationCount > 0 && <span className="absolute right-2 top-2 h-2.5 w-2.5 rounded-full border-2 border-[#0b2a4a] bg-[#5fc2ef]" />}
+            </Link>
+          )}
+          <button
+            type="button"
+            onClick={() => setOpen(!open)}
+            aria-label={open ? "Cerrar menú" : "Abrir menú"}
+            aria-expanded={open}
+            className="flex h-11 w-11 items-center justify-center text-white"
+          >
+            <svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
+              <path d={open ? "M6 6l12 12M18 6L6 18" : "M4 7h16M4 12h16M4 17h16"} />
+            </svg>
+          </button>
+        </div>
       </div>
 
-      {/* Fondo oscuro para cerrar el cajón al tocar fuera (solo móvil, solo si está abierto) */}
-      {open && (
-        <div
-          className="fixed inset-0 z-40 bg-ink/40 sm:hidden"
-          onClick={close}
-          aria-hidden="true"
-        />
-      )}
+      {/* Móvil: fondo para cerrar el desplegable al tocar fuera */}
+      {open && <div className="fixed inset-0 top-14 z-40 bg-ink/40 sm:hidden" onClick={close} aria-hidden="true" />}
 
       {/* Nav: cajón deslizante en móvil, columna fija en escritorio */}
       <nav
-        className={`fixed inset-y-0 left-0 z-50 flex w-64 transform flex-col overflow-y-auto bg-[#0b2a4a] p-4 text-sm text-[#dce7f1] transition-transform duration-200 ease-out sm:sticky sm:top-0 sm:h-screen sm:z-auto sm:w-56 sm:shrink-0 sm:translate-x-0 sm:transition-none ${
-          open ? "translate-x-0" : "-translate-x-full"
+        className={`fixed right-2 top-16 z-50 max-h-[calc(100dvh-9.5rem)] w-72 max-w-[calc(100vw-1rem)] flex-col overflow-y-auto rounded-xl bg-[#0b2a4a] p-3 text-sm text-[#dce7f1] shadow-xl sm:sticky sm:right-auto sm:top-0 sm:z-auto sm:flex sm:h-screen sm:max-h-none sm:w-56 sm:shrink-0 sm:rounded-none sm:p-4 sm:shadow-none ${
+          open ? "flex" : "hidden"
         }`}
       >
         <div className="mb-6 hidden px-1 sm:block">
@@ -122,41 +151,24 @@ export default function Sidebar({
             <ZenziaLogo onDark className="h-11 w-auto" />
           </div>
         </div>
-        <div className="mb-4 flex items-start justify-between px-1 sm:hidden">
-          <div>
-            <div className="flex items-center">
-              <ZenziaLogo onDark className="h-9 w-auto" />
-            </div>
-          </div>
-          <button
-            type="button"
-            onClick={close}
-            aria-label="Cerrar menú"
-            className="rounded-lg border border-[#47678a] p-2 text-white"
-          >
-            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
-              <path d="M1 1l12 12M13 1L1 13" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
-            </svg>
-          </button>
-        </div>
         {webOnly ? (
           <>
-            <Link href="/dashboard" className={item("/dashboard")} onClick={close}>
+            <Link href="/dashboard" className={deskOnly("/dashboard")} onClick={close}>
               <NavIcon href="/dashboard" /> Dashboard
             </Link>
-            <Link href="/mi-web" className={item("/mi-web")} onClick={close}>
+            <Link href="/mi-web" className={deskOnly("/mi-web")} onClick={close}>
               <NavIcon href="/mi-web" /> Mi web
             </Link>
-            <Link href="/galeria" className={item("/galeria")} onClick={close}>
+            <Link href="/galeria" className={deskOnly("/galeria")} onClick={close}>
               <NavIcon href="/galeria" /> Galería
             </Link>
           </>
         ) : (
           <>
-        <Link href="/dashboard" className={item("/dashboard")} onClick={close}>
+        <Link href="/dashboard" className={deskOnly("/dashboard")} onClick={close}>
           <NavIcon href="/dashboard" /> Dashboard
         </Link>
-        <Link href="/contactos" className={item("/contactos")} onClick={close}>
+        <Link href="/contactos" className={deskOnly("/contactos")} onClick={close}>
           <NavIcon href="/contactos" /> {terms.contacts}
         </Link>
         {showStats && (
@@ -187,11 +199,11 @@ export default function Sidebar({
           </Link>
         )}
         {modules.map((m) => (
-          <Link key={m.key} href={m.href} className={item(m.href)} onClick={close}>
+          <Link key={m.key} href={m.href} className={m.key === "agenda" ? deskOnly(m.href) : item(m.href)} onClick={close}>
             <NavIcon href={m.href} /> {m.key === "agenda" ? terms.agendaLabel : m.label}
           </Link>
         ))}
-        <Link href="/pagos" className={item("/pagos")} onClick={close}>
+        <Link href="/pagos" className={deskOnly("/pagos")} onClick={close}>
           <NavIcon href="/pagos" /> Cobros
         </Link>
         {locked.map((label) => (
@@ -240,12 +252,47 @@ export default function Sidebar({
           <span className="block font-semibold text-white">Contactar con soporte</span>
           WhatsApp · 673 895 732
         </a>
-        <div className="flex items-center justify-between gap-2 border-t border-[#2c4e70] pt-3">
-          <Link href="/perfil" className={`${item("/perfil")} flex-1 px-2`} onClick={close}>
+        <div className="flex items-center justify-end gap-2 border-t border-[#2c4e70] pt-3 sm:justify-between">
+          <Link href="/perfil" className={`${deskOnly("/perfil")} flex-1 px-2`} onClick={close}>
             <NavIcon href="/perfil" /> {webOnly ? "Perfil" : "Perfil del negocio"}
           </Link>
           <ThemeToggle />
         </div>
+      </nav>
+
+      {/* Móvil: botón de nueva cita y barra inferior fija */}
+      {showFab && (
+        <Link
+          href="/citas/nueva"
+          aria-label={terms.newAppointment}
+          className="fixed bottom-20 right-4 z-30 flex h-14 w-14 items-center justify-center rounded-full bg-[#163e6e] text-2xl text-white shadow-lg sm:hidden"
+          onClick={close}
+        >
+          +
+        </Link>
+      )}
+      <nav
+        aria-label="Menú principal"
+        className="fixed inset-x-0 bottom-0 z-40 grid border-t border-line bg-surface px-1 pb-[calc(0.25rem+env(safe-area-inset-bottom))] pt-1 sm:hidden"
+        style={{ gridTemplateColumns: `repeat(${tabs.length}, minmax(0, 1fr))` }}
+      >
+        {tabs.map((t) => {
+          const on = pathname === t.href || pathname.startsWith(`${t.href}/`);
+          return (
+            <Link
+              key={t.href}
+              href={t.href}
+              onClick={close}
+              aria-current={on ? "page" : undefined}
+              className={`flex min-h-[52px] min-w-0 flex-col items-center justify-center gap-0.5 rounded-lg text-[11px] font-semibold ${on ? "bg-brand-pale text-brand" : "text-slate"}`}
+            >
+              <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" className="shrink-0">
+                <path d={ICONS[t.href]} />
+              </svg>
+              <span className="max-w-full truncate">{t.label}</span>
+            </Link>
+          );
+        })}
       </nav>
     </>
   );
