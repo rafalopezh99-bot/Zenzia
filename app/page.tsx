@@ -36,32 +36,32 @@ const CAPACIDADES_TABS: TabDef[] = [
     key: "reservas",
     label: "Reservas",
     color: "coral",
-    title: "Tus clientes reservan solos, a cualquier hora",
-    body: "Compartes tu enlace y cada cliente ve un calendario con tus huecos libres, elige día y hora y deja sus datos. Sin cuentas ni llamadas, y la cita entra directa en tu agenda.",
+    title: "Reservas online disponibles las 24 horas",
+    body: "Comparte tu enlace y tus clientes verán un calendario con tus huecos libres. Eligen día y hora, dejan sus datos y la cita se registra directamente en tu agenda, sin llamadas ni cuentas de usuario.",
     bullets: ["Horario y duración a tu medida", "Solo se ven los huecos libres", "Sin que el cliente cree una cuenta"],
   },
   {
     key: "recordatorios",
     label: "Recordatorios",
     color: "accent",
-    title: "Menos citas perdidas, sin perseguir a nadie",
-    body: "Cada cliente recibe por email un recordatorio antes de su cita, sin que tengas que acordarte de avisarle uno a uno.",
-    bullets: ["Se envían solos", "Con los datos de cada cita", "Un olvido menos para ti"],
+    title: "Menos ausencias con recordatorios automáticos",
+    body: "Cada cliente recibe un recordatorio por email antes de su cita, de forma automática y sin gestión manual por tu parte.",
+    bullets: ["Envío automático", "Con los datos de cada cita", "Sin gestión manual"],
   },
   {
     key: "cobros",
     label: "Cobros",
     color: "teal",
-    title: "Sabes quién te debe y desde cuándo",
-    body: "Lo cobrado con su tick verde y lo pendiente con el tiempo que lleva sin pagarse. Y con un botón reclamas por WhatsApp, con el mensaje ya escrito.",
-    bullets: ["Cobrado y pendiente, de un vistazo", "Aviso del pago más antiguo", "Reclamar por WhatsApp con un toque"],
+    title: "Control de cobros y pagos pendientes",
+    body: "Consulta de un vistazo lo cobrado y lo pendiente, con el tiempo transcurrido en cada caso, y reclama los pagos por WhatsApp con un mensaje ya preparado.",
+    bullets: ["Cobrado y pendiente, de un vistazo", "Aviso del pago más antiguo", "Reclamación por WhatsApp"],
   },
   {
     key: "resenas",
     label: "Reseñas",
     color: "amber",
-    title: "Más reseñas y clientes que vuelven",
-    body: "Después de la cita, Zenzia pide la reseña de Google por ti. Y te avisa de los clientes que llevan tiempo sin venir para que puedas recuperarlos.",
+    title: "Mejora tu reputación y recupera clientes",
+    body: "Zenzia solicita la reseña de Google después de cada cita e identifica a los clientes que llevan tiempo sin volver, para que puedas retomar el contacto.",
     bullets: ["Petición de reseña automática", "Aviso de clientes inactivos", "Disponible desde Smart"],
   },
 ];
@@ -71,8 +71,8 @@ const MODULOS_TABS: TabDef[] = [
     key: "agenda",
     label: "Agenda",
     color: "coral",
-    title: "Tu día, de un vistazo",
-    body: "Vista por día, semana y mes, también desde el móvil. Si trabajáis varios, cada profesional tiene su agenda y puedes filtrarla con un toque.",
+    title: "Toda tu actividad, de un vistazo",
+    body: "Vistas por día, semana y mes, también desde el móvil, con agenda independiente para cada profesional de tu equipo.",
     bullets: ["Día, semana y mes", "Agenda por profesional", "Pensada también para el móvil"],
   },
   {
@@ -80,53 +80,53 @@ const MODULOS_TABS: TabDef[] = [
     label: "Clientes",
     color: "accent",
     title: "Cada cliente, con su historia",
-    body: "Ficha con sus datos, notas de cada sesión y su historial. Desde la lista le escribes por WhatsApp o email, o saltas a su próxima cita.",
-    bullets: ["Notas de cada sesión", "WhatsApp y email a un toque", "Importa tus clientes desde Excel"],
+    body: "Ficha con datos, notas de sesión e historial completo. Desde el listado puedes contactar por WhatsApp o email y acceder a su próxima cita.",
+    bullets: ["Notas de cada sesión", "Contacto por WhatsApp y email", "Importa tus clientes desde Excel"],
   },
   {
     key: "facturas",
     label: "Facturas",
     color: "teal",
-    title: "Factura sin salir de la agenda",
-    body: "Cobra una cita y la factura queda hecha. Presupuestos y proformas en el mismo sitio, con facturación VeriFactu y exportación para tu gestor.",
+    title: "Facturación integrada en tu agenda",
+    body: "Al cobrar una cita se genera su factura. Gestiona también presupuestos y proformas, con VeriFactu y exportación para tu gestoría.",
     bullets: ["De la cita a la factura", "VeriFactu", "Presupuestos y proformas"],
   },
   {
     key: "sector",
     label: "Tu sector",
     color: "amber",
-    title: "Módulos pensados para lo que haces",
-    body: "Historial, seguimiento, pautas o rutinas según tu actividad. Eliges tu sector y Zenzia activa lo que de verdad vas a usar.",
+    title: "Módulos específicos para tu actividad",
+    body: "Historial, seguimiento, pautas o rutinas según tu sector. Zenzia activa únicamente las herramientas que tu negocio necesita.",
     bullets: ["Historial y seguimiento", "Bonos de sesiones", "Consentimientos con firma online"],
   },
   {
     key: "asistente",
     label: "Asistente de IA",
     color: "coral",
-    title: "Pregunta y Zenzia te responde",
-    body: "En el plan Pro, un asistente de IA te dice qué citas tienes, te ayuda con tu agenda y te ahorra buscar entre pantallas.",
-    bullets: ["Consulta tu agenda", "Te ayuda con tus clientes", "Incluido en Pro"],
+    title: "Tu asistente de gestión",
+    body: "El plan Pro incluye un asistente de IA que responde a tus consultas sobre la agenda y agiliza la gestión diaria.",
+    bullets: ["Consulta tu agenda", "Agiliza la gestión de clientes", "Incluido en Pro"],
   },
 ];
 
 const PIPELINE = [
-  { stage: "Reserva", body: "El cliente elige día y hora, o la apuntas tú.", color: "coral" as const },
-  { stage: "Recordatorio", body: "Le llega un aviso antes de la cita, sin que hagas nada.", color: "accent" as const },
-  { stage: "Sesión", body: "Apuntas tus notas en su ficha, con todo su historial.", color: "teal" as const },
-  { stage: "Cobro", body: "Cobras, facturas y sabes qué queda pendiente.", color: "amber" as const },
+  { stage: "Reserva", body: "El cliente elige día y hora, o la registras desde el panel.", color: "coral" as const },
+  { stage: "Recordatorio", body: "Se envía un aviso automático antes de la cita.", color: "accent" as const },
+  { stage: "Sesión", body: "Registras tus notas en la ficha, junto a todo su historial.", color: "teal" as const },
+  { stage: "Cobro", body: "Cobro, factura y control de lo pendiente.", color: "amber" as const },
 ];
 
 const WEB_CARDS = [
-  { t: "Diseñada para tu negocio", b: "Una web hecha a medida, sin plantillas genéricas, que explica lo que haces y funciona bien en el móvil.", c: "coral" as const },
-  { t: "La editas tú, sin depender de nadie", b: "Cambias textos, fotos y álbumes, y añades secciones directamente sobre tu web, desde Zenzia.", c: "accent" as const },
-  { t: "Sabes qué funciona", b: "Visitas y clics en tus enlaces en un panel sencillo, explicado para que lo entienda cualquiera.", c: "teal" as const },
-  { t: "Unida a tu gestión", b: "Enlaza tu web con las reservas de Zenzia para que quien te encuentra pueda pedir cita al momento.", c: "amber" as const },
+  { t: "Diseñada para tu negocio", b: "Desarrollamos tu web a medida, sin plantillas genéricas, adaptada a cualquier dispositivo.", c: "coral" as const },
+  { t: "Autonomía para actualizarla", b: "Te entregamos un editor para modificar textos, fotos, álbumes y secciones directamente sobre tu web.", c: "accent" as const },
+  { t: "Métricas claras", b: "Mide visitas y clics en tus enlaces desde un panel sencillo y fácil de interpretar.", c: "teal" as const },
+  { t: "Integrada con tu gestión", b: "Conectamos tu web con las reservas de Zenzia para que tus visitas puedan solicitar cita al momento.", c: "amber" as const },
 ];
 
 const WEB_STEPS = [
-  { t: "Me cuentas tu proyecto", b: "Qué haces, a quién te diriges y qué quieres conseguir." },
-  { t: "La diseñamos y construimos", b: "Vas viendo la web real y la ajustamos contigo." },
-  { t: "La publicamos y es tuya", b: "A partir de ahí puedes cambiar sus contenidos cuando quieras." },
+  { t: "Auditamos tu negocio", b: "Analizamos tu actividad, tu público, tus objetivos y tu presencia digital actual." },
+  { t: "Diseñamos y desarrollamos", b: "Creamos tu web a medida y revisamos contigo cada avance." },
+  { t: "Publicamos y te la entregamos", b: "Te entregamos tu web lista, con todo lo necesario para actualizar sus contenidos." },
 ];
 
 const DOT: Record<string, string> = {
@@ -162,11 +162,11 @@ export default function LandingPage() {
           <div>
             <div>
               <h1 className="max-w-3xl text-4xl font-black leading-[1.08] tracking-tight text-mk-ink sm:text-5xl">
-                Tu negocio en orden y bien visible en internet
+                Gestión y presencia digital para negocios que quieren crecer
               </h1>
               <p className="mt-6 max-w-2xl text-base leading-relaxed text-mk-muted">
-                Zenzia es el CRM para gestionar citas, clientes y cobros desde un solo panel. Y si necesitas web, te la
-                diseño a medida para que puedas editarla tú.
+                En Zenzia ayudamos a los negocios a ordenar su día a día con un CRM completo para citas, clientes y cobros,
+                y a ganar visibilidad con webs desarrolladas a medida.
               </p>
 
               <div className="mt-7 flex flex-wrap gap-2">
@@ -202,13 +202,13 @@ export default function LandingPage() {
                     href="#desarrollo-web"
                     className="inline-block rounded-full border border-mk-ink px-7 py-3.5 text-sm font-semibold text-mk-ink transition hover:bg-mk-ink hover:text-white"
                   >
-                    Quiero una web
+                    Solicitar una web a medida
                   </a>
                 </div>
                 <p className="mt-2.5 text-xs text-mk-muted">
                   Prueba sin tarjeta · o{" "}
                   <a href="https://wa.me/34673895732?text=Hola%2C%20quiero%20informaci%C3%B3n%20sobre%20Zenzia" target="_blank" rel="noopener noreferrer" className="underline hover:text-mk-ink">
-                    escríbeme por WhatsApp
+                    contacta con nosotros por WhatsApp
                   </a>
                 </p>
               </div>
@@ -225,7 +225,7 @@ export default function LandingPage() {
       <section id="automatizaciones" className="border-b border-mk-line">
         <div className="mx-auto max-w-5xl px-6 py-20">
           <span className={EYEBROW}>CRM · Lo que hace por ti</span>
-          <h2 className={`mt-2 ${H2}`}>Menos tareas repetidas, más tiempo para tus clientes</h2>
+          <h2 className={`mt-2 ${H2}`}>Automatiza las tareas repetitivas y dedica más tiempo a tus clientes</h2>
           <div className="mt-10">
             <FeatureTabs tabs={CAPACIDADES_TABS} label="Automatizaciones de Zenzia" />
           </div>
@@ -236,10 +236,10 @@ export default function LandingPage() {
       <section className="border-b border-mk-line bg-mk-raised">
         <div className="mx-auto max-w-6xl px-6 py-16 text-center">
           <span className={EYEBROW}>CRM · A tu medida</span>
-          <h2 className={`mx-auto mt-2 max-w-2xl ${H2}`}>Se adapta a tu sector, no al revés</h2>
+          <h2 className={`mx-auto mt-2 max-w-2xl ${H2}`}>Configurado para tu sector</h2>
           <p className="mx-auto mt-4 max-w-xl text-sm leading-relaxed text-mk-muted">
-            Eliges a qué te dedicas y Zenzia activa los módulos que vas a usar. Tus horarios, tus servicios y tus
-            reservas los configuras tú desde tu perfil, sin tocar código.
+            Selecciona tu sector y Zenzia activa los módulos adecuados. Horarios, servicios y reservas se configuran
+            desde tu perfil, sin conocimientos técnicos.
           </p>
           <a
             href="/registro"
@@ -254,7 +254,7 @@ export default function LandingPage() {
       <section id="funcionalidades" className="border-b border-mk-line">
         <div className="mx-auto max-w-5xl px-6 py-20">
           <span className={EYEBROW}>CRM · Funcionalidades</span>
-          <h2 className={`mt-2 ${H2}`}>Todo tu día a día, en un mismo sitio</h2>
+          <h2 className={`mt-2 ${H2}`}>Toda la gestión de tu negocio en una sola plataforma</h2>
           <div className="mt-10">
             <FeatureTabs tabs={MODULOS_TABS} label="Funcionalidades de Zenzia" />
           </div>
@@ -265,7 +265,7 @@ export default function LandingPage() {
       <section className="border-b border-mk-line">
         <div className="mx-auto max-w-5xl px-6 py-20">
           <span className={EYEBROW}>CRM · De principio a fin</span>
-          <h2 className={`mt-2 ${H2}`}>De la reserva al cobro, sin perder el hilo</h2>
+          <h2 className={`mt-2 ${H2}`}>De la reserva al cobro, en un único proceso</h2>
           <div className="mt-12 grid gap-6 sm:grid-cols-4">
             {PIPELINE.map((p, i) => (
               <div key={p.stage} className="relative">
@@ -290,11 +290,11 @@ export default function LandingPage() {
         <div className="mx-auto max-w-6xl px-6 py-20">
           <span className="text-xs font-bold uppercase tracking-widest text-mk-amber">Desarrollo web</span>
           <h2 className="mt-2 max-w-2xl text-2xl font-black tracking-tight text-white sm:text-3xl">
-            Una web a medida que no te ata a nadie
+            Desarrollo web a medida, con el control en tus manos
           </h2>
           <p className="mt-4 max-w-2xl text-sm leading-relaxed text-white/80">
-            Además del CRM, diseño y construyo webs para negocios. Te la entrego lista y con un editor para que cambies
-            tú mismo los textos y las fotos, sin pagar a alguien cada vez que necesitas actualizar algo.
+            En Zenzia auditamos tu presencia digital, diseñamos y desarrollamos tu web y te la entregamos lista, con un editor
+            para que actualices textos e imágenes sin depender de terceros.
           </p>
           <ul className="mt-10 grid gap-4 sm:grid-cols-2">
             {WEB_CARDS.map((item) => (
@@ -307,7 +307,7 @@ export default function LandingPage() {
               </li>
             ))}
           </ul>
-          <h3 className="mt-14 text-lg font-bold text-white">Cómo trabajamos</h3>
+          <h3 className="mt-14 text-lg font-bold text-white">Nuestro proceso</h3>
           <ol className="mt-5 grid gap-6 sm:grid-cols-3">
             {WEB_STEPS.map((step, i) => (
               <li key={step.t}>
@@ -322,9 +322,9 @@ export default function LandingPage() {
               href="#contacto"
               className="inline-block rounded-full bg-white px-7 py-3.5 text-sm font-semibold text-mk-ink transition hover:brightness-95"
             >
-              Pedir presupuesto de mi web
+              Solicitar presupuesto
             </a>
-            <p className="mt-2.5 text-xs text-white/80">El precio depende de cada proyecto. Te lo digo antes de empezar.</p>
+            <p className="mt-2.5 text-xs text-white/80">Cada proyecto se presupuesta de forma personalizada antes de empezar.</p>
           </div>
         </div>
       </section>
@@ -335,8 +335,8 @@ export default function LandingPage() {
           <span className={EYEBROW}>Sectores</span>
           <h2 className={`mt-2 ${H2}`}>Para negocios que trabajan con citas</h2>
           <p className="mt-4 max-w-xl text-sm text-mk-muted">
-            Sobre todo clínicas y profesionales de la salud y el bienestar, y cualquier negocio con agenda. Eliges tu
-            sector al darte de alta y ajustas lo que quieras después.
+            Especializados en clínicas y profesionales de la salud y el bienestar, y disponibles para cualquier negocio
+            con agenda. Seleccionas tu sector al darte de alta y lo ajustas cuando lo necesites.
           </p>
 
           <div className="mt-12 space-y-8">
@@ -370,7 +370,7 @@ export default function LandingPage() {
         <div className="mx-auto max-w-6xl px-6 py-20">
           <span className={EYEBROW}>Planes del CRM</span>
           <h2 className={`mt-2 ${H2}`}>Elige el plan que necesita tu negocio</h2>
-          <p className="mt-4 max-w-xl text-sm text-mk-muted">Pruébalo gratis 14 días. Para contratar un plan, escríbeme por el formulario de contacto y lo dejamos activado. La web a medida se presupuesta aparte.</p>
+          <p className="mt-4 max-w-xl text-sm text-mk-muted">Prueba Zenzia gratis durante 14 días. Para contratar un plan, contacta con nosotros a través del formulario y lo activaremos. El desarrollo web se presupuesta aparte.</p>
           <div className="mt-12 grid overflow-hidden rounded-3xl border border-mk-line md:grid-cols-3">
             {PLANS.map((p) => (
               <div
@@ -416,7 +416,7 @@ export default function LandingPage() {
         <div className="mx-auto max-w-5xl px-6 py-20 text-center">
           <span className="text-xs font-bold uppercase tracking-widest text-mk-amber">14 días gratis</span>
           <h2 className="mx-auto mt-2 max-w-xl text-2xl font-black tracking-tight text-white sm:text-3xl">
-            Pruébalo con tu propio negocio
+            Comprueba cómo funciona en tu negocio
           </h2>
           <a
             href="/registro"
@@ -430,10 +430,10 @@ export default function LandingPage() {
       {/* ============ CONTACTO ============ */}
       <section id="contacto">
         <div className="mx-auto max-w-6xl px-6 py-20">
-          <span className={EYEBROW}>Hablamos</span>
-          <h2 className={`mt-2 ${H2}`}>¿Hablamos de tu CRM o de tu web?</h2>
+          <span className={EYEBROW}>Contacto</span>
+          <h2 className={`mt-2 ${H2}`}>Hablemos de tu proyecto</h2>
           <p className="mt-4 max-w-xl text-sm leading-relaxed text-mk-muted">
-            Cuéntame a qué te dedicas y qué necesitas. Te contesto yo mismo, normalmente en menos de 24 horas.
+            Cuéntanos a qué se dedica tu negocio y qué necesitas. Te responderemos normalmente en menos de 24 horas.
           </p>
 
           <div className="mt-10 grid gap-10 lg:grid-cols-[1fr_1.3fr]">

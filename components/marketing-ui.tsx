@@ -73,7 +73,7 @@ export function MarketingFooter() {
           <div>
             <ZenziaWordmark heightClass="h-10 sm:h-12" />
             <p className="mt-4 max-w-xs text-sm leading-relaxed text-mk-muted">
-              CRM para gestionar tu negocio y desarrollo web a medida.
+              CRM de gestión y desarrollo web a medida para negocios.
             </p>
           </div>
           <nav className="flex flex-wrap items-center gap-x-6 gap-y-2">

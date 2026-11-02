@@ -65,11 +65,11 @@ export default function LandingContactForm() {
       </div>
 
       <div>
-        <label className={labelClass}>Cuéntame tu negocio</label>
+        <label className={labelClass}>Cuéntanos sobre tu negocio</label>
         <textarea
           name="message"
           rows={4}
-          placeholder="A qué te dedicas y qué necesitas: CRM, web o las dos cosas"
+          placeholder="Actividad de tu negocio y qué necesitas: CRM, web o ambos"
           className={fieldClass}
         />
       </div>
