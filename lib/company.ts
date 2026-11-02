@@ -59,11 +59,6 @@ export const getCurrentCompanyProfile = cache(async () => {
     ? supabase.storage.from("logos").getPublicUrl(company.logo_path).data.publicUrl
     : null;
 
-  // Al acabar la prueba, la cuenta funciona como Gratis aunque el proceso
-  // horario que baja el plan en la base de datos aún no haya pasado.
-  const rawTrial = (company?.trial_ends_at as string | null) ?? null;
-  const trialOver = !!rawTrial && new Date(rawTrial).getTime() < Date.now() && company?.plan !== "web";
-
   return {
     companyId: membership.company_id as string,
     fullName: (membership.full_name as string | null) ?? null,
@@ -72,9 +67,9 @@ export const getCurrentCompanyProfile = cache(async () => {
     vertical: (company?.vertical as string | null) ?? null,
     logoUrl,
     dashboardWidgets: (company?.dashboard_widgets as unknown) ?? null,
-    plan: trialOver ? ("start" as const) : toPlanKey(company?.plan),
+    plan: toPlanKey(company?.plan),
     activated: (company?.activated as boolean | undefined) ?? true,
-    trialEndsAt: trialOver ? null : rawTrial,
+    trialEndsAt: (company?.trial_ends_at as string | null) ?? null,
   };
 });
 

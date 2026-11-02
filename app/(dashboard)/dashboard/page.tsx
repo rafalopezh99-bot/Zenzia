@@ -75,7 +75,7 @@ export default async function DashboardPage() {
   // el vertical (academia ve sus clases de hoy/mañana; el resto ve
   // notificaciones, próximas citas y el desglose de leads) se pide aparte
   // para no traer de Supabase datos que luego no se van a pintar.
-  const [{ count: contactCount }, { data: paidThisMonth }, { count: supplierCount }, { data: manualThisMonth }] = await Promise.all([
+  const [{ count: contactCount }, { data: paidThisMonth }, { count: supplierCount }] = await Promise.all([
     supabase.from("contacts").select("*", { count: "exact", head: true }).eq("status", "active"),
     supabase
       .from("invoices")
@@ -84,17 +84,8 @@ export default async function DashboardPage() {
       .gte("paid_at", monthStart.toISOString())
       .lt("paid_at", monthEnd.toISOString()),
     supabase.from("suppliers").select("*", { count: "exact", head: true }),
-    // Cobros apuntados a mano en la cita, sin factura (plan Gratis).
-    supabase
-      .from("appointments")
-      .select("price")
-      .is("invoice_id", null)
-      .gte("paid_at", monthStart.toISOString())
-      .lt("paid_at", monthEnd.toISOString()),
   ]);
-  const earnedThisMonth =
-    (paidThisMonth ?? []).reduce((sum: number, i: any) => sum + Number(i.amount), 0) +
-    (manualThisMonth ?? []).reduce((sum: number, a: any) => sum + Number(a.price), 0);
+  const earnedThisMonth = (paidThisMonth ?? []).reduce((sum: number, i: any) => sum + Number(i.amount), 0);
 
   let classesToday: any[] = [];
   let classesTomorrow: any[] = [];

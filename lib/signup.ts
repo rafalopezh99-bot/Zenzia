@@ -1,7 +1,6 @@
 import { sendEmail, escapeHtml } from "@/lib/messaging";
 import { createClient } from "@/lib/supabase/server";
 import { VERTICAL_PACKS } from "@/lib/modules";
-import { toPlanKey } from "@/lib/plans";
 
 class SignupError extends Error {}
 const fail = (msg: string): never => {
@@ -18,7 +17,8 @@ async function doSignup(formData: FormData, origin: string): Promise<string> {
   const full_name = String(formData.get("full_name") ?? "").trim();
   const business_name = String(formData.get("business_name") ?? "").trim();
   const vertical = String(formData.get("vertical") ?? "");
-  const plan = toPlanKey(formData.get("plan"));
+  // El registro es solo para probar: siempre 14 días de Smart (lo decide la base de datos).
+  const plan = "smart";
   const email = String(formData.get("email") ?? "").trim().toLowerCase();
   const password = String(formData.get("password") ?? "");
 

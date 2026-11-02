@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { Card, Input, Select, PrimaryButton } from "@/components/ui";
 import { VERTICAL_CATALOG, VERTICAL_CATEGORIES } from "@/lib/verticals";
-import { PLANS } from "@/lib/planContent";
 import ZenziaLogo from "@/components/ZenziaLogo";
 
 // Alta de cuenta en Zenzia (autoservicio): crea usuario, negocio y módulos
@@ -9,7 +8,6 @@ import ZenziaLogo from "@/components/ZenziaLogo";
 // elegido en /planes (con días de prueba si Stripe está configurado).
 export default async function RegistroPage(props: { searchParams: Promise<{ plan?: string; error?: string }> }) {
   const searchParams = await props.searchParams;
-  const defaultPlan = PLANS.some((p) => p.key === searchParams.plan) ? searchParams.plan : "smart";
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-paper px-4 py-10">
@@ -43,14 +41,9 @@ export default async function RegistroPage(props: { searchParams: Promise<{ plan
           </Select>
           <Input name="sector_other" placeholder="Escribe a qué te dedicas" className="hidden group-has-[option[value=otros]:checked]:block w-full" />
           </div>
-          <Select name="plan" defaultValue={defaultPlan} className="w-full">
-            {PLANS.map((p) => (
-              <option key={p.key} value={p.key}>
-                Plan {p.name} · {p.from ? "desde " : ""}
-                {p.price} €/mes
-              </option>
-            ))}
-          </Select>
+          <p className="rounded-xl bg-paper-deep px-3 py-2 text-xs text-slate">
+            Prueba gratis durante 14 días, sin tarjeta. Para contratar un plan después, escríbenos por el formulario de contacto.
+          </p>
           <Input name="email" type="email" placeholder="Email" required className="w-full" />
           <Input name="password" type="password" placeholder="Contraseña (mínimo 8 caracteres)" minLength={8} required className="w-full" />
           <label className="flex items-start gap-2 text-xs text-slate">

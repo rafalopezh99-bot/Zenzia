@@ -5,7 +5,7 @@ import { getCurrentCompanyProfile, ZENZIA_ADMIN_COMPANY_ID } from "@/lib/company
 import { updateAccount } from "@/lib/actions/accounts";
 
 const PLAN_OPTIONS = [
-  { key: "start", label: "Gratis" },
+  { key: "start", label: "Start" },
   { key: "smart", label: "Smart" },
   { key: "pro", label: "Pro" },
   { key: "web", label: "Web (interno)" },

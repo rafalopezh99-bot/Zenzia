@@ -2,7 +2,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { PLAN_LABEL, PLAN_LIMITS, type LimitKey, type PlanKey } from "@/lib/plans";
 
-// Tarjeta del dashboard del plan Gratis: cuántos clientes lleva de su límite y
+// Tarjeta del dashboard del plan Start: cuántos clientes lleva de su límite y
 // cuántas citas se han perdido por ausencias (lo que resuelven los
 // recordatorios de Smart). Smart y Pro no tienen límites y no la ven.
 

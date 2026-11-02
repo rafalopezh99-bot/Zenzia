@@ -37,16 +37,14 @@ export default async function DashboardLayout({ children }: { children: React.Re
           </h1>
           <p className="mt-2 text-sm text-slate">
             {trialEnded && profile.activated
-              ? "Tus 14 días de prueba de Zenzia han terminado. Tus datos siguen guardados: contacta con soporte para activar tu plan y seguir usándolo."
+              ? "Tus 14 días de prueba de Zenzia han terminado. Tus datos siguen guardados: contáctanos para activar tu plan y seguir usándolo."
               : "Contacta con soporte para activar tu cuenta."}
           </p>
           <a
-            href="https://wa.me/34673895732?text=Hola%2C%20quiero%20activar%20mi%20plan%20de%20Zenzia"
-            target="_blank"
-            rel="noopener noreferrer"
+            href="/#contacto"
             className="mt-6 inline-block rounded-xl bg-brand px-5 py-2.5 text-sm font-bold text-white"
           >
-            Contactar con soporte · 673 895 732
+            Ir al formulario de contacto
           </a>
           <div className="mt-4">
             <a href="/logout" className="text-xs text-slate hover:text-ink">
@@ -71,7 +69,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
   const currentPath = (await headers()).get("x-pathname") ?? "";
   // Plan Web (interno): solo "Mi web" y su galería.
   if (webOnly && !["/mi-web", "/galeria", "/dashboard", "/perfil"].some((p) => currentPath.startsWith(p))) redirect("/mi-web");
-  if (stripeEnabled() && !isAdmin && !webOnly && profile.plan !== "start" && !profile.trialEndsAt && !["/planes", "/perfil"].some((p) => currentPath.startsWith(p))) {
+  if (stripeEnabled() && !isAdmin && !webOnly && !profile.trialEndsAt && !["/planes", "/perfil"].some((p) => currentPath.startsWith(p))) {
     const { data: sub } = await (await createClient())
       .from("companies")
       .select("subscription_status")
@@ -140,12 +138,10 @@ export default async function DashboardLayout({ children }: { children: React.Re
         {trialDaysLeft !== null && !isAdmin && (
           <div className="mb-4 flex flex-wrap items-center justify-between gap-2 rounded-xl border border-line bg-paper-deep px-4 py-2 text-sm text-ink">
             <span>
-              Prueba de {PLAN_LABEL[profile.plan]}: te {trialDaysLeft === 1 ? "queda 1 día" : `quedan ${trialDaysLeft} días`}. Después tu cuenta pasa a Gratis y no pierdes tus datos.
+              Prueba de {PLAN_LABEL[profile.plan]}: te {trialDaysLeft === 1 ? "queda 1 día" : `quedan ${trialDaysLeft} días`}. Contáctanos para activar tu plan y seguir usándolo.
             </span>
             <a
-              href="https://wa.me/34673895732?text=Hola%2C%20quiero%20activar%20mi%20plan%20de%20Zenzia"
-              target="_blank"
-              rel="noopener noreferrer"
+              href="/#contacto"
               className="font-semibold text-brand hover:underline"
             >
               Activar mi plan

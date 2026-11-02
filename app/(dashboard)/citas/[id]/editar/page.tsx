@@ -3,7 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { notFound } from "next/navigation";
 import { updateAppointment, deleteAppointment, setAppointmentStatus } from "@/lib/actions/appointments";
 import Link from "next/link";
-import { markAppointmentPaid, chargeAppointment, applyBonoToAppointment } from "@/lib/actions/documents";
+import { chargeAppointment, applyBonoToAppointment } from "@/lib/actions/documents";
 import { PAYMENT_METHOD_LABEL, PAYMENT_METHODS } from "@/lib/paymentMethod";
 import NoteTemplatePicker from "@/components/NoteTemplatePicker";
 import { noteTemplatesFor } from "@/lib/noteTemplates";
@@ -99,11 +99,9 @@ export default async function EditarCitaPage(props: { params: Promise<{ id: stri
           </p>
         ) : appointment.package_id ? (
           <p className="text-sm text-ink">✓ Descontada del bono</p>
-        ) : appointment.paid_method ? (
-          <p className="text-sm text-ink">✓ Cobrada ({PAYMENT_METHOD_LABEL[appointment.paid_method as keyof typeof PAYMENT_METHOD_LABEL] ?? appointment.paid_method})</p>
         ) : (
           <div className="space-y-2">
-            <form action={(plan === "start" ? markAppointmentPaid : chargeAppointment).bind(null, appointment.id)} className="flex flex-wrap items-center gap-2">
+            <form action={chargeAppointment.bind(null, appointment.id)} className="flex flex-wrap items-center gap-2">
               <Input
                 name="price"
                 type="number"
@@ -123,7 +121,7 @@ export default async function EditarCitaPage(props: { params: Promise<{ id: stri
                   </option>
                 ))}
               </Select>
-              <PrimaryButton className="w-full">{plan === "start" ? "Marcar como cobrada" : "Cobrar y facturar"}</PrimaryButton>
+              <PrimaryButton className="w-full">Cobrar y facturar</PrimaryButton>
             </form>
             {bono && (
               <form action={applyBonoToAppointment.bind(null, appointment.id, bono.id)}>

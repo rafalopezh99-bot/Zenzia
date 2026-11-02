@@ -16,38 +16,41 @@ export interface PlanContent {
   featured: boolean;
 }
 
+export const formatPlanPrice = (price: number) =>
+  price.toLocaleString("es-ES", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
 export const PLANS: PlanContent[] = [
   {
     key: "start",
-    name: "Gratis",
-    claim: "Ordena tu negocio sin pagar nada.",
-    price: 0,
+    name: "Start",
+    claim: "Ordena tu negocio: clientes, agenda y cobros.",
+    price: 14.99,
     from: false,
-    setup: "Gratis para siempre, sin tarjeta",
+    setup: "Sin cuota de implantación",
     includes: null,
     features: [
       "1 profesional",
-      "Hasta 50 clientes",
+      "Hasta 40 clientes",
       "Agenda por día, semana y mes",
       "Fichas de cliente con notas",
-      "Servicios y cobros apuntados a mano",
+      "Servicios y cobros con un clic",
+      "Facturas con VeriFactu, presupuestos y proformas",
       "WhatsApp, email y próxima cita de cada cliente",
     ],
-    cta: "Crear cuenta gratis",
+    cta: "Contactar",
     featured: false,
   },
   {
     key: "smart",
     name: "Smart",
     claim: "Adaptado a tu sector y con las tareas repetitivas automatizadas.",
-    price: 49,
+    price: 34.99,
     from: false,
-    setup: "14 días de prueba gratis",
-    includes: "Todo lo de Gratis, más:",
+    setup: "Implantación: 149,99 €",
+    includes: "Todo lo de Start, más:",
     features: [
       "Clientes ilimitados y hasta 3 profesionales",
       "Módulos de tu sector (historial, seguimiento, pautas, rutinas…)",
-      "Facturas con VeriFactu, presupuestos y proformas",
       "Reservas online 24/7, configuradas por ti",
       "Recordatorios automáticos por email",
       "Petición de reseñas de Google y aviso a clientes inactivos",
@@ -55,16 +58,16 @@ export const PLANS: PlanContent[] = [
       "Consentimientos con firma online",
       "Estadísticas de tu negocio",
     ],
-    cta: "Probar 14 días gratis",
+    cta: "Contactar",
     featured: true,
   },
   {
     key: "pro",
     name: "Pro",
     claim: "La IA trabaja contigo y tu negocio crece.",
-    price: 89,
+    price: 49.99,
     from: false,
-    setup: "14 días de prueba gratis",
+    setup: "Implantación: 249,99 €",
     includes: "Todo lo de Smart, más:",
     features: [
       "Hasta 10 profesionales",
@@ -74,7 +77,7 @@ export const PLANS: PlanContent[] = [
       "Soporte prioritario",
       "Próximamente: notas con IA, lista de espera, pago online y conexiones con otras apps",
     ],
-    cta: "Probar 14 días gratis",
+    cta: "Contactar",
     featured: false,
   },
 ];

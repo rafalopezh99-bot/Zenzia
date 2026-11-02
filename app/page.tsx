@@ -3,7 +3,7 @@ import { MarketingHeader, MarketingFooter } from "@/components/marketing-ui";
 import LandingContactForm from "@/components/LandingContactForm";
 import DashboardMockup from "@/components/DashboardMockup";
 import FeatureTabs, { type TabDef } from "@/components/FeatureTabs";
-import { PLANS } from "@/lib/planContent";
+import { formatPlanPrice, PLANS } from "@/lib/planContent";
 
 // Landing pública de Zenzia (dominio raíz, zenzia.es). Quinta versión del
 // rediseño 2026. Rafa pidió esta vez calcar la ARQUITECTURA de
@@ -152,7 +152,7 @@ export default function LandingPage() {
                 El CRM que se adapta a tu negocio, no al revés
               </h1>
               <p className="mt-6 max-w-lg text-base leading-relaxed text-mk-muted">
-                Empieza gratis y gestiona tu negocio desde un solo panel, con módulos para tu sector y automatizaciones
+                Pruébalo gratis 14 días y gestiona tu negocio desde un solo panel, con módulos para tu sector y automatizaciones
                 que trabajan solas.
               </p>
 
@@ -349,8 +349,7 @@ export default function LandingPage() {
                 <span className="mt-4 text-sm font-bold text-mk-coral">Zenzia {p.name}</span>
                 <h3 className="mt-2 min-h-[3.5rem] text-lg font-bold text-mk-ink">{p.claim}</h3>
                 <div className="mt-4 text-4xl font-black text-mk-accent">
-                  {p.from && <span className="mr-1 text-sm text-mk-coral">Desde</span>}
-                  {p.price} €<span className="ml-1 text-sm font-normal text-mk-muted">/mes</span>
+                  {formatPlanPrice(p.price)} €<span className="ml-1 text-sm font-normal text-mk-muted">/mes</span>
                 </div>
                 <p className="mt-1 text-xs text-mk-muted">{p.setup}</p>
                 {p.includes && <p className="mt-6 text-sm font-bold text-mk-accent">{p.includes}</p>}
@@ -363,7 +362,7 @@ export default function LandingPage() {
                   ))}
                 </ul>
                 <a
-                  href={`/registro?plan=${p.key}`}
+                  href="#contacto"
                   className={`mt-8 rounded-xl px-4 py-3 text-center text-sm font-bold ${
                     p.featured ? "bg-mk-accent text-white" : "border border-mk-line text-mk-ink"
                   }`}

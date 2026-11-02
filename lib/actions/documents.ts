@@ -209,23 +209,6 @@ export async function chargeAppointment(appointmentId: string, formData: FormDat
   revalidatePath("/dashboard");
 }
 
-// Plan Gratis: apuntar el cobro a mano, sin generar factura.
-export async function markAppointmentPaid(appointmentId: string, formData: FormData) {
-  const supabase = await createClient();
-  const price = Number(formData.get("price") ?? 0);
-  const method = String(formData.get("payment_method") ?? "");
-  if (!(price > 0)) throw new Error("Indica el precio de la sesión");
-  if (!method) throw new Error("Indica el método de pago");
-  const { error } = await supabase
-    .from("appointments")
-    .update({ paid_method: method, price, paid_at: new Date().toISOString() })
-    .eq("id", appointmentId);
-  if (error) throw new Error(error.message);
-  revalidatePath(`/citas/${appointmentId}/editar`);
-  revalidatePath("/pagos");
-  revalidatePath("/dashboard");
-}
-
 // Descontar la sesión del bono activo del cliente (sin factura: el bono ya
 // se cobró al venderlo).
 export async function applyBonoToAppointment(appointmentId: string, packageId: string) {

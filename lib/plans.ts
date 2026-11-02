@@ -1,5 +1,4 @@
-// Planes Zenzia (Gratis / Smart / Pro): única fuente de verdad de qué
-// (Gratis se guarda en la base de datos con la clave "start").
+// Planes Zenzia (Start / Smart / Pro): única fuente de verdad de qué
 // desbloquea cada plan. El plan se guarda en companies.plan.
 //
 // El plan marca el MÁXIMO permitido y el vertical decide qué tiene sentido
@@ -11,14 +10,14 @@ import type { WidgetKey } from "@/lib/widgets";
 // "web" es un plan interno (no se vende en la web): solo "Mi web" y su galería.
 export type PlanKey = "start" | "smart" | "pro" | "web";
 
-export const PLAN_LABEL: Record<PlanKey, string> = { start: "Gratis", smart: "Smart", pro: "Pro", web: "Web" };
+export const PLAN_LABEL: Record<PlanKey, string> = { start: "Start", smart: "Smart", pro: "Pro", web: "Web" };
 
-// Límites (null = ilimitado, 0 = no incluido). En Gratis, los clientes se
+// Límites (null = ilimitado, 0 = no incluido). En Start, los clientes se
 // cuentan en total, no por mes.
 export type LimitKey = "contacts" | "invoices" | "quotes" | "proformas";
 
 export const PLAN_LIMITS: Record<PlanKey, Record<LimitKey, number | null>> = {
-  start: { contacts: 50, invoices: 0, quotes: 0, proformas: 0 },
+  start: { contacts: 40, invoices: null, quotes: null, proformas: null },
   smart: { contacts: null, invoices: null, quotes: null, proformas: null },
   pro: { contacts: null, invoices: null, quotes: null, proformas: null },
   web: { contacts: 0, invoices: 0, quotes: 0, proformas: 0 },
@@ -26,9 +25,9 @@ export const PLAN_LIMITS: Record<PlanKey, Record<LimitKey, number | null>> = {
 
 export const PLAN_USERS: Record<PlanKey, number | null> = { start: 1, smart: 3, pro: 10, web: 1 };
 
-// Gratis: solo panel, clientes, agenda y cobros a mano. Smart y Pro tienen
-// todos los módulos que active su vertical (Mi Web, solo Pro).
-const START_MODULES: ModuleKey[] = ["agenda"];
+// Start: panel, clientes, agenda, facturación y presupuestos. Smart y Pro
+// tienen todos los módulos que active su vertical (Mi Web, solo Pro).
+const START_MODULES: ModuleKey[] = ["agenda", "facturacion", "presupuestos"];
 
 export function planAllowsModule(plan: PlanKey, key: ModuleKey): boolean {
   if (plan === "web") return key === "sitio_web";
