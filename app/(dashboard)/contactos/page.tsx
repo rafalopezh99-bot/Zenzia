@@ -9,6 +9,8 @@ import { updateContactStageInline, deleteContact, unenrollContact } from "@/lib/
 import StageSelect from "@/components/StageSelect";
 import DeleteContactButton from "@/components/DeleteContactButton";
 import UnenrollContactButton from "@/components/UnenrollContactButton";
+import { whatsappUrl } from "@/lib/whatsapp";
+import { appLocalParts, formatAppTime } from "@/lib/timezone";
 
 const contactIconLinkClass =
   "inline-flex h-7 w-7 items-center justify-center rounded-full border border-line transition hover:border-brand";
@@ -65,6 +67,21 @@ export default async function ContactosPage(props: { searchParams: Promise<{ q?:
           .is("custom_fields->>imported", null)
       : { count: null };
 
+    // Próxima cita de cada cliente (la primera que llega de cada uno).
+    const { data: nextAppointments } = await supabase
+      .from("appointments")
+      .select("id, contact_id, starts_at")
+      .eq("status", "scheduled")
+      .gte("starts_at", new Date().toISOString())
+      .order("starts_at", { ascending: true });
+    const nextByContact = new Map<string, { id: string; starts_at: string }>();
+    for (const a of nextAppointments ?? []) {
+      if (!nextByContact.has(a.contact_id)) nextByContact.set(a.contact_id, a);
+    }
+    const pad = (n: number) => String(n).padStart(2, "0");
+    const actionClass =
+      "inline-flex min-h-9 items-center gap-1.5 whitespace-nowrap rounded-lg border border-line bg-surface px-3 text-xs font-semibold text-brand transition hover:border-brand";
+
     return (
       <div>
         <PageHeader moduleHeader
@@ -101,14 +118,15 @@ export default async function ContactosPage(props: { searchParams: Promise<{ q?:
               <tr>
                 <th className={thEl}>Nombre</th>
                 <th className={thEl}>Teléfono</th>
-                <th className={`${thEl} hidden sm:table-cell`}>Dirección</th>
-                <th className={thEl}>WhatsApp</th>
+                <th className={thEl}>Contactar</th>
                 <th className={thEl}></th>
               </tr>
             </thead>
             <tbody>
               {(contacts ?? []).map((c: any) => {
-                const whatsappDigits: string = (c.phone ?? "").replace(/[^\d]/g, "");
+                const whatsapp = whatsappUrl(c.phone);
+                const next = nextByContact.get(c.id);
+                const nextParts = next ? appLocalParts(next.starts_at) : null;
                 return (
                   <tr key={c.id} className={trEl}>
                     <td className={tdEl}>
@@ -125,23 +143,29 @@ export default async function ContactosPage(props: { searchParams: Promise<{ q?:
                         <span className="text-slate/50">—</span>
                       )}
                     </td>
-                    <td className={`${tdEl} hidden sm:table-cell`}>
-                      {c.custom_fields?.billing_address || <span className="text-slate/50">—</span>}
-                    </td>
                     <td className={tdEl}>
-                      {whatsappDigits ? (
-                        <a
-                          href={`https://wa.me/${whatsappDigits}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          title="WhatsApp"
-                          className={contactIconLinkClass}
-                        >
-                          <WhatsAppIcon />
-                        </a>
-                      ) : (
-                        <span className="text-slate/50">—</span>
-                      )}
+                      <div className="flex flex-wrap gap-1.5">
+                        {whatsapp && (
+                          <a href={whatsapp} target="_blank" rel="noopener noreferrer" className={actionClass}>
+                            <WhatsAppIcon /> WhatsApp
+                          </a>
+                        )}
+                        {next && nextParts ? (
+                          <Link
+                            href={`/citas?view=day&day=${nextParts.year}-${pad(nextParts.month)}-${pad(nextParts.day)}&cita=${next.id}`}
+                            className={actionClass}
+                          >
+                            Próxima cita · {pad(nextParts.day)}/{pad(nextParts.month)}, {formatAppTime(next.starts_at)}
+                          </Link>
+                        ) : (
+                          <span className={`${actionClass} cursor-default border-dashed font-normal text-slate hover:border-line`}>Sin próxima cita</span>
+                        )}
+                        {c.email && (
+                          <a href={`mailto:${c.email}`} className={actionClass}>
+                            <EmailIcon /> Email
+                          </a>
+                        )}
+                      </div>
                     </td>
                     <td className={tdEl}>
                       <DeleteContactButton contactId={c.id} contactName={c.full_name} deleteContact={deleteContact} />
@@ -151,7 +175,7 @@ export default async function ContactosPage(props: { searchParams: Promise<{ q?:
               })}
               {(contacts ?? []).length === 0 && (
                 <tr>
-                  <td colSpan={5} className={`${tdEl} text-center text-slate`}>
+                  <td colSpan={4} className={`${tdEl} text-center text-slate`}>
                     {q ? "Ningún cliente coincide con la búsqueda." : "Todavía no tienes clientes."}
                   </td>
                 </tr>

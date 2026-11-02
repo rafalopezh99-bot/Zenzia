@@ -4,9 +4,9 @@
 // oscuro el navy pasa a un tono claro; con
 // `light` se fuerza siempre la versión clara (web pública, sin modo oscuro).
 // El tamaño lo marca la altura que llegue en className (h-6, h-14...).
-export default function ZenziaLogo({ className, light = false }: { className: string; light?: boolean }) {
-  const ink = light ? "fill-[#163e6e]" : "fill-[#163e6e] dark:fill-[#e6eef7]";
-  const accent = light ? "fill-[#2f9ce0]" : "fill-[#2f9ce0] dark:fill-[#4fa8e8]";
+export default function ZenziaLogo({ className, light = false, onDark = false }: { className: string; light?: boolean; onDark?: boolean }) {
+  const ink = onDark ? "fill-white" : light ? "fill-[#163e6e]" : "fill-[#163e6e] dark:fill-[#e6eef7]";
+  const accent = onDark ? "fill-[#5fc2ef]" : light ? "fill-[#2f9ce0]" : "fill-[#2f9ce0] dark:fill-[#4fa8e8]";
   return (
     <svg viewBox="0 0 232 66" role="img" aria-label="Zenzia" className={`${className} w-auto`}>
       <text

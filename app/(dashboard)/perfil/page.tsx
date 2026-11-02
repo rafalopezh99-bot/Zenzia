@@ -17,7 +17,7 @@ import { setCompanyModules } from "@/lib/actions/company";
 
 export const dynamic = "force-dynamic";
 
-const WEEK_LETTERS = ["L", "M", "X", "J", "V", "S", "D"];
+const WEEK_NAMES = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"];
 const TABS = [
   { key: "negocio", label: "Negocio" },
   { key: "servicios", label: "Servicios" },
@@ -402,25 +402,62 @@ export default async function PerfilPage(props: { searchParams: Promise<{ tab?: 
                 <label className="flex items-center gap-2">
                   <input type="checkbox" name="booking_enabled" defaultChecked={booking.enabled} /> Activar reservas online
                 </label>
-                <div className="flex flex-wrap gap-3">
-                  {WEEK_LETTERS.map((d, i) => (
-                    <label key={i} className="flex items-center gap-1">
-                      <input type="checkbox" name="booking_days" value={i + 1} defaultChecked={booking.days.includes(i + 1)} /> {d}
-                    </label>
-                  ))}
+                <div className="grid gap-2 sm:grid-cols-3">
+                  <label className="text-xs text-slate">
+                    Duración de la sesión (min)
+                    <Input name="booking_duration" type="number" min="5" step="5" defaultValue={booking.duration} className="mt-1 w-full" />
+                  </label>
+                  <label className="text-xs text-slate">
+                    Descanso entre sesiones (min)
+                    <Input name="booking_gap" type="number" min="0" step="5" defaultValue={booking.gap} className="mt-1 w-full" />
+                  </label>
+                  <label className="text-xs text-slate">
+                    Reservar con hasta (semanas)
+                    <Input name="booking_weeks" type="number" min="1" max="52" defaultValue={booking.weeks} className="mt-1 w-full" />
+                  </label>
                 </div>
-                <div className="grid grid-cols-3 gap-2">
-                  <label className="text-xs text-slate">
-                    Desde
-                    <Input name="booking_start" type="time" defaultValue={booking.start} className="mt-1 w-full" />
+                <p className="text-xs text-slate">Los huecos del calendario se calculan con la duración, el descanso y este horario. Deja la tarde vacía si ese día solo abres por la mañana.</p>
+                <div className="space-y-2">
+                  {WEEK_NAMES.map((name, i) => {
+                    const d = i + 1;
+                    const h = booking.hours[d];
+                    return (
+                      <div key={d} className="grid items-center gap-2 border-t border-line pt-2 sm:grid-cols-[100px_1fr_1fr]">
+                        <label className="flex items-center gap-2 font-medium">
+                          <input type="checkbox" name={`booking_open_${d}`} defaultChecked={h.open} /> {name}
+                        </label>
+                        <div className="flex items-center gap-1 text-xs text-slate">
+                          <Input aria-label={`${name}, mañana, desde`} name={`booking_a_${d}`} type="time" defaultValue={h.a} className="w-full" />a
+                          <Input aria-label={`${name}, mañana, hasta`} name={`booking_b_${d}`} type="time" defaultValue={h.b} className="w-full" />
+                        </div>
+                        <div className="flex items-center gap-1 text-xs text-slate">
+                          <Input aria-label={`${name}, tarde, desde`} name={`booking_c_${d}`} type="time" defaultValue={h.c} className="w-full" />a
+                          <Input aria-label={`${name}, tarde, hasta`} name={`booking_d_${d}`} type="time" defaultValue={h.d} className="w-full" />
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+                <div className="space-y-2 border-t border-line pt-3">
+                  <label className="flex items-center gap-2">
+                    <input type="checkbox" name="booking_price_on" defaultChecked={booking.priceOn} /> Mostrar precio en la página de reservas
                   </label>
-                  <label className="text-xs text-slate">
-                    Hasta
-                    <Input name="booking_end" type="time" defaultValue={booking.end} className="mt-1 w-full" />
+                  <label className="block text-xs text-slate">
+                    Texto del precio
+                    <Input name="booking_price" defaultValue={booking.price} placeholder="Desde 40 € la sesión" className="mt-1 w-full" />
                   </label>
-                  <label className="text-xs text-slate">
-                    Duración (min)
-                    <Input name="booking_duration" type="number" min="15" step="5" defaultValue={booking.duration} className="mt-1 w-full" />
+                </div>
+                <div className="space-y-2 border-t border-line pt-3">
+                  <label className="flex items-center gap-2">
+                    <input type="checkbox" name="booking_notes_on" defaultChecked={booking.notesOn} /> Pedir un comentario al reservar
+                  </label>
+                  <label className="block text-xs text-slate">
+                    Pregunta
+                    <Input name="booking_notes_label" defaultValue={booking.notesLabel} className="mt-1 w-full" />
+                  </label>
+                  <label className="block text-xs text-slate">
+                    Explicación
+                    <Input name="booking_notes_help" defaultValue={booking.notesHelp} className="mt-1 w-full" />
                   </label>
                 </div>
                 {booking.enabled && (

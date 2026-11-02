@@ -135,7 +135,7 @@ const COLUMN_HEIGHT = ROW_HEIGHT * HOURS.length;
 // Con ?view=day muestra un solo día (?day=YYYY-MM-DD) con la misma rejilla.
 export default async function CitasPage(
   props: {
-    searchParams: Promise<{ week?: string; view?: string; day?: string; pro?: string }>;
+    searchParams: Promise<{ week?: string; view?: string; day?: string; pro?: string; cita?: string }>;
   }
 ) {
   const searchParams = await props.searchParams;
@@ -336,7 +336,7 @@ export default async function CitasPage(
                       href={`/citas/${a.id}/editar`}
                       className={`absolute overflow-hidden rounded px-1 py-0.5 text-[10px] leading-tight transition hover:brightness-95 ${colorForContact(
                         colorKey
-                      )} ${a.status === "cancelled" ? "line-through opacity-60" : a.status === "no_show" ? "opacity-60" : ""}`}
+                      )} ${a.status === "cancelled" ? "line-through opacity-60" : a.status === "no_show" ? "opacity-60" : ""} ${a.id === searchParams.cita ? "z-10 ring-2 ring-brand" : ""}`}
                       style={{
                         top: a.top,
                         height: a.height,

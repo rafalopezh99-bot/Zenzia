@@ -1,7 +1,8 @@
 import WebAnalytics from "@/components/WebAnalytics";
 import { UsersIcon, CalendarClockIcon, BellIcon, WalletIcon, TruckIcon } from "@/components/icons";
 import { createClient } from "@/lib/supabase/server";
-import { Card, PageHeader, Badge } from "@/components/ui";
+import Link from "next/link";
+import { Card, Badge } from "@/components/ui";
 import { getCurrentCompanyProfile } from "@/lib/company";
 import { getTerminology, showsAcademiaFields, isConsultaVertical } from "@/lib/terminology";
 import { appLocalParts, fromAppLocalInput, formatAppTime } from "@/lib/timezone";
@@ -232,6 +233,57 @@ export default async function DashboardPage() {
     }
   }
 
+  // Sectores de consulta: la agenda de hoy y lo que requiere una acción.
+  let todayAppointments: any[] = [];
+  let pendingInvoiceCount = 0;
+  let pendingInvoiceTotal = 0;
+  let unpaidCitas = 0;
+  if (consulta && !isAcademia) {
+    const [{ data: todayData }, { data: pendingInv }, { count: unpaid }] = await Promise.all([
+      supabase
+        .from("appointments")
+        .select("id, starts_at, status, contacts(full_name), services(name)")
+        .neq("status", "cancelled")
+        .gte("starts_at", todayStart.toISOString())
+        .lt("starts_at", tomorrowStart.toISOString())
+        .order("starts_at", { ascending: true }),
+      supabase.from("invoices").select("amount").eq("status", "pendiente"),
+      supabase
+        .from("appointments")
+        .select("id", { count: "exact", head: true })
+        .in("status", ["scheduled", "completed"])
+        .lt("starts_at", new Date().toISOString())
+        .gt("price", 0)
+        .is("invoice_id", null)
+        .is("package_id", null)
+        .is("paid_method", null),
+    ]);
+    todayAppointments = todayData ?? [];
+    pendingInvoiceCount = (pendingInv ?? []).length;
+    pendingInvoiceTotal = (pendingInv ?? []).reduce((sum: number, i: any) => sum + Number(i.amount), 0);
+    unpaidCitas = unpaid ?? 0;
+  }
+  const attention = [
+    pendingInvoiceCount > 0 && {
+      title: pendingInvoiceCount === 1 ? "1 factura sin cobrar" : `${pendingInvoiceCount} facturas sin cobrar`,
+      sub: `${pendingInvoiceTotal.toFixed(2)} € en total`,
+      href: "/pagos?estado=pendientes",
+      cta: "Ver",
+    },
+    unpaidCitas > 0 && {
+      title: unpaidCitas === 1 ? `1 ${terms.appointment.toLowerCase()} sin cobrar` : `${unpaidCitas} ${appointmentsLower} sin cobrar`,
+      sub: "Ya han pasado y no consta el cobro",
+      href: "/pagos?estado=pendientes",
+      cta: "Ver",
+    },
+    newNotifications > 0 && {
+      title: newNotifications === 1 ? "1 notificación nueva" : `${newNotifications} notificaciones nuevas`,
+      sub: "Reservas y avisos por revisar",
+      href: "/notificaciones",
+      cta: "Ver",
+    },
+  ].filter(Boolean) as { title: string; sub: string; href: string; cta: string }[];
+
   const statWidgetsShown = [
     show("stat_contactos"),
     show("stat_citas") && !isAcademia,
@@ -296,6 +348,52 @@ export default async function DashboardPage() {
           {show("stat_proveedores") && (
             <StatCard icon={TruckIcon} tone="slate" value={supplierCount ?? 0} label="Proveedores dados de alta" />
           )}
+        </div>
+      )}
+
+      {consulta && !isAcademia && (
+        <div className="mb-8 grid grid-cols-1 items-start gap-4 lg:grid-cols-5">
+          <Card className="lg:col-span-3">
+            <div className="mb-2 flex items-center justify-between gap-3">
+              <h2 className="text-lg font-semibold text-ink">Agenda de hoy</h2>
+              <Link href="/citas?view=day" className="text-sm font-medium text-brand hover:underline">
+                Ver agenda
+              </Link>
+            </div>
+            <ul className="divide-y divide-line">
+              {todayAppointments.map((a: any) => (
+                <li key={a.id}>
+                  <Link href={`/citas/${a.id}/editar`} className="flex items-center gap-3 py-2.5 hover:text-brand">
+                    <span className="w-12 shrink-0 text-sm font-semibold tabular-nums text-ink">{formatAppTime(a.starts_at)}</span>
+                    <span className="min-w-0 flex-1">
+                      <span className="block truncate text-sm font-medium text-ink">{a.contacts?.full_name}</span>
+                      {a.services?.name && <span className="block truncate text-xs text-slate">{a.services.name}</span>}
+                    </span>
+                    {a.status === "completed" && <Badge tone="green">Hecha</Badge>}
+                    {a.status === "no_show" && <Badge tone="amber">No vino</Badge>}
+                  </Link>
+                </li>
+              ))}
+              {todayAppointments.length === 0 && <li className="py-3 text-sm text-slate">Hoy no tienes {appointmentsLower}.</li>}
+            </ul>
+          </Card>
+          <Card className="lg:col-span-2">
+            <h2 className="mb-2 text-lg font-semibold text-ink">Necesita tu atención</h2>
+            <ul className="divide-y divide-line">
+              {attention.map((x) => (
+                <li key={x.title} className="flex items-center justify-between gap-3 py-2.5">
+                  <span className="min-w-0">
+                    <span className="block text-sm font-medium text-ink">{x.title}</span>
+                    <span className="block text-xs text-slate">{x.sub}</span>
+                  </span>
+                  <Link href={x.href} className="shrink-0 rounded-lg bg-brand-pale px-3 py-1.5 text-xs font-semibold text-brand">
+                    {x.cta}
+                  </Link>
+                </li>
+              ))}
+              {attention.length === 0 && <li className="py-3 text-sm text-slate">Todo al día.</li>}
+            </ul>
+          </Card>
         </div>
       )}
 

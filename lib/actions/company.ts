@@ -51,12 +51,37 @@ export async function updateCompanyProfile(formData: FormData) {
   const tax_id = text("tax_id");
   // Reservas online y reseñas: solo llegan si el plan las incluye.
   if (formData.has("booking_duration")) {
+    const time = (name: string) => {
+      const v = String(formData.get(name) ?? "");
+      return /^\d{2}:\d{2}/.test(v) ? v.slice(0, 5) : "";
+    };
+    const hours: Record<number, { open: boolean; a: string; b: string; c: string; d: string }> = {};
+    for (let d = 1; d <= 7; d++) {
+      hours[d] = {
+        open: formData.get(`booking_open_${d}`) === "on",
+        a: time(`booking_a_${d}`),
+        b: time(`booking_b_${d}`),
+        c: time(`booking_c_${d}`),
+        d: time(`booking_d_${d}`),
+      };
+    }
+    const open = Object.entries(hours).filter(([, h]) => h.open);
+    const starts = open.map(([, h]) => h.a).filter(Boolean).sort();
+    const ends = open.flatMap(([, h]) => [h.b, h.d]).filter(Boolean).sort();
     companyUpdate.booking = {
       enabled: formData.get("booking_enabled") === "on",
-      duration: Number(formData.get("booking_duration")) || 60,
-      days: formData.getAll("booking_days").map(Number),
-      start: String(formData.get("booking_start") || "09:00"),
-      end: String(formData.get("booking_end") || "19:00"),
+      duration: Math.max(5, Number(formData.get("booking_duration")) || 60),
+      gap: Math.max(0, Number(formData.get("booking_gap")) || 0),
+      weeks: Math.min(52, Math.max(1, Number(formData.get("booking_weeks")) || 8)),
+      hours,
+      priceOn: formData.get("booking_price_on") === "on",
+      price: String(formData.get("booking_price") ?? "").trim().slice(0, 120),
+      notesOn: formData.get("booking_notes_on") === "on",
+      notesLabel: String(formData.get("booking_notes_label") ?? "").trim().slice(0, 120),
+      notesHelp: String(formData.get("booking_notes_help") ?? "").trim().slice(0, 300),
+      days: open.map(([d]) => Number(d)),
+      start: starts[0] ?? "09:00",
+      end: ends[ends.length - 1] ?? "19:00",
     };
   }
   if (formData.has("google_review_url")) {
