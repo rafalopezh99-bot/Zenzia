@@ -58,13 +58,8 @@ export default async function ContactosPage(props: { searchParams: Promise<{ q?:
   if (consulta) {
     // Contador del límite mensual del plan junto al botón de alta.
     const limit = PLAN_LIMITS[plan].contacts;
-    const now = new Date();
-    const { count: thisMonth } = limit
-      ? await supabase
-          .from("contacts")
-          .select("id", { count: "exact", head: true })
-          .gte("created_at", new Date(now.getFullYear(), now.getMonth(), 1).toISOString())
-          .is("custom_fields->>imported", null)
+    const { count: used } = limit
+      ? await supabase.from("contacts").select("id", { count: "exact", head: true })
       : { count: null };
 
     // Próxima cita de cada cliente (la primera que llega de cada uno).
@@ -92,7 +87,7 @@ export default async function ContactosPage(props: { searchParams: Promise<{ q?:
             <div className="flex items-center gap-3">
               {limit !== null && (
                 <span className="text-xs text-slate">
-                  {thisMonth ?? 0}/{limit} este mes
+                  {used ?? 0}/{limit} clientes
                 </span>
               )}
               <Link href="/contactos/importar" className="text-sm font-medium text-slate hover:text-brand">

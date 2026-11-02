@@ -48,7 +48,7 @@ export default async function PlanesPage(
       <div className="grid gap-4 md:grid-cols-3">
         {PLANS.map((p) => {
           const paid = ["active", "trialing", "past_due"].includes(co?.subscription_status ?? "");
-          const current = p.key === plan && (paid || !payments);
+          const current = p.key === plan && (paid || !payments || p.key === "start");
           return (
             <Card key={p.key} className={`flex flex-col ${p.featured ? "border-brand" : ""}`}>
               <div className="flex items-center justify-between">
@@ -72,7 +72,7 @@ export default async function PlanesPage(
                   </li>
                 ))}
               </ul>
-              {!current && payments && (
+              {!current && payments && p.price > 0 && (
                 <form action={choosePlan.bind(null, p.key)} className="mt-6">
                   <button
                     className={`w-full rounded-xl px-4 py-2.5 text-center text-sm font-bold ${
@@ -83,7 +83,7 @@ export default async function PlanesPage(
                   </button>
                 </form>
               )}
-              {!current && !payments && (
+              {!current && !payments && p.price > 0 && (
                 <a
                   href={`mailto:zenzia.co@gmail.com?subject=${subject}%20a%20${p.name}`}
                   className={`mt-6 rounded-xl px-4 py-2.5 text-center text-sm font-bold ${

@@ -2,29 +2,17 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { PLAN_LABEL, PLAN_LIMITS, type LimitKey, type PlanKey } from "@/lib/plans";
 
-// Tarjeta del dashboard para planes con límites: cuánto lleva gastado este
-// mes de su plan y, en Start, cuántas citas se han perdido por ausencias
-// (el dolor que resuelven los recordatorios de Smart). Pro no la ve.
-const USAGE: { key: LimitKey; table: string; label: string }[] = [
-  { key: "contacts", table: "contacts", label: "Clientes nuevos" },
-  { key: "invoices", table: "invoices", label: "Facturas" },
-];
+// Tarjeta del dashboard del plan Gratis: cuántos clientes lleva de su límite y
+// cuántas citas se han perdido por ausencias (lo que resuelven los
+// recordatorios de Smart). Smart y Pro no tienen límites y no la ven.
 
 export default async function PlanUsageCard({ plan, monthStart }: { plan: PlanKey; monthStart: Date }) {
-  if (plan === "pro") return null;
+  if (plan !== "start") return null;
   const supabase = await createClient();
   const since = monthStart.toISOString();
 
-  const [usage, { count: noShows }] = await Promise.all([
-    Promise.all(
-      USAGE.map(async (u) => {
-        let query = supabase.from(u.table).select("id", { count: "exact", head: true }).gte("created_at", since);
-        // Los pacientes importados no cuentan para el límite.
-        if (u.table === "contacts") query = query.is("custom_fields->>imported", null);
-        const { count } = await query;
-        return { ...u, used: count ?? 0, limit: PLAN_LIMITS[plan][u.key] ?? 0 };
-      })
-    ),
+  const [{ count: contacts }, { count: noShows }] = await Promise.all([
+    supabase.from("contacts").select("id", { count: "exact", head: true }),
     supabase
       .from("appointments")
       .select("id", { count: "exact", head: true })
@@ -32,11 +20,13 @@ export default async function PlanUsageCard({ plan, monthStart }: { plan: PlanKe
       .gte("starts_at", since),
   ]);
 
+  const usage = [{ key: "contacts" as LimitKey, label: "Clientes", used: contacts ?? 0, limit: PLAN_LIMITS[plan].contacts ?? 0 }];
+
   return (
     <div className="mb-8 rounded-2xl border border-line bg-surface p-5 sm:max-w-4xl">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <span className="text-sm font-semibold text-ink">
-          Plan {PLAN_LABEL[plan]} · uso de este mes
+          Plan {PLAN_LABEL[plan]}
         </span>
         <Link href="/planes" className="text-sm font-semibold text-brand hover:underline">
           Mejorar plan →

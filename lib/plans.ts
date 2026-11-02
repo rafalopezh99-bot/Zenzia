@@ -1,4 +1,5 @@
-// Planes Zenzia (Start / Smart / Pro): única fuente de verdad de qué
+// Planes Zenzia (Gratis / Smart / Pro): única fuente de verdad de qué
+// (Gratis se guarda en la base de datos con la clave "start").
 // desbloquea cada plan. El plan se guarda en companies.plan.
 //
 // El plan marca el MÁXIMO permitido y el vertical decide qué tiene sentido
@@ -10,23 +11,24 @@ import type { WidgetKey } from "@/lib/widgets";
 // "web" es un plan interno (no se vende en la web): solo "Mi web" y su galería.
 export type PlanKey = "start" | "smart" | "pro" | "web";
 
-export const PLAN_LABEL: Record<PlanKey, string> = { start: "Start", smart: "Smart", pro: "Pro", web: "Web" };
+export const PLAN_LABEL: Record<PlanKey, string> = { start: "Gratis", smart: "Smart", pro: "Pro", web: "Web" };
 
-// Límites mensuales (null = ilimitado). Se cuenta lo creado en el mes en curso.
+// Límites (null = ilimitado, 0 = no incluido). En Gratis, los clientes se
+// cuentan en total, no por mes.
 export type LimitKey = "contacts" | "invoices" | "quotes" | "proformas";
 
 export const PLAN_LIMITS: Record<PlanKey, Record<LimitKey, number | null>> = {
-  start: { contacts: 30, invoices: 30, quotes: 10, proformas: 10 },
-  smart: { contacts: 150, invoices: 150, quotes: 50, proformas: 50 },
+  start: { contacts: 50, invoices: 0, quotes: 0, proformas: 0 },
+  smart: { contacts: null, invoices: null, quotes: null, proformas: null },
   pro: { contacts: null, invoices: null, quotes: null, proformas: null },
   web: { contacts: 0, invoices: 0, quotes: 0, proformas: 0 },
 };
 
-export const PLAN_USERS: Record<PlanKey, number | null> = { start: 1, smart: 3, pro: null, web: 1 };
+export const PLAN_USERS: Record<PlanKey, number | null> = { start: 1, smart: 3, pro: 10, web: 1 };
 
-// Start: solo dashboard, clientes, agenda, facturación y perfil. Smart y
-// Pro tienen todos los módulos que active su vertical (Mi Web, solo Pro).
-const START_MODULES: ModuleKey[] = ["agenda", "facturacion", "presupuestos"];
+// Gratis: solo panel, clientes, agenda y cobros a mano. Smart y Pro tienen
+// todos los módulos que active su vertical (Mi Web, solo Pro).
+const START_MODULES: ModuleKey[] = ["agenda"];
 
 export function planAllowsModule(plan: PlanKey, key: ModuleKey): boolean {
   if (plan === "web") return key === "sitio_web";
@@ -50,8 +52,8 @@ const FEATURE_MIN_PLAN: Record<PlanFeature, PlanKey> = {
   booking: "smart",
   email_reminders: "smart",
   whatsapp: "pro",
-  reviews: "pro",
-  winback: "pro",
+  reviews: "smart",
+  winback: "smart",
   portal: "pro",
   assistant: "pro",
 };
@@ -92,6 +94,16 @@ const LIMIT_NOUN: Record<LimitKey, string> = {
 export async function assertWithinLimit(plan: PlanKey, key: LimitKey) {
   const limit = PLAN_LIMITS[plan][key];
   if (limit === null) return;
+  if (limit === 0) {
+    throw new Error(`Las ${LIMIT_NOUN[key]} no están incluidas en el plan ${PLAN_LABEL[plan]}. Mejora tu plan para usarlas.`);
+  }
+  if (plan === "start" && key === "contacts") {
+    const { count } = await (await createClient()).from("contacts").select("id", { count: "exact", head: true });
+    if ((count ?? 0) >= limit) {
+      throw new Error(`Has llegado al límite de ${limit} clientes del plan ${PLAN_LABEL[plan]}. Mejora tu plan para seguir.`);
+    }
+    return;
+  }
 
   const now = new Date();
   const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();

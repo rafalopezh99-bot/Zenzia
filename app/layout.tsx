@@ -11,7 +11,7 @@ const DESCRIPTION =
 export const metadata: Metadata = {
   metadataBase: new URL("https://zenzia.es"),
   title: {
-    default: "Zenzia · CRM para autónomos: agenda, clientes y facturación con VeriFactu",
+    default: "Zenzia · CRM para tu negocio: agenda, clientes y facturación con VeriFactu",
     template: "%s · Zenzia",
   },
   description: DESCRIPTION,

@@ -152,8 +152,8 @@ export default function LandingPage() {
                 El CRM que se adapta a tu negocio, no al revés
               </h1>
               <p className="mt-6 max-w-lg text-base leading-relaxed text-mk-muted">
-                Vende y gestiona más rápido con el panel más directo para autónomos, con automatizaciones
-                que trabajan solas y tu propia web incluida.
+                Empieza gratis y gestiona tu negocio desde un solo panel, con módulos para tu sector y automatizaciones
+                que trabajan solas.
               </p>
 
               <div className="mt-7 flex flex-wrap gap-2">
@@ -440,7 +440,7 @@ export default function LandingPage() {
                 name: "Zenzia",
                 applicationCategory: "BusinessApplication",
                 operatingSystem: "Web",
-                description: "CRM para autónomos que trabajan con citas: agenda, clientes, facturación con VeriFactu, reservas online y recordatorios.",
+                description: "CRM para negocios que trabajan con citas: agenda, clientes, facturación con VeriFactu, reservas online y recordatorios.",
                 offers: PLANS.map((p) => ({ "@type": "Offer", name: `Zenzia ${p.name}`, price: p.price, priceCurrency: "EUR" })),
               },
             ],

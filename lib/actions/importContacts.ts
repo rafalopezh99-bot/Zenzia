@@ -3,7 +3,8 @@
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
-import { getCurrentCompanyId } from "@/lib/company";
+import { getCurrentCompanyProfile } from "@/lib/company";
+import { PLAN_LIMITS } from "@/lib/plans";
 import { parseCsv } from "@/lib/csv";
 
 // Columnas reconocidas (cabeceras en minúscula y sin acentos).
@@ -27,7 +28,7 @@ function toIsoDate(v: string): string | null {
 }
 
 // Importa pacientes/clientes desde un CSV (exportado de Excel u otro
-// programa). Los importados no cuentan para el límite mensual del plan.
+// programa). En el plan Gratis cuentan para su límite total de clientes.
 export async function importContacts(formData: FormData) {
   const file = formData.get("file") as File | null;
   if (!file || file.size === 0) redirect("/contactos/importar?error=Elige un archivo CSV");
@@ -39,7 +40,7 @@ export async function importContacts(formData: FormData) {
   const idx = Object.fromEntries(Object.keys(FIELDS).map((k) => [k, col(k)]));
   if (idx.full_name < 0) redirect("/contactos/importar?error=No encuentro la columna Nombre");
 
-  const companyId = await getCurrentCompanyId();
+  const { companyId, plan } = await getCurrentCompanyProfile();
   const get = (r: string[], k: string) => (idx[k] >= 0 ? (r[idx[k]] ?? "").trim() : "");
   const records = rows
     .slice(1, 2001)
@@ -60,6 +61,13 @@ export async function importContacts(formData: FormData) {
     });
 
   const supabase = await createClient();
+  const limit = PLAN_LIMITS[plan].contacts;
+  if (limit !== null) {
+    const { count } = await supabase.from("contacts").select("id", { count: "exact", head: true });
+    if ((count ?? 0) + records.length > limit) {
+      redirect(`/contactos/importar?error=${encodeURIComponent(`Tu plan permite ${limit} clientes y ya tienes ${count ?? 0}. Mejora tu plan para importar más.`)}`);
+    }
+  }
   const { error } = await supabase.from("contacts").insert(records);
   if (error) redirect(`/contactos/importar?error=${encodeURIComponent(error.message)}`);
   revalidatePath("/contactos");

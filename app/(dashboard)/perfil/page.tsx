@@ -482,7 +482,7 @@ export default async function PerfilPage(props: { searchParams: Promise<{ tab?: 
           <Card className="mb-4">
             <div className="mb-3 flex items-center justify-between">
               <h2 className="text-sm font-semibold uppercase tracking-wide text-slate">Reseñas de Google</h2>
-              {!planHas(plan, "reviews") && <span className="text-xs font-semibold text-slate">🔒 Pro</span>}
+              {!planHas(plan, "reviews") && <span className="text-xs font-semibold text-slate">🔒 Smart</span>}
             </div>
             {planHas(plan, "reviews") ? (
               <>

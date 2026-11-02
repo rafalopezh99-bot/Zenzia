@@ -6,7 +6,7 @@ import { createClient } from "@/lib/supabase/server";
 import { headers } from "next/headers";
 import { stripeEnabled } from "@/lib/stripe";
 import { MODULE_CATALOG } from "@/lib/modules";
-import { filterModulesByPlan, planAllowsNotifications, planHas } from "@/lib/plans";
+import { filterModulesByPlan, PLAN_LABEL, planAllowsNotifications, planHas } from "@/lib/plans";
 import AssistantChat from "@/components/AssistantChat";
 
 // Todo lo que cuelga de este layout depende de la sesión y de los módulos
@@ -71,7 +71,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
   const currentPath = (await headers()).get("x-pathname") ?? "";
   // Plan Web (interno): solo "Mi web" y su galería.
   if (webOnly && !["/mi-web", "/galeria", "/dashboard", "/perfil"].some((p) => currentPath.startsWith(p))) redirect("/mi-web");
-  if (stripeEnabled() && !isAdmin && !webOnly && !["/planes", "/perfil"].some((p) => currentPath.startsWith(p))) {
+  if (stripeEnabled() && !isAdmin && !webOnly && profile.plan !== "start" && !profile.trialEndsAt && !["/planes", "/perfil"].some((p) => currentPath.startsWith(p))) {
     const { data: sub } = await (await createClient())
       .from("companies")
       .select("subscription_status")
@@ -118,7 +118,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
   // candado y lleva a /planes (el "gusanillo" para mejorar de plan).
   // Start: menú limpio (Dashboard, Clientes, Calendario, Facturación, Perfil),
   // sin apartados con candado. En Smart solo se enseña lo que es de Pro.
-  const locked = profile.plan === "start" ? [] : [
+  const locked = [
     ...allModules.filter((m) => !modules.includes(m) && m.key !== "presupuestos").map((m) => m.label),
     ...(showNotifications ? [] : ["Notificaciones"]),
   ];
@@ -140,7 +140,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
         {trialDaysLeft !== null && !isAdmin && (
           <div className="mb-4 flex flex-wrap items-center justify-between gap-2 rounded-xl border border-line bg-paper-deep px-4 py-2 text-sm text-ink">
             <span>
-              Prueba gratuita: te {trialDaysLeft === 1 ? "queda 1 día" : `quedan ${trialDaysLeft} días`}.
+              Prueba de {PLAN_LABEL[profile.plan]}: te {trialDaysLeft === 1 ? "queda 1 día" : `quedan ${trialDaysLeft} días`}. Después tu cuenta pasa a Gratis y no pierdes tus datos.
             </span>
             <a
               href="https://wa.me/34673895732?text=Hola%2C%20quiero%20activar%20mi%20plan%20de%20Zenzia"

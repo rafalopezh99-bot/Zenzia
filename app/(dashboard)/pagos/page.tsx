@@ -37,7 +37,7 @@ export default async function PagosPage(
 ) {
   const searchParams = await props.searchParams;
   const supabase = await createClient();
-  const { vertical } = await getCurrentCompanyProfile();
+  const { vertical, plan } = await getCurrentCompanyProfile();
   const terms = getTerminology(vertical);
   const estado = searchParams.estado === "pendientes" || searchParams.estado === "cobrados" ? searchParams.estado : "todos";
 
@@ -60,20 +60,43 @@ export default async function PagosPage(
     .is("package_id", null)
     .is("paid_method", null);
 
+  // Cobros apuntados a mano en la cita, sin factura (plan Gratis).
+  let manualQ = supabase
+    .from("appointments")
+    .select("id, price, paid_method, paid_at, services(name), contacts(full_name)")
+    .not("paid_at", "is", null)
+    .is("invoice_id", null);
+
   if (searchParams.contact_id) {
+    manualQ = manualQ.eq("contact_id", searchParams.contact_id);
     query = query.eq("contact_id", searchParams.contact_id);
     pendingInvoicesQ = pendingInvoicesQ.eq("contact_id", searchParams.contact_id);
     pendingCitasQ = pendingCitasQ.eq("contact_id", searchParams.contact_id);
   }
-  if (searchParams.method) query = query.eq("payment_method", searchParams.method);
+  if (searchParams.method) {
+    query = query.eq("payment_method", searchParams.method);
+    manualQ = manualQ.eq("paid_method", searchParams.method);
+  }
 
   // Independientes entre sí: se piden a la vez en vez de una detrás de otra.
-  const [{ data: contacts }, { data: allPaid }, { data: pendingInvoices }, { data: pendingCitas }] = await Promise.all([
+  const [{ data: contacts }, { data: paidInvoices }, { data: pendingInvoices }, { data: pendingCitas }, { data: manualPaid }] = await Promise.all([
     supabase.from("contacts").select("id, full_name").order("full_name"),
     query,
     pendingInvoicesQ,
     pendingCitasQ,
+    manualQ,
   ]);
+  const allPaid = [
+    ...(paidInvoices ?? []),
+    ...(manualPaid ?? []).map((a: any) => ({
+      id: a.id,
+      concept: a.services?.name ?? "Cita",
+      amount: a.price,
+      payment_method: a.paid_method,
+      paid_at: a.paid_at,
+      contacts: a.contacts,
+    })),
+  ].sort((a: any, b: any) => (a.paid_at < b.paid_at ? 1 : -1));
 
   // Año/mes se filtran en JS (hora de Sevilla/Madrid) en vez de en la
   // consulta: paid_at es un instante y el "mes" que ve el usuario depende
@@ -146,7 +169,7 @@ export default async function PagosPage(
     <div>
       <PageHeader moduleHeader
         title="Cobros"
-        action={
+        action={plan === "start" ? undefined :
           <Link
             href="/facturacion"
             className="inline-block rounded-full border border-line px-5 py-2.5 text-sm font-medium text-ink transition hover:border-brand hover:text-brand"
