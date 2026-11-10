@@ -4,9 +4,13 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import WebGallery from "@/components/WebGallery";
 
-// "Mi web" para webas propias (companies.site_url): se ve la web real en un
-// iframe. Con "Editar", la web entra en modo edición (?zz_edit=1, ver
-// js/zenzia.js en la web del cliente) y avisa por postMessage de cada cambio:
+// "Mi web" para webs propias (companies.site_url): se ve la web real en un
+// iframe. Con "Editar", el iframe se abre con ?zz_edit=1: el script público de
+// la web (public/zz/site.js) pide un token con 'zz-edit-hello', este panel lo
+// consigue con la sesión del usuario (POST /api/site/edit-token, firmado, 5
+// min) y se lo pasa por postMessage; con él la web carga el editor desde
+// /api/site/editor (lib/site-editor/editorSource.ts). Fuera de Zenzia,
+// ?zz_edit=1 no hace nada. El editor avisa por postMessage de cada cambio:
 // textos (web_texts), fotos sueltas y álbumes (web_categories / web_photos,
 // fotos en el bucket "web-trabajos"). Nada se puede mover, solo editar/quitar.
 
@@ -113,7 +117,19 @@ export default function SiteLiveEditor({ siteUrl, companyId }: { siteUrl: string
     const onMessage = async (e: MessageEvent) => {
       if (e.origin !== origin || !e.data?.type) return;
       const d = e.data;
-      if (d.type === "zz-ready") {
+      if (d.type === "zz-edit-hello") {
+        // La web (en modo edición) pide permiso para cargar el editor.
+        const source = e.source as Window | null;
+        if (!edit || source !== frame.current?.contentWindow) return;
+        const res = await fetch("/api/site/edit-token", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ companyId }),
+        });
+        const { token } = res.ok ? await res.json() : { token: null };
+        if (!token) return flash("No se ha podido abrir el editor: vuelve a iniciar sesión.");
+        source?.postMessage({ type: "zz-edit-token", token }, origin);
+      } else if (d.type === "zz-ready") {
         setHasAlbums(d.albums !== false);
       } else if (d.type === "zz-text") {
         const { error } = await supabase.from("web_texts").upsert({ company_id: companyId, key: d.key, value: d.value, updated_at: new Date().toISOString() });

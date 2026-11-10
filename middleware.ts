@@ -38,9 +38,11 @@ export async function middleware(request: NextRequest) {
 // autentican con su propio secreto (ver esos route.ts), no con cookies.
 // Excluirlos del matcher les ahorra esa llamada a Supabase en cada visita
 // — justo las páginas que van a usar los clientes de los dos negocios que
-// entran ahora en el plan Web.
+// entran ahora en el plan Web. Tampoco el script público de esas webs
+// (/zz/site.js) ni sus endpoints en /api/site/ (textos, métricas, editor con
+// token; edit-token comprueba la sesión por su cuenta con getUser()).
 export const config = {
   matcher: [
-    "/((?!_next/static|_next/image|favicon\\.ico|robots\\.txt$|sitemap\\.xml$|manifest\\.webmanifest$|aviso-legal(?:/|$)|condiciones(?:/|$)|cookies(?:/|$)|privacidad(?:/|$)|encargado(?:/|$)|reservar(?:/|$)|cita(?:/|$)|consentimiento(?:/|$)|portal(?:/|$)|sitio(?:/|$)|api/stripe/webhook(?:/|$)|api/cron/automations(?:/|$)|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
+    "/((?!_next/static|_next/image|favicon\\.ico|robots\\.txt$|sitemap\\.xml$|manifest\\.webmanifest$|aviso-legal(?:/|$)|condiciones(?:/|$)|cookies(?:/|$)|privacidad(?:/|$)|encargado(?:/|$)|reservar(?:/|$)|cita(?:/|$)|consentimiento(?:/|$)|portal(?:/|$)|sitio(?:/|$)|api/stripe/webhook(?:/|$)|api/site/|zz/|api/cron/automations(?:/|$)|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
   ],
 };

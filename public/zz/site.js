@@ -1,13 +1,18 @@
-/* Zenzia · editor de webs de clientes (genérico).
+/* Zenzia · script público para las webs de clientes.
  * Se incluye en la web del cliente:
  *   <script src="https://app.zenzia.es/zz/site.js" data-company="<company_id>" defer></script>
- * - Siempre: aplica los cambios guardados en Zenzia (tabla web_texts).
- * - Con ?zz_edit=1 (dentro de "Mi web" en Zenzia): todo texto e imagen se
- *   edita encima, las listas marcadas con data-zz-list (p. ej. noticias) permiten
- *   añadir/quitar elementos y cada sección se puede ocultar o mostrar.
- *   También se pueden añadir secciones nuevas (texto, texto con foto o galería)
- *   entre las existentes. No se puede mover nada. Los cambios se mandan a Zenzia
- *   por postMessage.
+ *
+ * Qué hace (y nada más):
+ * - Aplica los cambios guardados desde "Mi web" en Zenzia. Los lee de
+ *   GET <app>/api/site/<company_id>/texts (caché, solo lectura). El navegador
+ *   del visitante no habla con Supabase ni lleva claves.
+ * - Métricas de visitas y clics SOLO con consentimiento expreso: hasta que la
+ *   web llame a window.zzConsent(true) (normalmente desde su banner de
+ *   cookies) no se mide nada ni se guarda nada en el navegador. Ver README.
+ * - Dentro del iframe de "Mi web" con ?zz_edit=1, pide al panel de Zenzia un
+ *   token firmado (postMessage) y carga el editor desde <app>/api/site/editor,
+ *   que solo lo sirve si el token es válido. Este archivo no contiene el
+ *   editor: abrir la web con ?zz_edit=1 fuera de Zenzia no hace nada.
  * - Los elementos que ya traen data-zz / data-zz-img / data-zz-href en el HTML
  *   conservan su clave; el resto se numera automáticamente por sección.
  */
@@ -15,50 +20,62 @@
   var me = document.currentScript;
   var CID = me && me.getAttribute('data-company');
   if (!CID) return;
-  var SB = 'https://fztomfxebxovgqahkqsy.supabase.co';
-  var KEY = 'sb_publishable_xP24V2ahFJDonoeqoC2wiw_0Ina4oUO';
-  var EDIT = /[?&]zz_edit=1/.test(location.search);
+  var API = new URL(me.src, location.href).origin;
+  var IN_FRAME = window.parent !== window;
+  var WANTS_EDIT = IN_FRAME && /[?&]zz_edit=1/.test(location.search);
+  // Orígenes del panel de Zenzia que pueden mandar el token del editor.
+  var ZENZIA = [API, 'https://app.zenzia.es', 'https://zenzia.es', 'https://www.zenzia.es'];
   var INLINE = { B: 1, STRONG: 1, EM: 1, I: 1, BR: 1, SMALL: 1, U: 1 };
   // Tarjetas que abren un álbum de fotos gestionado desde Zenzia.
   var ALBUM = '[data-zz-album], .work-card[data-category]';
   var PH = 'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="800" height="600"><rect width="100%" height="100%" fill="#e8edf3"/><text x="50%" y="50%" font-family="sans-serif" font-size="30" fill="#6b7a8c" text-anchor="middle">Pulsa para poner una foto</text></svg>');
+  // Estado compartido con el editor (solo se le expone si el servidor lo sirve).
+  var S = { cid: CID, api: API, ALBUM: ALBUM, PH: PH, extra: [], parentOrigin: null };
 
-  function post(msg) { if (window.parent !== window) window.parent.postMessage(msg, '*'); }
-
-  // ---- Métricas (visitas y clics) para el dashboard de Zenzia ----
-  // No cuenta lo que se ve dentro de Zenzia (vista previa / edición).
-  // Abrir la web con ?zz_me=1 marca este navegador como del dueño y deja de contar sus visitas.
-  try { if (/[?&]zz_me=1/.test(location.search)) localStorage.setItem('zz_me', '1'); } catch (e) {}
-  var ME = false;
-  try { ME = localStorage.getItem('zz_me') === '1'; } catch (e) {}
-  if (!EDIT && !ME && window.parent === window) {
-    // Id por navegador (no por pestaña) para contar personas distintas.
-    var sid = '';
-    try { sid = localStorage.getItem('zz_vid') || Math.random().toString(36).slice(2); localStorage.setItem('zz_vid', sid); } catch (e) {}
-    var device = /Mobi|Android|iPhone/i.test(navigator.userAgent) ? 'movil' : 'ordenador';
-    var track = function (type, extra) {
-      var body = { company_id: CID, type: type, path: location.pathname.slice(0, 250), device: device, session_id: sid };
-      for (var k in extra) body[k] = extra[k];
-      fetch(SB + '/rest/v1/web_events', {
-        method: 'POST', keepalive: true,
-        headers: { apikey: KEY, 'Content-Type': 'application/json', Prefer: 'return=minimal' },
-        body: JSON.stringify(body)
-      }).catch(function () {});
-    };
-    var NAMES = [[/wa\.me|whatsapp/i, 'WhatsApp'], [/^mailto:/i, 'Email'], [/^tel:/i, 'Teléfono'], [/instagram\.com/i, 'Instagram'],
-      [/tiktok\.com/i, 'TikTok'], [/facebook\.com/i, 'Facebook'], [/wallapop/i, 'Wallapop'], [/google\.[a-z.]+\/maps|maps\.app|goo\.gl\/maps/i, 'Cómo llegar']];
-    track('view', { referrer: (document.referrer || '').slice(0, 400) });
-    document.addEventListener('click', function (e) {
-      var a = e.target.closest && e.target.closest('a[href]');
-      if (!a) return;
-      var href = a.getAttribute('href') || '';
-      if (href.charAt(0) === '#') return; // saltos dentro de la misma página
-      var label = '';
-      for (var i = 0; i < NAMES.length; i++) if (NAMES[i][0].test(a.href)) { label = NAMES[i][1]; break; }
-      if (!label) label = (a.textContent || '').replace(/\s+/g, ' ').trim().slice(0, 80) || a.href.slice(0, 80);
-      track('click', { label: label, href: a.href.slice(0, 450) });
-    }, true);
+  // ---- Métricas (visitas y clics), solo con consentimiento ----
+  // window.zzConsent(true) activa la medición en esta página; zzConsent(false)
+  // la para y borra el identificador. La web del cliente tiene que llamarla en
+  // cada carga mientras el visitante tenga aceptada la analítica. Si su banner
+  // se ejecuta antes que este script, puede dejar window.zzConsentPending = true.
+  // Lo que se ve dentro de Zenzia (vista previa / edición) nunca cuenta.
+  var consent = false, viewSent = false, sid = '';
+  var device = /Mobi|Android|iPhone/i.test(navigator.userAgent) ? 'movil' : 'ordenador';
+  function track(type, extra) {
+    if (!consent) return;
+    var body = { type: type, path: location.pathname.slice(0, 250), device: device, session_id: sid };
+    for (var k in extra) body[k] = extra[k];
+    var url = API + '/api/site/' + encodeURIComponent(CID) + '/events', data = JSON.stringify(body);
+    try { if (navigator.sendBeacon && navigator.sendBeacon(url, data)) return; } catch (e) {}
+    fetch(url, { method: 'POST', body: data, keepalive: true, mode: 'no-cors' }).catch(function () {});
   }
+  var NAMES = [[/wa\.me|whatsapp/i, 'WhatsApp'], [/^mailto:/i, 'Email'], [/^tel:/i, 'Teléfono'], [/instagram\.com/i, 'Instagram'],
+    [/tiktok\.com/i, 'TikTok'], [/facebook\.com/i, 'Facebook'], [/wallapop/i, 'Wallapop'], [/google\.[a-z.]+\/maps|maps\.app|goo\.gl\/maps/i, 'Cómo llegar']];
+  function onClick(e) {
+    var a = e.target.closest && e.target.closest('a[href]');
+    if (!a) return;
+    var href = a.getAttribute('href') || '';
+    if (href.charAt(0) === '#') return; // saltos dentro de la misma página
+    var label = '';
+    for (var i = 0; i < NAMES.length; i++) if (NAMES[i][0].test(a.href)) { label = NAMES[i][1]; break; }
+    if (!label) label = (a.textContent || '').replace(/\s+/g, ' ').trim().slice(0, 80) || a.href.slice(0, 80);
+    track('click', { label: label, href: a.href.slice(0, 450) });
+  }
+  window.zzConsent = function (yes) {
+    if (IN_FRAME) return;
+    if (!yes) {
+      consent = false;
+      try { localStorage.removeItem('zz_vid'); } catch (e) {}
+      document.removeEventListener('click', onClick, true);
+      return;
+    }
+    if (consent) return;
+    consent = true;
+    // Id por navegador (no por pestaña) para contar personas distintas. Solo con consentimiento.
+    try { sid = localStorage.getItem('zz_vid') || Math.random().toString(36).slice(2); localStorage.setItem('zz_vid', sid); } catch (e) { sid = ''; }
+    document.addEventListener('click', onClick, true);
+    if (!viewSent) { viewSent = true; track('view', { referrer: (document.referrer || '').slice(0, 400) }); }
+  };
+  if (window.zzConsentPending === true) window.zzConsent(true);
 
   // Bloques: secciones de la página (más cabecera y pie).
   function blocks() {
@@ -170,7 +187,6 @@
 
   // ---- Secciones añadidas desde Zenzia: JSON en "sections" ----
   // [{ id, after: <clave de la sección anterior>, type: 'texto'|'foto'|'galeria', photos: [ids] }]
-  var EXTRA = [];
   function extraEl(sec) {
     var w = document.createElement('div');
     w.className = 'zz-x zz-x-' + sec.type;
@@ -223,278 +239,72 @@
     return w;
   }
   function renderExtras(saved) {
-    try { EXTRA = JSON.parse(saved || '[]'); } catch (e) { EXTRA = []; }
-    if (!Array.isArray(EXTRA)) EXTRA = [];
-    EXTRA.forEach(function (sec) {
+    try { S.extra = JSON.parse(saved || '[]'); } catch (e) { S.extra = []; }
+    if (!Array.isArray(S.extra)) S.extra = [];
+    S.extra.forEach(function (sec) {
       var a = document.querySelector('[data-zz-block="' + sec.after + '"], [data-zz-extra="' + sec.after + '"]');
       var el = extraEl(sec);
       if (a) a.insertAdjacentElement('afterend', el);
       else { var f = document.querySelector('footer'); if (f) f.parentNode.insertBefore(el, f); else document.body.appendChild(el); }
     });
   }
-  function saveExtras() { post({ type: 'zz-text', key: 'sections', value: JSON.stringify(EXTRA) }); }
 
+
+  // Secciones ocultas desde Zenzia: no se muestran (el editor cambia esta regla).
   var hideCss = document.createElement('style');
-  hideCss.textContent = EDIT
-    ? '[data-zz-hidden="1"]{opacity:.35;filter:grayscale(1)}'
-    : '[data-zz-hidden="1"]{display:none!important}';
+  hideCss.textContent = '[data-zz-hidden="1"]{display:none!important}';
   document.head.appendChild(hideCss);
 
-  function start(rows) {
-    var map = {};
-    rows.forEach(function (r) { map[r.key] = r.value; });
+  function post(msg) { if (S.parentOrigin) window.parent.postMessage(msg, S.parentOrigin); }
+  S.hideCss = hideCss; S.post = post; S.blocks = blocks; S.leaves = leaves; S.keyItems = keyItems;
+  S.listOrder = listOrder; S.extraEl = extraEl; S.syncLink = syncLink;
+
+  // Fuera del editor, las fotos que aún no se han puesto no se muestran.
+  function dropPlaceholders() {
+    document.querySelectorAll('img[data-zz-ph]').forEach(function (i) { (i.closest('[data-zz-photo]') || i).remove(); });
+  }
+
+  // ---- Carga del editor (solo dentro del iframe de "Mi web") ----
+  // El panel de Zenzia contesta a 'zz-edit-hello' con un token firmado de corta
+  // duración; el servidor solo sirve el editor si el token es válido.
+  function requestEditor() {
+    var done = false;
+    function finish() { done = true; window.removeEventListener('message', onMsg); }
+    function onMsg(e) {
+      if (done || e.source !== window.parent || ZENZIA.indexOf(e.origin) < 0) return;
+      var d = e.data;
+      if (!d || d.type !== 'zz-edit-token' || typeof d.token !== 'string') return;
+      finish();
+      S.parentOrigin = e.origin;
+      window.__zzSite = S;
+      var s = document.createElement('script');
+      s.src = API + '/api/site/editor?c=' + encodeURIComponent(CID) + '&t=' + encodeURIComponent(d.token);
+      s.onerror = function () { try { delete window.__zzSite; } catch (er) {} S.parentOrigin = null; dropPlaceholders(); };
+      document.head.appendChild(s);
+    }
+    window.addEventListener('message', onMsg);
+    window.parent.postMessage({ type: 'zz-edit-hello' }, '*');
+    setTimeout(function () { if (!done) { finish(); dropPlaceholders(); } }, 10000);
+  }
+
+  function start(map) {
+    if (!map || typeof map !== 'object' || Array.isArray(map)) map = {};
     document.querySelectorAll('[data-zz-list]').forEach(function (list) {
       setupList(list, map['list:' + list.getAttribute('data-zz-list')]);
     });
     assignKeys();
     renderExtras(map.sections);
     apply(map);
-    // Fuera del editor, las fotos que aún no se han puesto no se muestran.
-    if (!EDIT) document.querySelectorAll('img[data-zz-ph]').forEach(function (i) { (i.closest('[data-zz-photo]') || i).remove(); });
-    if (EDIT) enableEditing();
+    if (WANTS_EDIT) requestEditor();
+    else dropPlaceholders();
   }
 
-  fetch(SB + '/rest/v1/web_texts?company_id=eq.' + CID + '&select=key,value', { headers: { apikey: KEY } })
-    .then(function (r) { return r.ok ? r.json() : []; })
-    .catch(function () { return []; })
-    .then(function (rows) {
-      if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', function () { start(rows); });
-      else start(rows);
+  // Dentro de Zenzia se pide sin caché para ver al momento lo recién guardado.
+  fetch(API + '/api/site/' + encodeURIComponent(CID) + '/texts' + (IN_FRAME ? '?fresh=' + Date.now() : ''), { credentials: 'omit' })
+    .then(function (r) { return r.ok ? r.json() : {}; })
+    .catch(function () { return {}; })
+    .then(function (map) {
+      if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', function () { start(map); });
+      else start(map);
     });
-
-  // ------------------------- Modo edición -------------------------
-  function smallBtn(text, title, css) {
-    var b = document.createElement('button');
-    b.type = 'button';
-    b.textContent = text;
-    b.title = title;
-    b.setAttribute('data-zz-ui', '1');
-    b.style.cssText = 'font:600 12px system-ui,sans-serif;background:#2f9ce0;color:#fff;border:0;border-radius:999px;padding:4px 10px;cursor:pointer;z-index:50;' + (css || '');
-    return b;
-  }
-
-  function makeEditable(el) {
-    if (el.__zz) return;
-    el.__zz = 1;
-    try { el.contentEditable = 'plaintext-only'; } catch (e) {}
-    if (el.contentEditable !== 'plaintext-only') el.contentEditable = 'true';
-    // Se compara con el texto que había al empezar a editar (no al cargar la página).
-    var before = el.textContent;
-    el.addEventListener('focus', function () { before = el.textContent.replace(/\s+/g, ' ').trim(); });
-    el.addEventListener('keydown', function (e) { if (e.key === 'Enter' && !/^(P|LI|BLOCKQUOTE)$/.test(el.tagName)) { e.preventDefault(); el.blur(); } });
-    // Se guarda mientras se escribe (no solo al salir) para que no se pierda si se
-    // pulsa «Guardar» directamente. Un texto vacío no se guarda: se recupera el anterior.
-    var timer;
-    function send() {
-      clearTimeout(timer);
-      var v = el.textContent.replace(/\s+/g, ' ').trim();
-      if (!v || v === before) return;
-      before = v;
-      syncLink(el, v);
-      post({ type: 'zz-text', key: el.getAttribute('data-zz'), value: v });
-    }
-    el.addEventListener('input', function () { clearTimeout(timer); timer = setTimeout(send, 400); });
-    el.addEventListener('blur', function () {
-      send();
-      if (!el.textContent.trim()) el.textContent = before;
-    });
-  }
-
-  function decorateItem(list, it) {
-    if (it.__zzItem) return;
-    it.__zzItem = 1;
-    if (getComputedStyle(it).position === 'static') it.style.position = 'relative';
-    var del = smallBtn('✕ Quitar', 'Quitar este elemento', 'position:absolute;top:8px;right:8px;background:#e5484d');
-    del.addEventListener('click', function (e) {
-      e.preventDefault(); e.stopPropagation();
-      if (list.children.length <= 1) return alert('Tiene que quedar al menos uno.');
-      if (!confirm('¿Quitar este elemento de la web?')) return;
-      it.remove();
-      post({ type: 'zz-text', key: 'list:' + list.__zzName, value: listOrder(list) });
-    }, true);
-    it.appendChild(del);
-    it.querySelectorAll('[data-zz]').forEach(makeEditable);
-  }
-
-  function enableEditing() {
-    var css = document.createElement('style');
-    css.textContent =
-      '[data-zz]{outline:1.5px dashed rgba(47,156,224,.8);outline-offset:3px;cursor:text;border-radius:4px}' +
-      '[data-zz]:focus{outline:2px solid #2f9ce0;background:rgba(47,156,224,.08)}' +
-      '[data-zz-img]{outline:3px dashed rgba(47,156,224,.9);outline-offset:-3px;cursor:pointer}' +
-      '[data-zz-block]{position:relative}' +
-      '*{animation-play-state:paused}' +
-      '.reveal,[class*="reveal"]{opacity:1!important;transform:none!important}' +
-      '.zz-add{display:flex;justify-content:center;gap:8px;flex-wrap:wrap;padding:10px 0;position:relative;z-index:40}';
-    document.head.appendChild(css);
-
-    document.querySelectorAll('[data-zz]').forEach(makeEditable);
-
-    // Listas: quitar cada elemento y añadir nuevos (se añaden al principio).
-    document.querySelectorAll('[data-zz-list]').forEach(function (list) {
-      Array.prototype.forEach.call(list.children, function (it) { decorateItem(list, it); });
-      var add = smallBtn('+ Añadir', 'Añadir un elemento nuevo', 'display:block;margin:16px auto;padding:8px 18px;font-size:14px');
-      add.addEventListener('click', function (e) {
-        e.preventDefault();
-        var it = list.__zzTemplate.cloneNode(true);
-        it.setAttribute('data-zz-item', 'n' + Date.now());
-        list.insertBefore(it, list.firstChild);
-        keyItems(list);
-        decorateItem(list, it);
-        // El nuevo elemento parte del texto de la plantilla: se guarda tal cual.
-        it.querySelectorAll('[data-zz]').forEach(function (el) {
-          post({ type: 'zz-text', key: el.getAttribute('data-zz'), value: el.textContent.replace(/\s+/g, ' ').trim() });
-        });
-        post({ type: 'zz-text', key: 'list:' + list.__zzName, value: listOrder(list) });
-        it.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      });
-      list.parentNode.insertBefore(add, list);
-    });
-
-    // Secciones: ocultar / mostrar.
-    blocks().forEach(function (b) {
-      if (!b.hideable) return;
-      var hidden = b.el.getAttribute('data-zz-hidden') === '1';
-      var t = smallBtn(hidden ? '👁 Mostrar sección' : 'Ocultar sección', 'Ocultar o mostrar esta sección', 'position:absolute;top:10px;left:10px;background:#163e6e;opacity:.9');
-      t.addEventListener('click', function (e) {
-        e.preventDefault(); e.stopPropagation();
-        hidden = !hidden;
-        b.el.setAttribute('data-zz-hidden', hidden ? '1' : '');
-        t.textContent = hidden ? '👁 Mostrar sección' : 'Ocultar sección';
-        post({ type: 'zz-text', key: 'hide:' + b.key, value: hidden ? '1' : '' });
-      }, true);
-      b.el.appendChild(t);
-    });
-
-    // Añadir sección después de cada sección (y de las añadidas).
-    function addBar(afterKey, anchor) {
-      var bar = document.createElement('div');
-      bar.className = 'zz-add';
-      bar.setAttribute('data-zz-ui', '1');
-      var plus = smallBtn('+ Añadir sección aquí', 'Añadir una sección nueva debajo', 'opacity:.85');
-      plus.addEventListener('click', function (e) {
-        e.preventDefault(); e.stopPropagation();
-        bar.textContent = '';
-        [['texto', 'Texto'], ['foto', 'Texto y foto'], ['galeria', 'Galería de fotos']].forEach(function (t) {
-          var b = smallBtn(t[1], 'Añadir sección de ' + t[1].toLowerCase());
-          b.addEventListener('click', function (ev) {
-            ev.preventDefault(); ev.stopPropagation();
-            var sec = { id: Date.now().toString(36), after: afterKey, type: t[0], photos: [] };
-            EXTRA.push(sec);
-            saveExtras();
-            var el = extraEl(sec);
-            bar.insertAdjacentElement('afterend', el);
-            decorateExtra(sec, el);
-            bar.replaceWith(addBar(afterKey));
-            el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-          }, true);
-          bar.appendChild(b);
-        });
-        var cancel = smallBtn('Cancelar', 'Cancelar', 'background:#8a94a3');
-        cancel.addEventListener('click', function (ev) { ev.preventDefault(); ev.stopPropagation(); bar.replaceWith(addBar(afterKey)); }, true);
-        bar.appendChild(cancel);
-      }, true);
-      bar.appendChild(plus);
-      if (anchor) anchor.insertAdjacentElement('afterend', bar);
-      return bar;
-    }
-    function decorateExtra(sec, el) {
-      el.querySelectorAll('[data-zz]').forEach(makeEditable);
-      var del = smallBtn('🗑 Borrar sección', 'Borrar esta sección', 'position:absolute;top:10px;left:10px;background:#e5484d');
-      del.addEventListener('click', function (e) {
-        e.preventDefault(); e.stopPropagation();
-        if (!confirm('¿Borrar esta sección de la web?')) return;
-        EXTRA = EXTRA.filter(function (s) { return s.id !== sec.id; });
-        // Las que iban detrás de esta pasan a ir detrás de la anterior.
-        EXTRA.forEach(function (s) { if (s.after === sec.id) s.after = sec.after; });
-        saveExtras();
-        var bar = el.nextElementSibling;
-        if (bar && bar.classList.contains('zz-add')) bar.remove();
-        el.remove();
-      }, true);
-      el.appendChild(del);
-      if (sec.type === 'galeria') {
-        var grid = el.querySelector('.zz-grid');
-        var photoDel = function (c) {
-          var x = smallBtn('✕', 'Quitar foto', 'position:absolute;top:6px;right:6px;background:#e5484d;padding:2px 8px');
-          x.addEventListener('click', function (e) {
-            e.preventDefault(); e.stopPropagation();
-            var pid = c.getAttribute('data-zz-photo');
-            sec.photos = sec.photos.filter(function (q) { return q !== pid; });
-            saveExtras();
-            c.remove();
-          }, true);
-          c.appendChild(x);
-        };
-        grid.querySelectorAll('[data-zz-photo]').forEach(photoDel);
-        var add = smallBtn('+ Añadir foto', 'Añadir una foto a la galería', 'display:block;margin:16px auto 0;padding:8px 18px;font-size:14px');
-        add.addEventListener('click', function (e) {
-          e.preventDefault(); e.stopPropagation();
-          var pid = 'p' + Date.now().toString(36);
-          sec.photos.push(pid);
-          saveExtras();
-          var c = extraEl({ id: sec.id, type: 'galeria', photos: [pid] }).querySelector('[data-zz-photo]');
-          grid.appendChild(c);
-          photoDel(c);
-          post({ type: 'zz-img', key: 'x' + sec.id + '.' + pid });
-        }, true);
-        grid.insertAdjacentElement('afterend', add);
-      }
-      addBar(sec.id, el);
-    }
-    blocks().forEach(function (b) { if (b.el.tagName !== 'FOOTER') addBar(b.key, b.el); });
-    EXTRA.forEach(function (sec) {
-      var el = document.querySelector('[data-zz-extra="' + sec.id + '"]');
-      if (el) decorateExtra(sec, el);
-    });
-
-    // Enlaces externos: cambiar la dirección con 🔗.
-    document.querySelectorAll('[data-zz-href]').forEach(function (a) {
-      var b = smallBtn('🔗', 'Cambiar enlace', 'margin-left:4px;padding:1px 6px');
-      b.addEventListener('click', function (e) {
-        e.preventDefault(); e.stopPropagation();
-        var url = prompt('Dirección del enlace:', a.href);
-        if (!url) return;
-        if (!/^(https?:|mailto:|tel:)/.test(url)) url = 'https://' + url;
-        a.href = url;
-        post({ type: 'zz-text', key: 'href:' + a.getAttribute('data-zz-href'), value: url });
-      }, true);
-      a.insertAdjacentElement('afterend', b);
-    });
-
-    // Nada navega: los clics editan. Las imágenes se sustituyen desde Zenzia.
-    document.addEventListener('click', function (e) {
-      if (e.target.closest('[data-zz-ui]')) return;
-      var card = e.target.closest(ALBUM);
-      if (card) { e.preventDefault(); e.stopPropagation(); post({ type: 'zz-album', slug: card.getAttribute('data-zz-album') || card.getAttribute('data-category') }); return; }
-      var img = e.target.closest('[data-zz-img]');
-      if (img) { e.preventDefault(); e.stopPropagation(); post({ type: 'zz-img', key: img.getAttribute('data-zz-img') }); return; }
-      if (e.target.closest('a, button')) e.preventDefault();
-    }, true);
-    document.addEventListener('submit', function (e) { e.preventDefault(); }, true);
-
-    var hasAlbums = !!document.querySelector(ALBUM);
-    document.querySelectorAll(ALBUM).forEach(function (c) { c.style.outline = '3px dashed rgba(47,156,224,.9)'; c.style.outlineOffset = '-3px'; });
-
-    // Zenzia pide las fotos actuales (estáticas) de los álbumes para importarlas.
-    window.addEventListener('message', function (e) {
-      if (!e.data || e.data.type !== 'zz-export-static') return;
-      var data = (typeof workCategoriesData !== 'undefined' && workCategoriesData) || {};
-      var slugs = Object.keys(data);
-      (function next(i) {
-        if (i >= slugs.length) return post({ type: 'zz-static-done' });
-        var slug = slugs[i], cat = data[slug];
-        var subEl = document.querySelector('[data-category="' + slug + '"] .work-card-sub');
-        var items = (cat.items || []).filter(function (it) { return it.type !== 'video'; });
-        Promise.all(items.map(function (it) {
-          return fetch(it.src).then(function (r) { return r.blob(); }).then(function (b) { return { blob: b, caption: it.caption || '' }; }).catch(function () { return null; });
-        })).then(function (files) {
-          post({ type: 'zz-static', slug: slug, title: cat.label, subtitle: subEl ? subEl.textContent : '', files: files.filter(Boolean) });
-          next(i + 1);
-        });
-      })(0);
-    });
-
-    post({ type: 'zz-ready', albums: hasAlbums });
-  }
 })();

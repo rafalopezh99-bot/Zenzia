@@ -492,7 +492,8 @@ export default function LandingPage() {
         </svg>
       </a>
 
-      {/* Métricas de visitas y clics (las mismas que el plan Web de los clientes). */}
+      {/* Script del plan Web (textos de "Mi web"). Las métricas solo se activan si se
+          añade un banner de cookies que llame a window.zzConsent(true) — ver README. */}
       <script src="/zz/site.js" data-company="5a279e59-d107-4341-80a2-f33bb5f71b24" defer />
     </div>
   );

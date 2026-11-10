@@ -1,4 +1,6 @@
 -- Webs de clientes: editor en vivo, plan interno "web" y métricas (aplicado en Supabase el 14/10/2026).
+-- OJO: las políticas públicas de web_texts y web_events de este archivo se retiran en
+-- 2026-11-10-web-site-script-hardening.sql (el navegador ya no habla con Supabase).
 alter table public.companies add column site_url text;
 create table public.web_texts (
   company_id uuid not null references public.companies(id) on delete cascade,

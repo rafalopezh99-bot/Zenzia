@@ -3,7 +3,9 @@ import { Card } from "@/components/ui";
 import { createClient } from "@/lib/supabase/server";
 
 // Dashboard del plan Web: visitas y clics de la web del cliente (tabla
-// web_events, la rellena el script de su web). Últimos 30 días.
+// web_events, la rellena POST /api/site/<id>/events, al que llama el script
+// público de su web SOLO si el visitante ha aceptado la analítica en el banner
+// de cookies: window.zzConsent(true), ver README). Últimos 30 días.
 const DAY = 86400000;
 
 type WebLink = { id: string; label: string; url: string };
@@ -129,7 +131,7 @@ export default async function WebAnalytics({
           `${views.filter((v) => inDays(v, 7)).length} esta semana · ${views.filter((v) => inDays(v, 1)).length} hoy`,
           "Veces que se ha abierto tu web en los últimos 30 días. Si alguien entra varias veces, cuenta cada vez."
         )}
-        {kpi("Visitantes", visitors, undefined, "Personas distintas que han entrado (aproximado: cada visita desde un navegador nuevo cuenta como una persona).")}
+        {kpi("Visitantes", visitors, undefined, "Personas distintas que han entrado (aproximado: cada navegador que acepta la analítica cuenta como una persona).")}
         {kpi(
           "Clics en enlaces",
           clicks.length,
@@ -182,7 +184,10 @@ export default async function WebAnalytics({
           {bars(sources, "Todavía no hay visitas registradas.")}
         </Card>
       </div>
-      <p className="mt-4 text-xs text-slate/70">Las visitas que haces tú desde Zenzia (vista previa y edición) no cuentan.</p>
+      <p className="mt-4 text-xs text-slate/70">
+        Solo se cuentan las visitas que aceptan la analítica en el aviso de cookies de tu web. Las visitas que haces tú desde Zenzia
+        (vista previa y edición) no cuentan.
+      </p>
     </div>
   );
 }
