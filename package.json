@@ -12,6 +12,7 @@
     "@anthropic-ai/sdk": "^0.134.0",
     "@supabase/ssr": "0.12.5",
     "@supabase/supabase-js": "2.112.4",
+    "linkedom": "^0.18.15",
     "next": "^15.5.27",
     "pdf-lib": "^1.17.1",
     "react": "^19.1.1",

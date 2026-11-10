@@ -54,3 +54,22 @@ Las consultas a Supabase usan `any` en las relaciones embebidas
 el esquema esté estable en un proyecto real, generar tipos con
 `npx supabase gen types typescript --project-id <id> > lib/supabase/types.ts`
 y tipar el cliente elimina esos `any`.
+
+## Webs de clientes: «Editar y publicar»
+
+Las webs a medida que el cliente edita desde **Mi web** funcionan así (ver `lib/web-publish/`):
+
+- **Plantilla** en `web-sites/<company_id>/`: el HTML que entregamos, sus estilos, fuentes, páginas legales, `cookies.js`… **sin** el `<script>` de `app.zenzia.es/zz/site.js`.
+- **Cambios del cliente** en `web_texts` (textos, fotos, listas, secciones ocultas o añadidas).
+- **Mi web → Editar**: el iframe carga `/api/mi-web/preview/index.html?edit=1` (solo con sesión). El servidor aplica `web_texts` a la plantilla e inyecta `public/zz/editor.js`. El editor ya no está en la web pública.
+- **Mi web → Publicar**: `lib/actions/webPublish.ts` genera el HTML final, copia las fotos de Supabase a `/media/` y lo sube a Netlify (`companies.netlify_site_id`). La web publicada son archivos estáticos: no llama a Supabase, no lleva claves y no registra visitas.
+
+Dar de alta una web nueva:
+
+1. Copiar su carpeta a `web-sites/<company_id>/` (sin `site.js`). Lo que se añada a la plantilla y no deba editarse lleva `data-zz-skip`; los scripts que no deben ejecutarse en el editor (p. ej. el aviso de cookies), `data-zz-noedit`. Ojo: añadir o quitar textos en una sección cambia la numeración de claves de esa sección (`seccion.N`) y descoloca lo ya guardado.
+2. `update companies set site_url = '…', netlify_site_id = '<id del sitio en Netlify>' where id = '<company_id>';` (solo la empresa admin puede cambiar `netlify_site_id`).
+3. Desplegar Zenzia.
+
+Requisito: variable de entorno `NETLIFY_AUTH_TOKEN` (token personal de Netlify) en el sitio de Zenzia.
+
+`public/zz/site.js` queda solo para las webs que aún lo cargan (3DLAB); ya no registra visitas.
