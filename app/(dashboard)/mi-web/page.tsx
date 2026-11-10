@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getCurrentCompanyId } from "@/lib/company";
 import { updateSiteContent, addService, removeService, toggleSitePublished } from "@/lib/actions/siteContent";
 import { getSiteTemplate } from "@/lib/site-templates/registry";
+import { hasSiteSource } from "@/lib/web-publish/source";
 import { Card, PageHeader, PrimaryButton } from "@/components/ui";
 
 // Módulo "Mi Web" (sitio_web): pensado para poder venderse suelto, sin el
@@ -20,8 +21,31 @@ export default async function MiWebPage() {
 
   // Web propia hecha por nosotros (companies.site_url): editor en vivo sobre
   // la web real en vez del editor de plantillas.
-  const { data: co } = await supabase.from("companies").select("site_url").eq("id", companyId).single();
-  if (co?.site_url) return <SiteLiveEditor siteUrl={co.site_url.replace(/\/$/, "")} companyId={companyId} />;
+  const { data: co } = await supabase.from("companies").select("site_url, netlify_site_id, web_published_at").eq("id", companyId).single();
+  if (co?.site_url) {
+    // «Editar y publicar» (lib/web-publish): plantilla en el repo + sitio de Netlify.
+    const publishMode = !!co.netlify_site_id && (await hasSiteSource(companyId));
+    let lastEditAt: string | null = null;
+    if (publishMode) {
+      const { data: last } = await supabase
+        .from("web_texts")
+        .select("updated_at")
+        .eq("company_id", companyId)
+        .order("updated_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      lastEditAt = (last?.updated_at as string | undefined) ?? null;
+    }
+    return (
+      <SiteLiveEditor
+        siteUrl={co.site_url.replace(/\/$/, "")}
+        companyId={companyId}
+        publishMode={publishMode}
+        publishedAt={(co.web_published_at as string | null) ?? null}
+        lastEditAt={lastEditAt}
+      />
+    );
+  }
 
   const { data: site } = await supabase
     .from("site_content")

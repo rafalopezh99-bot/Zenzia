@@ -3,12 +3,24 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import WebGallery from "@/components/WebGallery";
+import { publishWebsite } from "@/lib/actions/webPublish";
 
-// "Mi web" para webas propias (companies.site_url): se ve la web real en un
-// iframe. Con "Editar", la web entra en modo edición (?zz_edit=1, ver
-// js/zenzia.js en la web del cliente) y avisa por postMessage de cada cambio:
-// textos (web_texts), fotos sueltas y álbumes (web_categories / web_photos,
-// fotos en el bucket "web-trabajos"). Nada se puede mover, solo editar/quitar.
+// "Mi web" para webs propias (companies.site_url). Dos modos:
+//
+// - publish (webs con plantilla en web-sites/<company_id>/, ver
+//   lib/web-publish/): el iframe muestra la vista previa que genera Zenzia
+//   (/api/mi-web/preview, con sesión). Con "Editar" se carga el editor
+//   (public/zz/editor.js) SOLO ahí; los cambios se guardan en web_texts y la web
+//   pública no cambia hasta pulsar "Publicar" (se genera y se sube a Netlify).
+//   La web pública no lleva ningún script de Zenzia ni llama a Supabase.
+//
+// - legacy (webs que aún cargan app.zenzia.es/zz/site.js, p. ej. 3DLAB): se ve
+//   la web real en el iframe y "Editar" la abre con ?zz_edit=1. Pendiente de
+//   pasar al modo publish.
+//
+// En ambos, la web avisa por postMessage de cada cambio: textos (web_texts),
+// fotos sueltas y álbumes (web_categories / web_photos, fotos en el bucket
+// "web-trabajos"). Nada se puede mover, solo editar/quitar.
 
 type Category = { id: string; slug: string; title: string; subtitle: string; position: number };
 type Photo = { id: string; path: string; caption: string; position: number };
@@ -29,9 +41,29 @@ async function toJpeg(file: Blob, max: number): Promise<Blob> {
 const slugify = (s: string) =>
   s.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "") || `album-${Date.now()}`;
 
-export default function SiteLiveEditor({ siteUrl, companyId }: { siteUrl: string; companyId: string }) {
+export default function SiteLiveEditor({
+  siteUrl,
+  companyId,
+  publishMode = false,
+  publishedAt = null,
+  lastEditAt = null,
+}: {
+  siteUrl: string;
+  companyId: string;
+  publishMode?: boolean;
+  publishedAt?: string | null;
+  lastEditAt?: string | null;
+}) {
   const supabase = createClient();
-  const origin = new URL(siteUrl).origin;
+  const [origin, setOrigin] = useState(() => (publishMode ? "" : new URL(siteUrl).origin));
+  useEffect(() => {
+    if (publishMode) setOrigin(window.location.origin);
+  }, [publishMode]);
+  // Hay cambios guardados que todavía no están en la web publicada.
+  const [pending, setPending] = useState(() => !!lastEditAt && (!publishedAt || lastEditAt > publishedAt));
+  const [lastPublished, setLastPublished] = useState<string | null>(publishedAt);
+  const [publishing, setPublishing] = useState(false);
+  const [publishError, setPublishError] = useState("");
   const frame = useRef<HTMLIFrameElement>(null);
   const fileInput = useRef<HTMLInputElement>(null);
   const pendingImageKey = useRef<string | null>(null);
@@ -118,6 +150,7 @@ export default function SiteLiveEditor({ siteUrl, companyId }: { siteUrl: string
       } else if (d.type === "zz-text") {
         const { error } = await supabase.from("web_texts").upsert({ company_id: companyId, key: d.key, value: d.value, updated_at: new Date().toISOString() });
         flash(error ? `Error: ${error.message}` : "✓ Texto guardado");
+        if (!error) setPending(true);
       } else if (d.type === "zz-img") {
         pendingImageKey.current = d.key;
         setPicking(d.key);
@@ -154,6 +187,7 @@ export default function SiteLiveEditor({ siteUrl, companyId }: { siteUrl: string
     setPicking(null);
     if (!key) return;
     await supabase.from("web_texts").upsert({ company_id: companyId, key: `img:${key}`, value: url, updated_at: new Date().toISOString() });
+    setPending(true);
     flash("✓ Foto cambiada");
     reload();
   };
@@ -165,6 +199,7 @@ export default function SiteLiveEditor({ siteUrl, companyId }: { siteUrl: string
     setBusy(true);
     const path = await uploadPhoto(file, "site");
     await supabase.from("web_texts").upsert({ company_id: companyId, key: `img:${key}`, value: publicUrl(path), updated_at: new Date().toISOString() });
+    setPending(true);
     setBusy(false);
     flash("✓ Foto cambiada");
     reload();
@@ -231,7 +266,22 @@ export default function SiteLiveEditor({ siteUrl, companyId }: { siteUrl: string
     frame.current?.contentWindow?.postMessage({ type: "zz-export-static" }, origin);
   };
 
-  const src = `${siteUrl}/?${edit ? "zz_edit=1&" : ""}v=${version}`;
+  const publish = async () => {
+    if (!confirm("Se publicará la web con todos los cambios guardados. ¿Continuar?")) return;
+    setPublishing(true);
+    setPublishError("");
+    const r = await publishWebsite();
+    setPublishing(false);
+    if (r.ok) {
+      setPending(false);
+      setLastPublished(r.publishedAt);
+      flash("✓ Web publicada");
+    } else setPublishError(r.error);
+  };
+
+  const src = publishMode
+    ? `/api/mi-web/preview/index.html?${edit ? "edit=1&" : ""}v=${version}`
+    : `${siteUrl}/?${edit ? "zz_edit=1&" : ""}v=${version}`;
   const btn = "rounded-full border border-line px-4 py-2 text-sm font-medium text-ink transition hover:border-brand";
 
   return (
@@ -259,6 +309,16 @@ export default function SiteLiveEditor({ siteUrl, companyId }: { siteUrl: string
               Descartar cambios
             </button>
           )}
+          {publishMode && !edit && (
+            <button
+              onClick={publish}
+              disabled={publishing || !pending}
+              title={pending ? "Subir los cambios a tu web" : "No hay cambios sin publicar"}
+              className="rounded-full border border-brand px-5 py-2 text-sm font-bold text-brand transition disabled:opacity-50"
+            >
+              {publishing ? "Publicando…" : "Publicar"}
+            </button>
+          )}
           <button
             onClick={() => {
               // Al guardar, se espera un momento a que lleguen los últimos textos escritos.
@@ -283,10 +343,22 @@ export default function SiteLiveEditor({ siteUrl, companyId }: { siteUrl: string
         </div>
       </div>
 
+      {publishMode && (
+        <div className={`mb-3 rounded-xl px-4 py-2 text-sm ${publishError ? "bg-red-50 text-red-700" : pending ? "bg-amber-50 text-amber-800" : "bg-surface text-slate"}`}>
+          {publishError
+            ? `No se pudo publicar: ${publishError}`
+            : pending
+              ? "Tienes cambios guardados que aún no están en tu web. Cuando termines, pulsa «Publicar»."
+              : lastPublished
+                ? `Tu web está al día · publicada el ${new Date(lastPublished).toLocaleString("es-ES", { dateStyle: "short", timeStyle: "short" })}`
+                : "Tu web está al día."}
+        </div>
+      )}
+
       <div className="relative">
         <iframe ref={frame} key={src} src={src} title="Mi web" className="h-[calc(100vh-170px)] w-full rounded-2xl border border-line bg-white" />
-        {busy && (
-          <div className="absolute inset-0 flex items-center justify-center rounded-2xl bg-black/30 text-sm font-semibold text-white">Guardando…</div>
+        {(busy || publishing) && (
+          <div className="absolute inset-0 flex items-center justify-center rounded-2xl bg-black/30 text-sm font-semibold text-white">{publishing ? "Publicando tu web…" : "Guardando…"}</div>
         )}
 
         {album && (
