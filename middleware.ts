@@ -41,6 +41,6 @@ export async function middleware(request: NextRequest) {
 // entran ahora en el plan Web.
 export const config = {
   matcher: [
-    "/((?!_next/static|_next/image|favicon\\.ico|robots\\.txt$|sitemap\\.xml$|manifest\\.webmanifest$|aviso-legal(?:/|$)|condiciones(?:/|$)|cookies(?:/|$)|privacidad(?:/|$)|encargado(?:/|$)|reservar(?:/|$)|cita(?:/|$)|consentimiento(?:/|$)|portal(?:/|$)|sitio(?:/|$)|api/stripe/webhook(?:/|$)|api/cron/automations(?:/|$)|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
+    "/((?!_next/static|_next/image|favicon\\.ico|robots\\.txt$|sitemap\\.xml$|manifest\\.webmanifest$|aviso-legal(?:/|$)|condiciones(?:/|$)|cookies(?:/|$)|privacidad(?:/|$)|encargado(?:/|$)|reservar(?:/|$)|cita(?:/|$)|consentimiento(?:/|$)|portal(?:/|$)|sitio(?:/|$)|api/stripe/webhook(?:/|$)|api/cron/automations(?:/|$)|api/web-events(?:/|$)|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
   ],
 };
