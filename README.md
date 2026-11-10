@@ -73,5 +73,3 @@ Dar de alta una web nueva:
 Requisito: variable de entorno `NETLIFY_AUTH_TOKEN` (token personal de Netlify) en el sitio de Zenzia.
 
 `public/zz/site.js` queda solo para las webs que aún lo cargan (3DLAB); ya no registra visitas.
-
-**Estadísticas con consentimiento:** el aviso de cookies de cada web (p. ej. `web-sites/<id>/cookies.js`) solo envía visitas y clics si el visitante acepta las cookies de estadística, y los manda a `POST /api/web-events` de Zenzia (nunca a Supabase). El endpoint comprueba que el `Origin` es el dominio de `companies.site_url`, guarda en `web_events` con la clave de servicio y borra lo de más de 2 años. El `<script>` lleva `data-company` y `data-stats="https://app.zenzia.es/api/web-events"`.
