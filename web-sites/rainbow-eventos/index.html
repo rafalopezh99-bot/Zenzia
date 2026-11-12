@@ -1,0 +1,732 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Rainbow Eventos · Decoración y animación de eventos en Sevilla</title>
+<meta name="description" content="Comuniones, bodas, cumpleaños, bautizos y puestas de largo en Sevilla, Huelva, Cádiz y Córdoba. Decoración con globos, mesas dulces, stands, miniferia, animación, glitter bar y talleres.">
+<meta name="theme-color" content="#FFF8F1">
+<meta property="og:title" content="Rainbow Eventos · Llenamos de color tus eventos">
+<meta property="og:description" content="Decoración, stands, miniferia y animación para comuniones, bodas y cumpleaños en Sevilla y alrededores.">
+<meta property="og:image" content="img/elegante.jpg">
+<meta property="og:locale" content="es_ES">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cg fill='none' stroke-width='7' stroke-linecap='round'%3E%3Cpath d='M8 50a24 24 0 0 1 48 0' stroke='%23F2A7A0'/%3E%3Cpath d='M17 50a15 15 0 0 1 30 0' stroke='%23F6D58E'/%3E%3Cpath d='M26 50a6 6 0 0 1 12 0' stroke='%239ED9C3'/%3E%3C/g%3E%3C/svg%3E">
+<link rel="stylesheet" href="fonts/fonts.css">
+<style>
+:root{
+  --cream:#FFF8F1;
+  --paper:#FFFFFF;
+  --ink:#43373D;
+  --ink-soft:#75686E;
+  --line:#F0E2D8;
+  --pink:#F2A7A0;  --pink-d:#C8564C;  --pink-l:#FDE8E4;
+  --mint:#9ED9C3;  --mint-d:#2E8A6B;  --mint-l:#E3F5EE;
+  --lav:#C9B6E4;   --lav-d:#7457A8;   --lav-l:#F0EAF8;
+  --sun:#F6D58E;   --sun-d:#A2731A;   --sun-l:#FDF3DA;
+  --sky:#A9D3EE;   --sky-d:#2F76A6;   --sky-l:#E6F2FA;
+  --wa:#25D366;    --wa-d:#128C4A;
+  --radius:22px;
+  --shadow:0 10px 30px rgba(120,80,70,.10);
+  --shadow-lg:0 22px 50px rgba(120,80,70,.16);
+  --wrap:1160px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;scroll-padding-top:84px}
+body{font-family:'Nunito',system-ui,sans-serif;color:var(--ink);background:var(--cream);line-height:1.6;font-size:17px;overflow-x:hidden}
+img{max-width:100%;height:auto;display:block}
+a{color:inherit}
+h1,h2,h3{font-family:'Fredoka','Nunito',sans-serif;font-weight:600;line-height:1.15;letter-spacing:-.01em}
+.wrap{max-width:var(--wrap);margin:0 auto;padding:0 20px}
+section{padding:96px 0;position:relative}
+.eyebrow{display:inline-flex;align-items:center;gap:8px;font-weight:800;font-size:.8rem;letter-spacing:.14em;text-transform:uppercase;color:var(--pink-d)}
+.eyebrow::before{content:"";width:22px;height:3px;border-radius:3px;background:linear-gradient(90deg,var(--pink),var(--sun),var(--mint),var(--sky),var(--lav))}
+.sec-head{max-width:680px;margin:0 auto 52px;text-align:center}
+.sec-head h2{font-size:clamp(2rem,4.4vw,3rem);margin:12px 0 14px}
+.sec-head p{color:var(--ink-soft);font-size:1.08rem}
+.rainbow-text{background:linear-gradient(90deg,var(--pink-d),#D68B2B,var(--mint-d),var(--sky-d),var(--lav-d));-webkit-background-clip:text;background-clip:text;color:transparent}
+
+/* Botones */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;padding:15px 26px;border-radius:999px;font-weight:800;font-size:1rem;text-decoration:none;border:0;cursor:pointer;font-family:inherit;transition:transform .15s ease,box-shadow .15s ease,background .15s ease}
+.btn:hover{transform:translateY(-2px)}
+.btn:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid var(--lav-d);outline-offset:3px}
+.btn-primary{background:var(--pink-d);color:#fff;box-shadow:0 10px 24px rgba(200,86,76,.32)}
+.btn-primary:hover{background:#B2463D}
+.btn-wa{background:var(--wa-d);color:#fff;box-shadow:0 10px 24px rgba(18,140,74,.28)}
+.btn-wa:hover{background:#0E7A40}
+.btn-ghost{background:#fff;color:var(--ink);box-shadow:inset 0 0 0 2px var(--line)}
+.btn svg{width:20px;height:20px;flex:none}
+
+/* Cabecera */
+header{position:sticky;top:0;z-index:100;background:rgba(255,248,241,.88);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-bottom:1px solid transparent;transition:border-color .2s,box-shadow .2s}
+header.scrolled{border-color:var(--line);box-shadow:0 6px 20px rgba(120,80,70,.06)}
+.nav{display:flex;align-items:center;justify-content:space-between;height:74px;gap:20px}
+.logo{display:flex;flex-direction:column;align-items:center;text-decoration:none;line-height:1}
+.logo-word{font-family:'Fredoka',sans-serif;font-weight:500;font-size:1.45rem;letter-spacing:.28em;margin-right:-.28em}
+.logo-word span:nth-child(1){color:#E08A80}.logo-word span:nth-child(2){color:#E3AE45}.logo-word span:nth-child(3){color:#E3AE45}
+.logo-word span:nth-child(4){color:#5FBF9C}.logo-word span:nth-child(5){color:#6FB0DC}.logo-word span:nth-child(6){color:#A58ACF}.logo-word span:nth-child(7){color:#A58ACF}
+.logo-sub{font-size:.66rem;letter-spacing:.42em;text-transform:uppercase;color:var(--ink-soft);margin-top:4px;margin-right:-.42em}
+.nav-links{display:flex;align-items:center;gap:6px;list-style:none}
+.nav-links a{text-decoration:none;font-weight:700;font-size:.96rem;padding:9px 13px;border-radius:999px;transition:background .15s}
+.nav-links a:hover{background:var(--pink-l)}
+.nav-cta{padding:11px 20px!important;background:var(--pink-d);color:#fff!important}
+.nav-cta:hover{background:#B2463D!important}
+.menu-btn{display:none;width:46px;height:46px;border-radius:50%;border:0;background:#fff;box-shadow:inset 0 0 0 2px var(--line);cursor:pointer;align-items:center;justify-content:center}
+.menu-btn svg{width:22px;height:22px}
+
+/* Hero */
+.hero{padding:56px 0 90px;overflow:hidden}
+.hero::before{content:"";position:absolute;inset:-20% -10% auto -10%;height:120%;z-index:-1;
+  background:
+   radial-gradient(42% 38% at 8% 18%,rgba(242,167,160,.45),transparent 70%),
+   radial-gradient(36% 36% at 30% 0%,rgba(246,213,142,.45),transparent 70%),
+   radial-gradient(40% 40% at 70% 8%,rgba(158,217,195,.45),transparent 70%),
+   radial-gradient(40% 44% at 96% 30%,rgba(201,182,228,.5),transparent 70%),
+   radial-gradient(40% 40% at 60% 90%,rgba(169,211,238,.35),transparent 70%)}
+.hero-grid{display:grid;grid-template-columns:1.05fr .95fr;gap:48px;align-items:center}
+.hero-badge{display:inline-flex;align-items:center;gap:10px;background:#fff;padding:8px 16px 8px 10px;border-radius:999px;font-weight:800;font-size:.88rem;box-shadow:var(--shadow)}
+.hero-badge i{width:10px;height:10px;border-radius:50%;background:var(--wa);box-shadow:0 0 0 4px rgba(37,211,102,.2);animation:pulse 2s infinite}
+@keyframes pulse{50%{box-shadow:0 0 0 8px rgba(37,211,102,0)}}
+.hero h1{font-size:clamp(2.5rem,5.4vw,4.1rem);margin:22px 0 20px}
+.hero h1 .line2{display:block}
+.hero-lead{font-size:1.18rem;color:var(--ink-soft);max-width:520px}
+.hero-actions{display:flex;flex-wrap:wrap;gap:14px;margin:34px 0 30px}
+.hero-zones{display:flex;flex-wrap:wrap;align-items:center;gap:8px;font-weight:700;font-size:.92rem;color:var(--ink-soft)}
+.hero-zones svg{width:18px;height:18px;color:var(--pink-d)}
+.hero-zones b{color:var(--ink)}
+.hero-visual{position:relative;height:560px}
+.hero-arc{position:absolute;left:50%;top:-6px;transform:translateX(-50%);width:110%;max-width:620px;z-index:0;opacity:.9}
+.polaroid{position:absolute;background:#fff;padding:10px 10px 30px;border-radius:8px;box-shadow:var(--shadow-lg);transition:transform .3s ease}
+.polaroid img{width:100%;aspect-ratio:4/4.4;object-fit:cover;border-radius:3px}
+.polaroid figcaption{position:absolute;left:0;right:0;bottom:10px;text-align:center;font-family:'Fredoka',sans-serif;font-weight:500;font-size:1.02rem}
+.polaroid:hover{transform:rotate(0) scale(1.04)!important;z-index:5}
+.p1{width:56%;left:0;top:110px;transform:rotate(-6deg);z-index:2}
+.p2{width:52%;right:0;top:40px;transform:rotate(5deg);z-index:1}
+.p3{width:48%;left:30%;top:300px;transform:rotate(-1deg);z-index:3}
+.sparkle{position:absolute;color:var(--sun);animation:float 5s ease-in-out infinite}
+.sparkle svg{width:100%;height:100%}
+@keyframes float{50%{transform:translateY(-10px) rotate(12deg)}}
+
+/* Cinta de eventos */
+.ribbon{background:#fff;border-block:1px solid var(--line);padding:18px 0;overflow:hidden}
+.ribbon-track{display:flex;gap:48px;width:max-content;animation:marquee 30s linear infinite}
+.ribbon-track span{font-family:'Fredoka',sans-serif;font-weight:500;font-size:1.3rem;white-space:nowrap;display:flex;align-items:center;gap:48px}
+.ribbon-track span::after{content:"";width:10px;height:10px;border-radius:50%;background:var(--c,var(--pink))}
+@keyframes marquee{to{transform:translateX(-50%)}}
+
+/* Nosotros */
+.about-grid{display:grid;grid-template-columns:.9fr 1.1fr;gap:64px;align-items:center}
+.about-img{position:relative}
+.about-img img{border-radius:var(--radius);box-shadow:var(--shadow-lg);aspect-ratio:4/4.6;object-fit:cover;width:100%}
+.about-sticker{position:absolute;right:-22px;bottom:34px;background:#fff;border-radius:18px;padding:16px 20px;box-shadow:var(--shadow-lg);display:flex;align-items:center;gap:12px;font-weight:800;line-height:1.25;max-width:230px}
+.about-sticker .dot{width:44px;height:44px;flex:none;border-radius:14px;background:var(--mint-l);display:grid;place-items:center;font-size:1.4rem}
+.about-text h2{font-size:clamp(2rem,4.2vw,2.9rem);margin:12px 0 18px}
+.about-text>p{color:var(--ink-soft);margin-bottom:14px;font-size:1.06rem}
+.values{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:28px}
+.value{background:#fff;border-radius:18px;padding:18px;border:1px solid var(--line)}
+.value strong{display:block;font-family:'Fredoka',sans-serif;font-weight:600;font-size:1.08rem;margin:8px 0 4px}
+.value p{font-size:.94rem;color:var(--ink-soft);line-height:1.5}
+.value .ico{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;font-size:1.25rem}
+
+/* Eventos */
+.events{background:#fff}
+.events-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+.event{border-radius:var(--radius);padding:30px 26px;background:var(--bg);position:relative;overflow:hidden;transition:transform .2s,box-shadow .2s}
+.event:hover{transform:translateY(-6px);box-shadow:var(--shadow)}
+.event::after{content:"";position:absolute;right:-40px;top:-40px;width:130px;height:130px;border-radius:50%;background:var(--fg);opacity:.18}
+.event .emoji{font-size:2.2rem;line-height:1}
+.event h3{font-size:1.45rem;margin:16px 0 8px}
+.event p{color:var(--ink-soft);font-size:.98rem}
+
+/* Decoración */
+.styles-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+.style-card{position:relative;border-radius:var(--radius);overflow:hidden;background:#fff;box-shadow:var(--shadow);transition:transform .25s,box-shadow .25s}
+.style-card:hover{transform:translateY(-6px);box-shadow:var(--shadow-lg)}
+.style-card img{width:100%;aspect-ratio:1/1;object-fit:cover;transition:transform .5s ease}
+.style-card:hover img{transform:scale(1.05)}
+.style-card figcaption{padding:16px 20px 20px}
+.style-card h3{font-size:1.3rem;display:flex;align-items:center;gap:10px}
+.style-card h3::before{content:"";width:12px;height:12px;border-radius:50%;background:var(--c)}
+.style-card p{color:var(--ink-soft);font-size:.95rem;margin-top:4px}
+.styles-note{text-align:center;margin-top:38px;color:var(--ink-soft)}
+.styles-note a{font-weight:800;color:var(--pink-d)}
+
+/* Servicios */
+.services{background:linear-gradient(180deg,var(--lav-l),var(--cream))}
+.tabs{display:flex;flex-wrap:wrap;justify-content:center;gap:10px;margin-bottom:36px}
+.tab{border:0;background:#fff;font-family:inherit;font-weight:800;font-size:.98rem;padding:12px 20px;border-radius:999px;cursor:pointer;box-shadow:inset 0 0 0 2px var(--line);color:var(--ink);transition:background .15s,color .15s,box-shadow .15s}
+.tab[aria-selected="true"]{background:var(--ink);color:#fff;box-shadow:none}
+.panel{display:grid;grid-template-columns:repeat(4,1fr);gap:18px}
+.panel[hidden]{display:none}
+.svc{background:#fff;border-radius:20px;padding:24px 22px;border:1px solid var(--line);transition:transform .2s,box-shadow .2s}
+.svc:hover{transform:translateY(-4px);box-shadow:var(--shadow)}
+.svc .ico{width:54px;height:54px;border-radius:16px;display:grid;place-items:center;font-size:1.7rem;background:var(--bg,var(--pink-l))}
+.svc h3{font-size:1.18rem;margin:16px 0 6px}
+.svc p{font-size:.93rem;color:var(--ink-soft);line-height:1.5}
+
+/* Miniferia */
+.feria-card{background:#fff;border-radius:32px;box-shadow:var(--shadow-lg);overflow:hidden;display:grid;grid-template-columns:1.1fr .9fr}
+.feria-media{position:relative;background:var(--pink-l);display:flex;flex-direction:column}
+.feria-media img{width:100%;height:100%;object-fit:cover;min-height:320px}
+.feria-tag{position:absolute;top:22px;left:22px;background:var(--pink-d);color:#fff;font-weight:800;padding:8px 16px;border-radius:999px;transform:rotate(-4deg);box-shadow:0 8px 20px rgba(200,86,76,.35);font-size:.95rem}
+.feria-body{padding:44px 42px}
+.feria-body h2{font-size:clamp(2rem,4vw,2.8rem);margin:10px 0 12px}
+.feria-body>p{color:var(--ink-soft)}
+.games{display:flex;flex-wrap:wrap;gap:8px;margin:22px 0}
+.games li{list-style:none;background:var(--sun-l);border-radius:999px;padding:7px 14px;font-weight:700;font-size:.92rem}
+.games li:nth-child(5n+2){background:var(--mint-l)}.games li:nth-child(5n+3){background:var(--lav-l)}.games li:nth-child(5n+4){background:var(--sky-l)}.games li:nth-child(5n+5){background:var(--pink-l)}
+.includes{display:grid;gap:10px;margin:6px 0 28px}
+.includes li{list-style:none;display:flex;gap:10px;align-items:center;font-weight:700}
+.includes li::before{content:"♥";color:var(--pink-d);font-size:1.1rem}
+
+/* Talleres */
+.workshops-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:22px}
+.workshop{background:#fff;border-radius:var(--radius);padding:30px 26px;border:2px dashed var(--c);text-align:center;transition:transform .2s}
+.workshop:hover{transform:rotate(-1deg) translateY(-4px)}
+.workshop .big{font-size:3rem;line-height:1}
+.workshop h3{font-size:1.4rem;margin:14px 0 8px}
+.workshop p{color:var(--ink-soft);font-size:.97rem}
+
+/* CTA agenda */
+.agenda{padding:0}
+.agenda-box{border-radius:32px;padding:64px 40px;text-align:center;position:relative;overflow:hidden;
+  background:linear-gradient(120deg,#FBD9D3 0%,#FCEBC4 28%,#D5F0E5 55%,#D8EAF7 78%,#E6DCF4 100%)}
+.agenda-box h2{font-size:clamp(1.9rem,4.4vw,3.1rem);max-width:760px;margin:12px auto 14px}
+.agenda-box p{font-size:1.15rem;color:var(--ink-soft);margin-bottom:30px}
+.agenda-box .hero-actions{justify-content:center;margin:0}
+
+/* Contacto */
+.contact-grid{display:grid;grid-template-columns:.85fr 1.15fr;gap:40px;align-items:start}
+.contact-info h2{font-size:clamp(2rem,4.2vw,2.8rem);margin:12px 0 16px}
+.contact-info>p{color:var(--ink-soft);margin-bottom:28px}
+.channels{display:grid;gap:12px}
+.channel{display:flex;align-items:center;gap:14px;background:#fff;border:1px solid var(--line);border-radius:18px;padding:14px 18px;text-decoration:none;transition:transform .15s,box-shadow .15s}
+a.channel:hover{transform:translateX(4px);box-shadow:var(--shadow)}
+.channel .ico{width:44px;height:44px;flex:none;border-radius:14px;display:grid;place-items:center}
+.channel .ico svg{width:22px;height:22px}
+.channel small{display:block;color:var(--ink-soft);font-size:.82rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em}
+.channel b{font-weight:800;word-break:break-word}
+form{background:#fff;border-radius:28px;padding:36px;box-shadow:var(--shadow-lg)}
+form h3{font-size:1.5rem;margin-bottom:6px}
+form>p{color:var(--ink-soft);font-size:.95rem;margin-bottom:24px}
+.fields{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.field{display:flex;flex-direction:column;gap:6px}
+.field.full{grid-column:1/-1}
+label,.legend{font-weight:800;font-size:.9rem}
+input,select,textarea{font:inherit;font-size:1rem;color:var(--ink);background:var(--cream);border:2px solid var(--line);border-radius:14px;padding:12px 14px;width:100%;transition:border-color .15s,background .15s}
+input:focus,select:focus,textarea:focus{border-color:var(--lav-d);background:#fff;outline:none}
+textarea{min-height:110px;resize:vertical}
+fieldset{border:0}
+.checks{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+.check{position:relative}
+.check input{position:absolute;opacity:0;inset:0;cursor:pointer}
+.check span{display:inline-block;padding:8px 14px;border-radius:999px;background:var(--cream);border:2px solid var(--line);font-weight:700;font-size:.9rem;transition:all .15s}
+.check input:checked+span{background:var(--lav-l);border-color:var(--lav-d);color:var(--lav-d)}
+.check input:focus-visible+span{outline:3px solid var(--lav-d);outline-offset:2px}
+.form-foot{display:flex;flex-wrap:wrap;align-items:center;gap:16px;margin-top:24px}
+.form-foot .btn{flex:1 1 auto}
+.form-note{font-size:.82rem;color:var(--ink-soft);margin-top:14px;line-height:1.5}
+.err{color:var(--pink-d);font-size:.85rem;font-weight:700;display:none}
+.field.invalid input,.field.invalid select{border-color:var(--pink-d)}
+.field.invalid .err{display:block}
+
+/* Footer */
+footer{background:var(--ink);color:rgba(255,255,255,.75);padding:56px 0 110px;margin-top:96px}
+.foot{display:flex;flex-wrap:wrap;justify-content:space-between;gap:30px;align-items:flex-start}
+footer .logo-sub{color:rgba(255,255,255,.6)}
+.foot p{max-width:340px;margin-top:14px;font-size:.95rem}
+.foot ul{list-style:none;display:grid;gap:8px}
+.foot a{text-decoration:none}.foot a:hover{color:#fff;text-decoration:underline}
+.foot h4{color:#fff;font-family:'Fredoka',sans-serif;font-weight:500;font-size:1.05rem;margin-bottom:12px}
+.copy{border-top:1px solid rgba(255,255,255,.12);margin-top:36px;padding-top:20px;font-size:.85rem}
+
+/* WhatsApp flotante */
+.wa-float{position:fixed;right:20px;bottom:20px;z-index:200;display:flex;align-items:center;gap:10px;text-decoration:none}
+.wa-float .bubble{background:#fff;color:var(--ink);font-weight:800;font-size:.9rem;padding:10px 16px;border-radius:999px;box-shadow:var(--shadow-lg);opacity:0;transform:translateX(10px);transition:opacity .3s,transform .3s;pointer-events:none;white-space:nowrap}
+.wa-float.show-bubble .bubble,.wa-float:hover .bubble{opacity:1;transform:none}
+.wa-float .circle{width:62px;height:62px;border-radius:50%;background:var(--wa);display:grid;place-items:center;box-shadow:0 12px 28px rgba(37,211,102,.45);position:relative;transition:transform .2s}
+.wa-float .circle::before{content:"";position:absolute;inset:0;border-radius:50%;background:var(--wa);z-index:-1;animation:ring 2.4s ease-out infinite}
+@keyframes ring{from{transform:scale(1);opacity:.55}to{transform:scale(1.7);opacity:0}}
+.wa-float:hover .circle{transform:scale(1.08)}
+.wa-float svg{width:34px;height:34px;color:#fff}
+
+/* Animación de entrada */
+.reveal{opacity:0;transform:translateY(24px);transition:opacity .7s ease,transform .7s ease}
+.reveal.in{opacity:1;transform:none}
+
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}
+  .reveal{opacity:1;transform:none}
+}
+
+/* Responsive */
+@media (max-width:1020px){
+  .panel{grid-template-columns:repeat(3,1fr)}
+  .hero-grid,.about-grid,.contact-grid{grid-template-columns:1fr}
+  .hero-visual{height:520px;max-width:560px;margin:0 auto;width:100%}
+  .about-img{max-width:520px;margin:0 auto}
+  .feria-card{grid-template-columns:1fr}
+}
+@media (max-width:860px){
+  .menu-btn{display:inline-flex}
+  .nav-links{position:absolute;top:74px;left:12px;right:12px;flex-direction:column;align-items:stretch;background:#fff;border-radius:22px;padding:12px;box-shadow:var(--shadow-lg);opacity:0;transform:translateY(-10px);pointer-events:none;transition:opacity .2s,transform .2s}
+  .nav-links.open{opacity:1;transform:none;pointer-events:auto}
+  .nav-links a{display:block;padding:13px 16px}
+  .nav-cta{text-align:center;margin-top:6px}
+  .events-grid,.styles-grid,.workshops-grid{grid-template-columns:1fr 1fr}
+  .panel{grid-template-columns:1fr 1fr}
+}
+@media (max-width:600px){
+  body{font-size:16px}
+  section{padding:72px 0}
+  .wrap{padding:0 16px}
+  .hero{padding:32px 0 64px}
+  .hero-actions .btn{flex:1 1 100%}
+  .hero-visual{height:400px}
+  .polaroid{padding:7px 7px 30px}
+  .polaroid figcaption{font-size:.85rem;bottom:6px}
+  .p1{top:70px}.p3{top:210px}
+  .events-grid,.styles-grid,.workshops-grid,.values,.fields{grid-template-columns:1fr}
+  .panel{grid-template-columns:1fr 1fr;gap:12px}
+  .svc{padding:18px 16px}
+  .svc .ico{width:46px;height:46px;font-size:1.4rem}
+  .svc h3{font-size:1.05rem;margin-top:12px}
+  .about-sticker{right:12px;bottom:-22px}
+  .feria-body{padding:30px 22px}
+  .agenda-box{padding:48px 22px;border-radius:26px}
+  form{padding:24px 18px;border-radius:22px}
+  .wa-float .bubble{display:none}
+  .wa-float{right:16px;bottom:16px}
+  .tabs{gap:8px}.tab{padding:10px 15px;font-size:.9rem}
+}
+</style>
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-wa" viewBox="0 0 24 24"><path fill="currentColor" d="M19.05 4.91A9.82 9.82 0 0 0 12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38a9.9 9.9 0 0 0 4.74 1.21h.01c5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.91-7.01Zm-7.01 15.24h-.01a8.23 8.23 0 0 1-4.19-1.15l-.3-.18-3.12.82.83-3.04-.2-.31a8.2 8.2 0 0 1-1.26-4.38c0-4.54 3.7-8.23 8.25-8.23 2.2 0 4.27.86 5.82 2.42a8.18 8.18 0 0 1 2.41 5.83c0 4.54-3.7 8.22-8.23 8.22Zm4.52-6.16c-.25-.12-1.47-.72-1.69-.81-.23-.08-.39-.12-.56.13-.17.25-.64.81-.78.97-.14.17-.29.19-.54.06-.25-.12-1.05-.39-1.99-1.23-.74-.66-1.23-1.47-1.38-1.72-.14-.25-.02-.38.11-.51.11-.11.25-.29.37-.43.13-.15.17-.25.25-.42.08-.17.04-.31-.02-.43-.06-.12-.56-1.34-.76-1.84-.2-.48-.41-.42-.56-.43h-.48c-.17 0-.43.06-.66.31-.23.25-.86.85-.86 2.07 0 1.22.89 2.4 1.01 2.56.12.17 1.75 2.67 4.23 3.74.59.26 1.05.41 1.41.52.59.19 1.13.16 1.56.1.48-.07 1.47-.6 1.67-1.18.21-.58.21-1.07.14-1.18-.06-.1-.22-.16-.47-.28Z"/></symbol>
+  <symbol id="i-pin" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5" fill="none" stroke="currentColor" stroke-width="2"/></symbol>
+  <symbol id="i-ig" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="5" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="12" r="4" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="17.5" cy="6.5" r="1.2" fill="currentColor"/></symbol>
+  <symbol id="i-mail" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="3" fill="none" stroke="currentColor" stroke-width="2"/><path d="m4 7 8 6 8-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-phone" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2"/></symbol>
+  <symbol id="i-star" viewBox="0 0 24 24"><path fill="currentColor" d="M12 1.5c.5 5.6 4.9 10 10.5 10.5-5.6.5-10 4.9-10.5 10.5C11.5 16.9 7.1 12.5 1.5 12 7.1 11.5 11.5 7.1 12 1.5Z"/></symbol>
+</svg>
+
+<header id="top">
+  <div class="wrap nav">
+    <a class="logo" href="#top" aria-label="Rainbow Eventos, inicio">
+      <span class="logo-word" aria-hidden="true"><span>R</span><span>A</span><span>I</span><span>N</span><span>B</span><span>O</span><span>W</span></span>
+      <span class="logo-sub">eventos</span>
+    </a>
+    <button class="menu-btn" aria-label="Abrir menú" aria-expanded="false" aria-controls="menu">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+    </button>
+    <ul class="nav-links" id="menu">
+      <li><a href="#nosotros">Nosotros</a></li>
+      <li><a href="#eventos">Eventos</a></li>
+      <li><a href="#decoracion">Decoración</a></li>
+      <li><a href="#servicios">Servicios</a></li>
+      <li><a href="#miniferia">Miniferia</a></li>
+      <li><a class="nav-cta" href="#contacto">Pide presupuesto</a></li>
+    </ul>
+  </div>
+</header>
+
+<main>
+
+<!-- INICIO -->
+<section class="hero">
+  <div class="wrap hero-grid">
+    <div>
+      <span class="hero-badge"><i></i>Agenda 2027 abierta · reserva tu fecha</span>
+      <h1>Llenamos de color <span class="line2 rainbow-text">todos tus eventos</span></h1>
+      <p class="hero-lead">Decoración, mesas dulces, stands, miniferia y animación para comuniones, bodas, cumpleaños y cualquier celebración. Tú disfrutas; nosotras nos encargamos del resto.</p>
+      <div class="hero-actions">
+        <a class="btn btn-primary" href="#contacto">Pide tu presupuesto</a>
+        <a class="btn btn-wa" href="https://wa.me/34653221320?text=Hola%20Rainbow%20Eventos%2C%20me%20gustar%C3%ADa%20informaci%C3%B3n%20para%20un%20evento" target="_blank" rel="noopener"><svg><use href="#i-wa"/></svg>Escríbenos por WhatsApp</a>
+      </div>
+      <div class="hero-zones"><svg><use href="#i-pin"/></svg> Trabajamos en <b>Sevilla</b>·<b>Huelva</b>·<b>Cádiz</b>·<b>Córdoba</b></div>
+    </div>
+    <div class="hero-visual" aria-hidden="true">
+      <svg class="hero-arc" viewBox="0 0 400 210" fill="none" stroke-linecap="round" stroke-width="16">
+        <path d="M20 205a180 180 0 0 1 360 0" stroke="#F2A7A0" opacity=".55"/>
+        <path d="M44 205a156 156 0 0 1 312 0" stroke="#F6D58E" opacity=".6"/>
+        <path d="M68 205a132 132 0 0 1 264 0" stroke="#9ED9C3" opacity=".6"/>
+        <path d="M92 205a108 108 0 0 1 216 0" stroke="#A9D3EE" opacity=".6"/>
+        <path d="M116 205a84 84 0 0 1 168 0" stroke="#C9B6E4" opacity=".6"/>
+      </svg>
+      <figure class="polaroid p2"><img src="img/elegante.jpg" alt="" width="900" height="725"></figure>
+      <figure class="polaroid p1"><img src="img/floral.jpg" alt="" width="900" height="733"></figure>
+      <figure class="polaroid p3"><img src="img/moderna.jpg" alt="" width="900" height="667"><figcaption>¡A todo color! 🌈</figcaption></figure>
+      <span class="sparkle" style="width:28px;height:28px;left:4%;top:40px"><svg><use href="#i-star"/></svg></span>
+      <span class="sparkle" style="width:20px;height:20px;right:6%;top:360px;color:#C9B6E4;animation-delay:1.2s"><svg><use href="#i-star"/></svg></span>
+      <span class="sparkle" style="width:16px;height:16px;left:22%;bottom:30px;color:#9ED9C3;animation-delay:2.4s"><svg><use href="#i-star"/></svg></span>
+    </div>
+  </div>
+</section>
+
+<div class="ribbon" aria-hidden="true">
+  <div class="ribbon-track">
+    <span style="--c:var(--pink)">Comuniones</span><span style="--c:var(--sun)">Bodas</span><span style="--c:var(--mint)">Cumpleaños</span><span style="--c:var(--sky)">Bautizos</span><span style="--c:var(--lav)">Puestas de largo</span><span style="--c:var(--pink)">Eventos de empresa</span>
+    <span style="--c:var(--pink)">Comuniones</span><span style="--c:var(--sun)">Bodas</span><span style="--c:var(--mint)">Cumpleaños</span><span style="--c:var(--sky)">Bautizos</span><span style="--c:var(--lav)">Puestas de largo</span><span style="--c:var(--pink)">Eventos de empresa</span>
+  </div>
+</div>
+
+<!-- NOSOTROS -->
+<section id="nosotros">
+  <div class="wrap about-grid">
+    <div class="about-img reveal">
+      <img src="img/personalizable.jpg" alt="Decoración personalizada con cajas blancas, iniciales y guirnaldas verdes en una terraza" width="900" height="667" loading="lazy">
+      <div class="about-sticker"><span class="dot">🌈</span>Cada evento, diseñado a tu medida</div>
+    </div>
+    <div class="about-text reveal">
+      <span class="eyebrow">Nosotros</span>
+      <h2>Somos Rainbow, donde los sueños se celebran</h2>
+      <p>Somos un equipo joven de Sevilla con una idea muy clara: que cada celebración sea única y que tú solo tengas que preocuparte de disfrutarla.</p>
+      <p>Nos encargamos de todo lo que hace especial un evento: la decoración, la mesa dulce, los stands de comida, los juegos y la animación de los peques. Nos cuentas lo que imaginas y lo hacemos realidad, con el estilo y los colores que tú elijas.</p>
+      <div class="values">
+        <div class="value"><span class="ico" style="background:var(--pink-l)">🎈</span><strong>Todo en un solo sitio</strong><p>Decoración, stands, animación y talleres sin tener que buscar varios proveedores.</p></div>
+        <div class="value"><span class="ico" style="background:var(--mint-l)">✨</span><strong>100% personalizable</strong><p>Nombres, colores, temáticas y detalles pensados para tu evento.</p></div>
+        <div class="value"><span class="ico" style="background:var(--sun-l)">📍</span><strong>Vamos donde estés</strong><p>Sevilla, Huelva, Cádiz y Córdoba: en tu finca, restaurante o salón.</p></div>
+        <div class="value"><span class="ico" style="background:var(--lav-l)">💬</span><strong>Trato cercano</strong><p>Te asesoramos por WhatsApp desde la primera idea hasta el día del evento.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- EVENTOS -->
+<section id="eventos" class="events">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <span class="eyebrow">Eventos</span>
+      <h2>Celebramos contigo cada momento</h2>
+      <p>Sea cual sea la ocasión, la llenamos de color, de diversión y de detalles que tus invitados van a recordar.</p>
+    </div>
+    <div class="events-grid">
+      <article class="event reveal" style="--bg:var(--sky-l);--fg:var(--sky)"><span class="emoji">🕊️</span><h3>Comuniones</h3><p>Arcos de globos, mesa dulce, cartel con su nombre y animación para que los niños no paren de jugar.</p></article>
+      <article class="event reveal" style="--bg:var(--pink-l);--fg:var(--pink)"><span class="emoji">💍</span><h3>Bodas</h3><p>Decoración elegante, photocall, recena y un rincón para los más pequeños mientras los mayores disfrutan.</p></article>
+      <article class="event reveal" style="--bg:var(--sun-l);--fg:var(--sun)"><span class="emoji">🎂</span><h3>Cumpleaños</h3><p>Fiestas temáticas con sus personajes favoritos, gincanas, talleres, juegos y regalo final.</p></article>
+      <article class="event reveal" style="--bg:var(--mint-l);--fg:var(--mint)"><span class="emoji">👶</span><h3>Bautizos</h3><p>Decoración suave y delicada, mesas dulces y detalles personalizados para el día del bebé.</p></article>
+      <article class="event reveal" style="--bg:var(--lav-l);--fg:var(--lav)"><span class="emoji">🪩</span><h3>Puestas de largo</h3><p>DJ, hora loca, glitter bar y recenas para una noche que sus amigas no van a olvidar.</p></article>
+      <article class="event reveal" style="--bg:var(--pink-l);--fg:var(--sun)"><span class="emoji">🎪</span><h3>Empresas y más</h3><p>Ferias, inauguraciones, jornadas familiares y eventos de empresa con stands y animación.</p></article>
+    </div>
+  </div>
+</section>
+
+<!-- DECORACIÓN -->
+<section id="decoracion">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <span class="eyebrow">Decoración</span>
+      <h2>¿Qué decoración eliges para tu próximo evento?</h2>
+      <p>Arcos de globos, mesas dulces y photocalls en el estilo que más te guste. Estos son algunos de nuestros trabajos reales.</p>
+    </div>
+    <div class="styles-grid">
+      <figure class="style-card reveal" style="--c:#6CCFC1"><img src="img/elegante.jpg" alt="Arco de globos turquesa, blanco y dorado con cartel neón de Mi Primera Comunión" width="900" height="725" loading="lazy"><figcaption><h3>Elegante</h3><p>Tonos suaves y dorados para comuniones con mucho estilo.</p></figcaption></figure>
+      <figure class="style-card reveal" style="--c:#9DB9CF"><img src="img/clasica.jpg" alt="Mesa dulce con arco de globos azul y dorado y nombre personalizado en madera" width="900" height="831" loading="lazy"><figcaption><h3>Clásica</h3><p>Mesa dulce completa con el nombre del protagonista.</p></figcaption></figure>
+      <figure class="style-card reveal" style="--c:#A58ACF"><img src="img/floral.jpg" alt="Arco de globos lila y dorado con flores montado sobre una mesa" width="900" height="733" loading="lazy"><figcaption><h3>Floral</h3><p>Globos y flores en la paleta de color que tú elijas.</p></figcaption></figure>
+      <figure class="style-card reveal" style="--c:#2B2B2B"><img src="img/moderna.jpg" alt="Photocall de lentejuelas doradas con globos negros y dorados y números luminosos 18" width="900" height="667" loading="lazy"><figcaption><h3>Moderna</h3><p>Paneles de lentejuelas, neones y números luminosos.</p></figcaption></figure>
+      <figure class="style-card reveal" style="--c:#7FA77F"><img src="img/deportiva.jpg" alt="Mesa dulce de temática fútbol con globos verdes, blancos y dorados" width="900" height="783" loading="lazy"><figcaption><h3>Deportiva y temática</h3><p>Su equipo, su deporte o su personaje favorito.</p></figcaption></figure>
+      <figure class="style-card reveal" style="--c:#E3AE45"><img src="img/personalizable.jpg" alt="Cajas de madera blancas con iniciales y guirnaldas verdes" width="900" height="667" loading="lazy"><figcaption><h3>Personalizable</h3><p>Iniciales, carteles y detalles hechos para tu día.</p></figcaption></figure>
+    </div>
+    <p class="styles-note reveal">¿Tienes una idea diferente? <a href="#contacto">Cuéntanosla y la diseñamos contigo →</a></p>
+  </div>
+</section>
+
+<!-- SERVICIOS -->
+<section id="servicios" class="services">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <span class="eyebrow">Lo que ofrecemos</span>
+      <h2>Todo lo que imaginas, a tu alcance</h2>
+      <p>Combina lo que quieras y te preparamos un pack a medida para tu evento.</p>
+    </div>
+    <div class="tabs" role="tablist" aria-label="Tipos de servicio">
+      <button class="tab" role="tab" id="t-stands" aria-controls="p-stands" aria-selected="true">🍿 Stands</button>
+      <button class="tab" role="tab" id="t-anim" aria-controls="p-anim" aria-selected="false" tabindex="-1">🎭 Animación</button>
+      <button class="tab" role="tab" id="t-fiesta" aria-controls="p-fiesta" aria-selected="false" tabindex="-1">🪩 Fiesta</button>
+    </div>
+
+    <div class="panel" role="tabpanel" id="p-stands" aria-labelledby="t-stands">
+      <div class="svc"><span class="ico" style="--bg:var(--sun-l)">🍿</span><h3>Palomitera</h3><p>Palomitas recién hechas para que no falte el picoteo.</p></div>
+      <div class="svc"><span class="ico" style="--bg:var(--pink-l)">🍭</span><h3>Algodón de azúcar</h3><p>Nuestro puesto de algodón, el favorito de los peques.</p></div>
+      <div class="svc"><span class="ico" style="--bg:var(--sky-l)">🌭</span><h3>Hot dogs y burgers</h3><p>Carrito de hot dog y recenas para reponer fuerzas.</p></div>
+      <div class="svc"><span class="ico" style="--bg:var(--lav-l)">🧁</span><h3>Mesas y carritos dulces</h3><p>Candy bar decorado con chuches, dulces y donuts.</p></div>
+      <div class="svc"><span class="ico" style="--bg:var(--mint-l)">📸</span><h3>Photocall</h3><p>Con atrezo divertido para las fotos del recuerdo.</p></div>
+      <div class="svc"><span class="ico" style="--bg:var(--sun-l)">🎥</span><h3>Plataforma 360º</h3><p>Vídeos a cámara lenta que tus invitados van a querer compartir.</p></div>
+      <div class="svc"><span class="ico" style="--bg:var(--pink-l)">🎈</span><h3>Arcos de globos</h3><p>Orgánicos, con flores o con neón, en tus colores.</p></div>
+      <div class="svc"><span class="ico" style="--bg:var(--sky-l)">🎪</span><h3>Miniferia Rainbow</h3><p>Cuatro casetas de juegos con premios. <a href="#miniferia">Ver más</a></p></div>
+    </div>
+
+    <div class="panel" role="tabpanel" id="p-anim" aria-labelledby="t-anim" hidden>
+      <div class="svc"><span class="ico" style="--bg:var(--lav-l)">🦸</span><h3>Personajes en vivo</h3><p>Sus personajes favoritos visitan la fiesta.</p></div>
+      <div class="svc"><span class="ico" style="--bg:var(--pink-l)">🎨</span><h3>Pintacaras</h3><p>Diseños divertidos con pinturas aptas para la piel.</p></div>
+      <div class="svc"><span class="ico" style="--bg:var(--sky-l)">🎈</span><h3>Globoflexia</h3><p>Figuras de globos para llevarse a casa.</p></div>
+      <div class="svc"><span class="ico" style="--bg:var(--mint-l)">💃</span><h3>Juegos y bailes</h3><p>Animación interactiva para que todos participen.</p></div>
+      <div class="svc"><span class="ico" style="--bg:var(--sun-l)">🗺️</span><h3>Gincanas temáticas</h3><p>Pruebas y retos ambientados en su temática favorita.</p></div>
+      <div class="svc"><span class="ico" style="--bg:var(--lav-l)">🧪</span><h3>Talleres</h3><p>Slime, spa infantil o cocina. <a href="#talleres">Ver talleres</a></p></div>
+      <div class="svc"><span class="ico" style="--bg:var(--pink-l)">🎁</span><h3>Regalo final</h3><p>Un detalle para cada niño al terminar la animación.</p></div>
+      <div class="svc"><span class="ico" style="--bg:var(--sky-l)">✨</span><h3>Glitter bar</h3><p>Purpurina y brillo en la cara y el pelo.</p></div>
+    </div>
+
+    <div class="panel" role="tabpanel" id="p-fiesta" aria-labelledby="t-fiesta" hidden>
+      <div class="svc"><span class="ico" style="--bg:var(--lav-l)">🎧</span><h3>DJ</h3><p>Música para que la pista no se vacíe en toda la noche.</p></div>
+      <div class="svc"><span class="ico" style="--bg:var(--pink-l)">🥳</span><h3>Hora loca</h3><p>Gafas, pelucas, cotillones y mucha diversión.</p></div>
+      <div class="svc"><span class="ico" style="--bg:var(--sun-l)">💄</span><h3>Glitter bar</h3><p>Un rincón de maquillaje y brillo, ideal para puestas de largo.</p></div>
+      <div class="svc"><span class="ico" style="--bg:var(--sky-l)">🍔</span><h3>Recenas</h3><p>Hot dogs y hamburguesas para la segunda parte de la noche.</p></div>
+      <div class="svc"><span class="ico" style="--bg:var(--mint-l)">🎥</span><h3>Plataforma 360º</h3><p>El vídeo más divertido de la fiesta.</p></div>
+      <div class="svc"><span class="ico" style="--bg:var(--lav-l)">📸</span><h3>Photocall</h3><p>Fondos de lentejuelas, neones y atrezo.</p></div>
+      <div class="svc"><span class="ico" style="--bg:var(--pink-l)">🔢</span><h3>Números luminosos</h3><p>Su edad o sus iniciales en grande y con luz.</p></div>
+      <div class="svc"><span class="ico" style="--bg:var(--sun-l)">🎈</span><h3>Decoración</h3><p>Ambientación completa del espacio de la fiesta.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- MINIFERIA -->
+<section id="miniferia">
+  <div class="wrap">
+    <div class="feria-card reveal">
+      <div class="feria-media">
+        <img src="img/miniferia.jpg" alt="Cuatro casetas de feria de rayas rosas con arcoíris: latas y ruleta, patitos, aros y dulces" width="1010" height="390" loading="lazy">
+        <span class="feria-tag">¡Pregunta por la oferta!</span>
+      </div>
+      <div class="feria-body">
+        <span class="eyebrow">Miniferia Rainbow</span>
+        <h2>Diversión sin límites</h2>
+        <p>Montamos nuestra propia feria en tu evento: casetas de rayas y arcoíris llenas de juegos clásicos para que los niños (y no tan niños) se lo pasen en grande.</p>
+        <ul class="games" aria-label="Juegos disponibles">
+          <li>🏹 Tiro con arco</li><li>⭕ Lanzamiento de aros</li><li>🐟 Pesca de premios</li><li>🦆 Patitos</li><li>🥫 Derribar latas</li><li>🎡 Ruleta de la suerte</li><li>🎈 Explotar globos</li>
+        </ul>
+        <ul class="includes">
+          <li>4 casetas de juegos</li>
+          <li>Premios para los participantes</li>
+          <li>Decoración de las casetas</li>
+        </ul>
+        <a class="btn btn-primary" href="#contacto" data-service="Miniferia">Quiero la miniferia</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TALLERES -->
+<section id="talleres" style="padding-top:0">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <span class="eyebrow">Talleres personalizados</span>
+      <h2>Diseñamos tu fiesta soñada</h2>
+      <p>Actividades guiadas en las que los niños crean, se divierten y se llevan su propio recuerdo a casa.</p>
+    </div>
+    <div class="workshops-grid">
+      <article class="workshop reveal" style="--c:var(--mint)"><span class="big">🧪</span><h3>Slime party</h3><p>Colores, purpurina y texturas: cada peque prepara su propio slime.</p></article>
+      <article class="workshop reveal" style="--c:var(--pink)"><span class="big">🧖‍♀️</span><h3>Spa y skin care</h3><p>Mascarillas, albornoces y una tarde de relax para los más presumidos.</p></article>
+      <article class="workshop reveal" style="--c:var(--sun)"><span class="big">🧁</span><h3>Cocina y dulces</h3><p>Gorros de chef y manos a la masa decorando sus propios dulces.</p></article>
+    </div>
+  </div>
+</section>
+
+<!-- AGENDA -->
+<section class="agenda">
+  <div class="wrap">
+    <div class="agenda-box reveal">
+      <span class="eyebrow">Reserva ya</span>
+      <h2>¿Tienes una comunión, boda o evento en 2027?</h2>
+      <p>No esperes a que se llene nuestra agenda…</p>
+      <div class="hero-actions">
+        <a class="btn btn-primary" href="#contacto">Reservar mi fecha</a>
+        <a class="btn btn-ghost" href="https://wa.me/34653221320?text=Hola%2C%20quiero%20consultar%20disponibilidad%20para%202027" target="_blank" rel="noopener"><svg style="color:var(--wa-d)"><use href="#i-wa"/></svg>Consultar disponibilidad</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CONTACTO -->
+<section id="contacto">
+  <div class="wrap contact-grid">
+    <div class="contact-info reveal">
+      <span class="eyebrow">Contacto</span>
+      <h2>Cuéntanos tu evento</h2>
+      <p>Consulta sin compromiso. Rellena el formulario y te respondemos con una propuesta a medida, o escríbenos directamente.</p>
+      <div class="channels">
+        <a class="channel" href="https://wa.me/34653221320" target="_blank" rel="noopener"><span class="ico" style="background:#DCF8E7;color:var(--wa-d)"><svg><use href="#i-wa"/></svg></span><span><small>WhatsApp</small><b>653 221 320</b></span></a>
+        <a class="channel" href="tel:+34675302627"><span class="ico" style="background:var(--sky-l);color:var(--sky-d)"><svg><use href="#i-phone"/></svg></span><span><small>Teléfono</small><b>675 302 627</b></span></a>
+        <a class="channel" href="mailto:animacionesrainboww@gmail.com"><span class="ico" style="background:var(--pink-l);color:var(--pink-d)"><svg><use href="#i-mail"/></svg></span><span><small>Email</small><b>animacionesrainboww@gmail.com</b></span></a>
+        <a class="channel" href="https://www.instagram.com/rainbowweventos/" target="_blank" rel="noopener"><span class="ico" style="background:var(--lav-l);color:var(--lav-d)"><svg><use href="#i-ig"/></svg></span><span><small>Instagram</small><b>@rainbowweventos</b></span></a>
+        <div class="channel"><span class="ico" style="background:var(--sun-l);color:var(--sun-d)"><svg><use href="#i-pin"/></svg></span><span><small>Zona de trabajo</small><b>Sevilla, Huelva, Cádiz y Córdoba</b></span></div>
+      </div>
+    </div>
+
+    <form id="form" class="reveal" novalidate>
+      <h3>Pide tu presupuesto</h3>
+      <p>Tarda menos de un minuto. Al enviarlo se abrirá WhatsApp con tu mensaje ya escrito.</p>
+      <div class="fields">
+        <div class="field"><label for="f-name">Nombre *</label><input id="f-name" name="nombre" autocomplete="name" required><span class="err">Dinos tu nombre</span></div>
+        <div class="field"><label for="f-phone">Teléfono *</label><input id="f-phone" name="telefono" type="tel" autocomplete="tel" inputmode="tel" required pattern="\+?[0-9 ]{9,}"><span class="err">Revisa el teléfono</span></div>
+        <div class="field"><label for="f-type">Tipo de evento *</label>
+          <select id="f-type" name="evento" required>
+            <option value="">Elige uno…</option>
+            <option>Comunión</option><option>Boda</option><option>Cumpleaños</option><option>Bautizo</option><option>Puesta de largo</option><option>Evento de empresa</option><option>Otro</option>
+          </select><span class="err">Elige el tipo de evento</span></div>
+        <div class="field"><label for="f-date">Fecha aproximada</label><input id="f-date" name="fecha" type="date"></div>
+        <div class="field"><label for="f-place">Localidad</label><input id="f-place" name="localidad" placeholder="Ej. Dos Hermanas"></div>
+        <div class="field"><label for="f-guests">Nº de invitados</label><input id="f-guests" name="invitados" type="number" min="1" inputmode="numeric" placeholder="Aprox."></div>
+        <fieldset class="field full">
+          <legend class="legend">¿Qué te interesa?</legend>
+          <div class="checks">
+            <label class="check"><input type="checkbox" name="servicios" value="Decoración y globos"><span>Decoración y globos</span></label>
+            <label class="check"><input type="checkbox" name="servicios" value="Mesa dulce"><span>Mesa dulce</span></label>
+            <label class="check"><input type="checkbox" name="servicios" value="Stands de comida"><span>Stands de comida</span></label>
+            <label class="check"><input type="checkbox" name="servicios" value="Miniferia"><span>Miniferia</span></label>
+            <label class="check"><input type="checkbox" name="servicios" value="Animación infantil"><span>Animación infantil</span></label>
+            <label class="check"><input type="checkbox" name="servicios" value="Talleres"><span>Talleres</span></label>
+            <label class="check"><input type="checkbox" name="servicios" value="Glitter bar"><span>Glitter bar</span></label>
+            <label class="check"><input type="checkbox" name="servicios" value="DJ y hora loca"><span>DJ y hora loca</span></label>
+            <label class="check"><input type="checkbox" name="servicios" value="Photocall / 360º"><span>Photocall / 360º</span></label>
+          </div>
+        </fieldset>
+        <div class="field full"><label for="f-msg">Cuéntanos tu idea</label><textarea id="f-msg" name="mensaje" placeholder="Temática, colores, lugar del evento…"></textarea></div>
+      </div>
+      <div class="form-foot">
+        <button class="btn btn-wa" type="submit"><svg><use href="#i-wa"/></svg>Enviar por WhatsApp</button>
+        <button class="btn btn-ghost" type="button" id="send-mail"><svg><use href="#i-mail"/></svg>Enviar por email</button>
+      </div>
+      <p class="form-note">Tus datos no se guardan en esta web: solo se usan para preparar el mensaje que tú envías por WhatsApp o email a Rainbow Eventos.</p>
+    </form>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="foot">
+      <div>
+        <a class="logo" href="#top" style="align-items:flex-start" aria-label="Rainbow Eventos, volver arriba">
+          <span class="logo-word" aria-hidden="true"><span>R</span><span>A</span><span>I</span><span>N</span><span>B</span><span>O</span><span>W</span></span>
+          <span class="logo-sub">eventos</span>
+        </a>
+        <p>Llenamos de color todos tus eventos. Decoración, stands, miniferia y animación en Sevilla, Huelva, Cádiz y Córdoba.</p>
+      </div>
+      <div>
+        <h4>La web</h4>
+        <ul><li><a href="#nosotros">Nosotros</a></li><li><a href="#eventos">Eventos</a></li><li><a href="#decoracion">Decoración</a></li><li><a href="#servicios">Servicios</a></li><li><a href="#miniferia">Miniferia</a></li></ul>
+      </div>
+      <div>
+        <h4>Contacto</h4>
+        <ul><li><a href="https://wa.me/34653221320" target="_blank" rel="noopener">WhatsApp 653 221 320</a></li><li><a href="tel:+34675302627">Tel. 675 302 627</a></li><li><a href="mailto:animacionesrainboww@gmail.com">animacionesrainboww@gmail.com</a></li><li><a href="https://www.instagram.com/rainbowweventos/" target="_blank" rel="noopener">Instagram</a></li></ul>
+      </div>
+    </div>
+    <div class="copy">© <span id="year">2026</span> Rainbow Eventos · Sevilla</div>
+  </div>
+</footer>
+
+<a class="wa-float" href="https://wa.me/34653221320?text=Hola%20Rainbow%20Eventos%2C%20me%20gustar%C3%ADa%20informaci%C3%B3n%20para%20un%20evento" target="_blank" rel="noopener" aria-label="Escríbenos por WhatsApp">
+  <span class="bubble">¿Hablamos? 👋</span>
+  <span class="circle"><svg><use href="#i-wa"/></svg></span>
+</a>
+
+<script>
+(function(){
+  var WA = '34653221320', MAIL = 'animacionesrainboww@gmail.com';
+
+  // Cabecera con sombra al hacer scroll
+  var header = document.querySelector('header');
+  function onScroll(){ header.classList.toggle('scrolled', window.scrollY > 10); }
+  window.addEventListener('scroll', onScroll, {passive:true}); onScroll();
+
+  // Menú móvil
+  var btn = document.querySelector('.menu-btn'), menu = document.getElementById('menu');
+  btn.addEventListener('click', function(){
+    var open = menu.classList.toggle('open');
+    btn.setAttribute('aria-expanded', open);
+    btn.setAttribute('aria-label', open ? 'Cerrar menú' : 'Abrir menú');
+  });
+  menu.addEventListener('click', function(e){ if (e.target.tagName === 'A'){ menu.classList.remove('open'); btn.setAttribute('aria-expanded', false); } });
+
+  // Pestañas de servicios
+  var tabs = [].slice.call(document.querySelectorAll('.tab'));
+  function select(tab){
+    tabs.forEach(function(t){
+      var on = t === tab;
+      t.setAttribute('aria-selected', on); t.tabIndex = on ? 0 : -1;
+      document.getElementById(t.getAttribute('aria-controls')).hidden = !on;
+    });
+  }
+  tabs.forEach(function(t, i){
+    t.addEventListener('click', function(){ select(t); });
+    t.addEventListener('keydown', function(e){
+      var d = e.key === 'ArrowRight' ? 1 : e.key === 'ArrowLeft' ? -1 : 0;
+      if (d){ var n = tabs[(i + d + tabs.length) % tabs.length]; select(n); n.focus(); }
+    });
+  });
+
+  // Animación de entrada
+  var els = document.querySelectorAll('.reveal');
+  if ('IntersectionObserver' in window){
+    var io = new IntersectionObserver(function(entries){
+      entries.forEach(function(en){ if (en.isIntersecting){ en.target.classList.add('in'); io.unobserve(en.target); } });
+    }, {rootMargin:'0px 0px -8% 0px'});
+    els.forEach(function(el){ io.observe(el); });
+  } else { els.forEach(function(el){ el.classList.add('in'); }); }
+
+  // Burbuja del WhatsApp flotante
+  var wa = document.querySelector('.wa-float');
+  setTimeout(function(){ wa.classList.add('show-bubble'); setTimeout(function(){ wa.classList.remove('show-bubble'); }, 5000); }, 4000);
+
+  // Botones que preseleccionan un servicio en el formulario
+  document.querySelectorAll('[data-service]').forEach(function(a){
+    a.addEventListener('click', function(){
+      var cb = document.querySelector('.check input[value="' + a.getAttribute('data-service') + '"]');
+      if (cb) cb.checked = true;
+    });
+  });
+
+  // Formulario → mensaje de WhatsApp o email
+  var form = document.getElementById('form');
+  function validate(){
+    var ok = true;
+    ['f-name','f-phone','f-type'].forEach(function(id){
+      var el = document.getElementById(id), bad = !el.checkValidity() || !el.value.trim();
+      el.closest('.field').classList.toggle('invalid', bad);
+      el.setAttribute('aria-invalid', bad);
+      if (bad && ok){ el.focus(); ok = false; }
+    });
+    return ok;
+  }
+  function message(){
+    var v = function(id){ return document.getElementById(id).value.trim(); };
+    var servicios = [].map.call(form.querySelectorAll('input[name="servicios"]:checked'), function(c){ return c.value; });
+    var fecha = v('f-date');
+    if (fecha){ var p = fecha.split('-'); fecha = p[2] + '/' + p[1] + '/' + p[0]; }
+    var lines = [
+      '¡Hola Rainbow Eventos! 🌈 Quiero pedir presupuesto:',
+      '',
+      '• Nombre: ' + v('f-name'),
+      '• Teléfono: ' + v('f-phone'),
+      '• Evento: ' + v('f-type')
+    ];
+    if (fecha) lines.push('• Fecha: ' + fecha);
+    if (v('f-place')) lines.push('• Localidad: ' + v('f-place'));
+    if (v('f-guests')) lines.push('• Invitados: ' + v('f-guests'));
+    if (servicios.length) lines.push('• Me interesa: ' + servicios.join(', '));
+    if (v('f-msg')) lines.push('', v('f-msg'));
+    return lines.join('\n');
+  }
+  form.addEventListener('submit', function(e){
+    e.preventDefault();
+    if (!validate()) return;
+    window.open('https://wa.me/' + WA + '?text=' + encodeURIComponent(message()), '_blank', 'noopener');
+  });
+  document.getElementById('send-mail').addEventListener('click', function(){
+    if (!validate()) return;
+    var subject = 'Presupuesto: ' + document.getElementById('f-type').value + ' – ' + document.getElementById('f-name').value.trim();
+    location.href = 'mailto:' + MAIL + '?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(message());
+  });
+  form.addEventListener('input', function(e){
+    var f = e.target.closest('.field');
+    if (f && f.classList.contains('invalid') && e.target.checkValidity() && e.target.value.trim()){ f.classList.remove('invalid'); e.target.setAttribute('aria-invalid', false); }
+  });
+
+  document.getElementById('year').textContent = new Date().getFullYear();
+})();
+</script>
+</body>
+</html>
