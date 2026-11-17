@@ -53,6 +53,12 @@ header.scrolled{border-color:var(--line)}
 .burger{display:none;background:none;border:0;width:44px;height:44px;cursor:pointer}
 .burger svg{width:26px;height:26px}
 
+.lang{display:flex;gap:6px;order:3;margin-left:22px}.menu{order:2;margin-left:auto}.burger{order:4}
+.lang button{display:flex;align-items:center;gap:6px;background:none;border:1px solid transparent;border-radius:999px;padding:5px 9px;cursor:pointer;font:500 .75rem 'Jost',sans-serif;letter-spacing:.1em;color:var(--soft);opacity:.6;transition:opacity .2s,border-color .2s}
+.lang button:hover{opacity:1}
+.lang button[aria-pressed="true"]{opacity:1;border-color:var(--line);color:var(--ink)}
+.lang svg{width:22px;height:15px;border-radius:2px;box-shadow:0 0 0 1px rgba(0,0,0,.08)}
+@media (max-width:820px){.lang{margin-left:auto;margin-right:6px}.lang span{display:none}}
 /* Hero */
 .hero{padding:70px 0 120px;position:relative;overflow:hidden}
 .hero-grid{display:grid;grid-template-columns:1.1fr .9fr;gap:60px;align-items:center}
@@ -195,6 +201,10 @@ footer{border-top:1px solid var(--line);padding:46px 0 40px;font-size:.88rem;col
 <header id="top">
   <div class="wrap nav">
     <a class="logo" href="#top" aria-label="LOVE Bodas y Eventos, inicio"><b>LOVE</b><span>Bodas <i>♥</i> Eventos</span></a>
+    <div class="lang" role="group" aria-label="Idioma / Language">
+      <button type="button" data-l="es" aria-pressed="true" title="Español"><svg viewBox="0 0 30 20" aria-hidden="true"><rect width="30" height="20" fill="#AA151B"/><rect y="5" width="30" height="10" fill="#F1BF00"/></svg><span>ES</span></button>
+      <button type="button" data-l="en" aria-pressed="false" title="English"><svg viewBox="0 0 60 30" aria-hidden="true"><clipPath id="uk"><path d="M30 15h30v15zv15H0zH0V0zV0h30z"/></clipPath><path d="M0 0v30h60V0z" fill="#012169"/><path d="M0 0l60 30m0-30L0 30" stroke="#fff" stroke-width="6"/><path d="M0 0l60 30m0-30L0 30" clip-path="url(#uk)" stroke="#C8102E" stroke-width="4"/><path d="M30 0v30M0 15h60" stroke="#fff" stroke-width="10"/><path d="M30 0v30M0 15h60" stroke="#C8102E" stroke-width="6"/></svg><span>EN</span></button>
+    </div>
     <button class="burger" aria-label="Abrir menú" aria-expanded="false" aria-controls="menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 8h16M4 16h16"/></svg></button>
     <ul class="menu" id="menu">
       <li><a href="#nosotras">Nosotras</a></li>
@@ -379,9 +389,76 @@ footer{border-top:1px solid var(--line);padding:46px 0 40px;font-size:.88rem;col
     if(!f.reportValidity())return;
     fetch('/',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:new URLSearchParams(new FormData(f)).toString()})
       .then(function(r){if(!r.ok)throw 0;f.querySelector('.ok').style.display='block';f.reset()})
-      .catch(function(){alert('No se ha podido enviar. Escríbenos por Instagram, por favor.')});
+      .catch(function(){alert(window.loveAlert[window.loveLang||'es'])});
   });
   document.getElementById('y').textContent=new Date().getFullYear();
+})();
+</script>
+<script>
+(function(){
+  var EN={
+"Nosotras":"About us","Eventos":"Events","Servicios":"Services","Estilismo y formación":"Styling & training","Contacto":"Contact",
+"Wedding planners en Cádiz":"Wedding planners in Cádiz","Bodas únicas,":"Unique weddings,","hechas a mano":"handmade","para vosotros":"just for you",
+"Diseñamos, organizamos, decoramos y coordinamos vuestra boda o evento de principio a fin, para que lo disfrutéis como un invitado más.":"We design, plan, decorate and coordinate your wedding or event from start to finish, so you can enjoy it like one more guest.",
+"Cuéntanos tu boda":"Tell us about your wedding","Ver servicios":"See services","años organizando eventos":"years planning events","pioneras en Cádiz":"pioneers in Cádiz","parejas de aquí y de fuera":"local & international couples",
+"«No hay dos personas iguales,":"“No two people are alike,","ni dos bodas iguales»":"and no two weddings are either”",
+"En LOVE huimos de las bodas en serie. Cada evento lleva vuestro propio sello.":"At LOVE we run away from cookie-cutter weddings. Every event carries your own signature.",
+"Alicia Pérez Fopiani · Fundadora":"Alicia Pérez Fopiani · Founder","El alma de":"The soul of",
+"LOVE nace en Cádiz de la mano de Alicia Pérez Fopiani, diplomada en Turismo por la Universidad de Cádiz y profesional de la organización de eventos, las relaciones institucionales y el protocolo.":"LOVE was born in Cádiz, founded by Alicia Pérez Fopiani, a Tourism graduate from the University of Cádiz and a professional in event planning, institutional relations and protocol.",
+"Tras más de 12 años coordinando eventos en el sector público y privado, en España, Reino Unido y Alemania, creó una marca pionera dedicada a bodas y eventos diferentes, personalizados y exclusivos, al más puro estilo americano.":"After more than 12 years coordinating events in the public and private sectors in Spain, the UK and Germany, she created a pioneering brand devoted to different, personalised and exclusive weddings and events, in true American style.",
+"Bicentenario de la Constitución de 1812":"Bicentenary of the 1812 Constitution","Actos con la Casa Real":"Events with the Spanish Royal Household","Recepciones diplomáticas":"Diplomatic receptions","Eventos internacionales":"International events",
+"Contigo en":"With you","cada paso":"every step of the way",
+"Desde una consulta puntual hasta la organización completa. Vosotros decidís cuándo empezamos y hasta dónde llegamos.":"From a one-off consultation to full planning. You decide when we start and how far we go.",
+"Organización total o parcial":"Full or partial planning","Organizamos, diseñamos y coordinamos vuestra boda, rodeándoos de los mejores profesionales del sector.":"We plan, design and coordinate your wedding, surrounding you with the best professionals in the industry.",
+"Coordinación del día B":"Wedding day coordination","Empezamos 2 meses antes: cronograma, kit de emergencia y control de todos los proveedores.":"We start 2 months before: timeline, emergency kit and management of every supplier.",
+"Qué incluye":"What's included","Entrevista y revisión de proveedores":"Meeting and supplier review","Programa-cronograma del día":"Full wedding-day timeline","Supervisión del montaje":"Set-up supervision","Asistencia hasta el primer baile":"On site until the first dance",
+"Diseño y decoración":"Design & decoration","Creamos la imagen de vuestro evento: ambientes, invitaciones, meseros, minutas, photocalls…":"We create your event's look: spaces, invitations, table plans, menus, photo booths…",
+"Asesoría de proveedores":"Supplier advice","Os llevamos solo a profesionales de calidad según vuestros gustos y presupuesto.":"We only recommend quality professionals that fit your taste and budget.",
+"Qué proveedores":"Which suppliers","Fincas, hoteles, bodegas y playas":"Estates, hotels, wineries and beaches","Flores y decoración floral":"Flowers and floral design","Fotografía y vídeo":"Photography and video","Música, animación y transporte":"Music, entertainment and transport",
+"Asesoría de imagen":"Image consulting","Estilismo, maquillaje, peluquería y vestuario para novios, familia e invitados.":"Styling, make-up, hair and outfits for the couple, family and guests.",
+"Consultoría puntual":"One-off consultation","Os damos las pautas para que seáis vosotros quienes planifiquéis vuestra boda.":"We give you the guidelines so you can plan your own wedding.",
+"Otros eventos":"Other events","Bautizos, comuniones, aniversarios, pedidas de mano, fiestas y eventos de empresa.":"Christenings, communions, anniversaries, proposals, parties and corporate events.",
+"Protocolo y relaciones públicas":"Protocol & public relations","Actos institucionales y empresariales planificados con todo el rigor del protocolo.":"Institutional and corporate events planned with full protocol rigour.",
+"Cómo trabajamos":"How we work","De la idea al":"From the idea to","«sí, quiero»":"“I do”",
+"Nos conocemos":"We meet","Una primera reunión para escuchar vuestros deseos, gustos y presupuesto.":"A first meeting to hear your wishes, tastes and budget.",
+"Diseñamos":"We design","Elegimos la temática y creamos el proyecto decorativo con vuestro sello.":"We choose the theme and create a decoration project with your signature.",
+"Organizamos":"We plan","Seleccionamos proveedores, negociamos y lo dejamos todo atado.":"We select suppliers, negotiate and tie up every loose end.",
+"Lo disfrutáis":"You enjoy it","El gran día coordinamos cada detalle mientras vosotros solo vivís el momento.":"On the big day we coordinate every detail while you simply live the moment.",
+"No solo bodas":"Not just weddings","Celebramos":"We celebrate","todo lo importante":"everything that matters","Cualquier momento especial merece una buena organización.":"Every special moment deserves great planning.",
+"Pedidas de mano":"Proposals","Despedidas":"Hen & stag parties","Bautizos":"Christenings","Comuniones":"Communions","Fiestas de 15 años":"Quinceañeras","Mayoría de edad":"18th birthdays","Aniversarios":"Anniversaries","Homenajes y jubilaciones":"Tributes & retirements","Fiestas temáticas":"Themed parties","Inauguraciones":"Openings","Congresos y presentaciones":"Conferences & launches",
+"Más que wedding planners":"More than wedding planners","Estilismo, formación":"Styling, training","y protocolo":"and protocol",
+"Estilismo":"Styling","Para dejar a todos con la boca abierta":"To leave everyone speechless","Un equipo de profesionales para la novia y sus invitadas, con estudio personalizado de tu imagen.":"A team of professionals for the bride and her guests, with a personalised image study.",
+"Maquillaje":"Make-up","Peluquería":"Hair","Ramo de novia":"Bridal bouquet",
+"Formación":"Training","Talleres y cursos":"Workshops & courses","Presenciales y a distancia. Consulta fechas y plazas disponibles.":"In person and online. Ask about dates and availability.",
+"Protocolo":"Protocol","Saber estar":"Etiquette","Automaquillaje":"Self make-up","Autopeluquería":"Self hairstyling",
+"Empresas":"Companies","Protocolo e instituciones":"Protocol & institutions","Planificación y ejecución de actos públicos y privados para proyectar la mejor imagen de tu empresa o institución.":"Planning and running public and private events to project the best image of your company or institution.",
+"Presentaciones":"Launches","Firmas de convenios":"Agreement signings","Ruedas de prensa":"Press conferences","Recepciones":"Receptions",
+"Vuestro gran día":"Your big day","Disfrutad de vuestra boda":"Enjoy your wedding","sin preocuparos de nada":"without a single worry","Primera reunión sin compromiso.":"First meeting with no obligation.","Reservar una reunión":"Book a meeting",
+"Hablemos de":"Let's talk about","vuestra boda":"your wedding","Contadnos vuestra idea y os responderemos lo antes posible para concertar una primera reunión.":"Tell us your idea and we'll get back to you as soon as possible to arrange a first meeting.",
+"Dónde":"Where","Cádiz · bodas en toda Andalucía y destino":"Cádiz · weddings across Andalusia & destination weddings",
+"Nombre":"Name","Teléfono":"Phone","Tipo de evento":"Type of event","Boda":"Wedding","Pedida de mano":"Proposal","Bautizo / comunión":"Christening / communion","Evento de empresa":"Corporate event","Estilismo / formación":"Styling / training","Otro":"Other",
+"Fecha aproximada":"Approximate date","Contadnos vuestra idea":"Tell us your idea","He leído y acepto la política de privacidad.":"I have read and accept the privacy policy.","Enviar mensaje":"Send message",
+"¡Gracias! Hemos recibido tu mensaje y te responderemos muy pronto.":"Thank you! We've received your message and will reply very soon.",
+"Ej. septiembre 2027":"e.g. September 2027","Abrir menú":"Open menu","Volver arriba":"Back to top","LOVE Bodas y Eventos, inicio":"LOVE Weddings & Events, home",
+"LOVE Bodas y Eventos · Wedding Planner en Cádiz":"LOVE Weddings & Events · Wedding Planner in Cádiz"
+  };
+  var nodes=[],attrs=[],root=document.body;
+  var w=document.createTreeWalker(root,NodeFilter.SHOW_TEXT,{acceptNode:function(n){return n.parentNode.closest('script,style,svg,.logo')?2:1}});
+  while(w.nextNode()){var n=w.currentNode,k=n.nodeValue.replace(/\s+/g,' ').trim();if(EN[k])nodes.push([n,n.nodeValue,n.nodeValue.replace(k,EN[k])]);}
+  document.querySelectorAll('[placeholder],[aria-label]').forEach(function(el){['placeholder','aria-label'].forEach(function(a){var v=el.getAttribute(a);if(v&&EN[v])attrs.push([el,a,v,EN[v]])})});
+  var title=document.title;
+  window.loveAlert={es:'No se ha podido enviar. Escríbenos por Instagram, por favor.',en:'The message could not be sent. Please write to us on Instagram.'};
+  function set(l){
+    var en=l==='en';
+    nodes.forEach(function(x){x[0].nodeValue=en?x[2]:x[1]});
+    attrs.forEach(function(x){x[0].setAttribute(x[1],en?x[3]:x[2])});
+    document.title=en?EN[title]:title; document.documentElement.lang=l;
+    document.querySelectorAll('.lang button').forEach(function(b){b.setAttribute('aria-pressed',b.dataset.l===l)});
+    window.loveLang=l; try{localStorage.setItem('love_lang',l)}catch(e){}
+  }
+  var q=new URLSearchParams(location.search).get('lang'),saved;try{saved=localStorage.getItem('love_lang')}catch(e){}
+  set(q==='en'||q==='es'?q:saved||((navigator.language||'es').slice(0,2)==='es'?'es':'en'));
+  document.querySelectorAll('.lang button').forEach(function(b){b.addEventListener('click',function(){set(b.dataset.l)})});
 })();
 </script>
 </body>

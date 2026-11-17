@@ -6,4 +6,4 @@
 /formacion/*       /#estilismo   301
 /protocolo_love/*  /#estilismo   301
 /contacto/*        /#contacto    301
-/en/*              /             301
+/en/*              /?lang=en     301
