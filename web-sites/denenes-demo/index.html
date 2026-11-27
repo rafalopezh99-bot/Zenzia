@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DeNenes Bebé · Moda infantil y puericultura</title>
+<meta name="description" content="Moda infantil clásica y puericultura. Tiendas en Almería y Sevilla. Pedidos por WhatsApp, pago con Bizum y envíos en 24/48 h.">
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#FBF8F2">
+<link rel="icon" href="img/logo.png">
+<style>
+@font-face{font-family:'Cormorant';font-weight:500;font-display:swap;src:url(fonts/cormorant-garamond-latin-500-normal.woff2) format('woff2')}
+@font-face{font-family:'Cormorant';font-weight:500;font-style:italic;font-display:swap;src:url(fonts/cormorant-garamond-latin-500-italic.woff2) format('woff2')}
+@font-face{font-family:'Jost';font-weight:400;font-display:swap;src:url(fonts/jost-latin-400-normal.woff2) format('woff2')}
+@font-face{font-family:'Jost';font-weight:500;font-display:swap;src:url(fonts/jost-latin-500-normal.woff2) format('woff2')}
+:root{--cream:#FBF8F2;--paper:#fff;--ink:#35332F;--soft:#77716A;--line:#ECE5DA;--sage:#7F9C7C;--sage-d:#5E7A5B;--sage-l:#E9EFE5;--camel:#C29E78;--camel-l:#F4ECE2;--rose:#C47A6B;--wa:#25D366;--wa-d:#128C4A}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;scroll-padding-top:80px}
+body{font-family:'Jost',system-ui,sans-serif;font-size:16px;line-height:1.6;color:var(--ink);background:var(--cream);overflow-x:hidden}
+img{display:block;max-width:100%;height:auto}
+a{color:inherit}
+button{font:inherit;color:inherit}
+h1,h2,h3{font-family:'Cormorant',Georgia,serif;font-weight:500;line-height:1.1}
+h2{font-size:clamp(2rem,5vw,2.9rem)}
+em{font-style:italic;color:var(--sage-d)}
+.wrap{max-width:1180px;margin:0 auto;padding:0 20px}
+section{padding:80px 0}
+.kicker{display:block;font-size:.74rem;letter-spacing:.26em;text-transform:uppercase;color:var(--camel);font-weight:500;margin-bottom:10px}
+.center{text-align:center}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;padding:14px 26px;border-radius:999px;font-weight:500;font-size:.95rem;text-decoration:none;border:0;cursor:pointer;transition:transform .15s,background .2s}
+.btn:hover{transform:translateY(-1px)}
+.btn svg{width:20px;height:20px;flex:none}
+.btn-sage{background:var(--sage-d);color:#fff}.btn-sage:hover{background:#4E6A4B}
+.btn-wa{background:var(--wa-d);color:#fff}.btn-wa:hover{background:#0E7A40}
+.btn-line{border:1px solid var(--ink);background:transparent}.btn-line:hover{background:var(--ink);color:#fff}
+:focus-visible{outline:2px solid var(--sage-d);outline-offset:3px}
+
+.demo{background:var(--ink);color:#fff;text-align:center;font-size:.8rem;padding:6px 12px;letter-spacing:.04em}
+
+/* Header */
+header{position:sticky;top:0;z-index:40;background:rgba(251,248,242,.94);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.nav{display:flex;align-items:center;justify-content:space-between;height:74px;gap:16px}
+.brand{display:flex;align-items:center;gap:12px;text-decoration:none}
+.brand img{width:52px;height:52px;border-radius:50%;border:1px solid var(--line)}
+.brand b{font-family:'Cormorant',serif;font-weight:500;font-size:1.5rem;line-height:1}
+.brand small{display:block;font-size:.62rem;letter-spacing:.3em;text-transform:uppercase;color:var(--soft);margin-top:3px}
+.menu{display:flex;gap:28px;list-style:none}
+.menu a{text-decoration:none;font-size:.88rem;letter-spacing:.06em}
+.menu a:hover{color:var(--sage-d)}
+.cart-btn{position:relative;width:48px;height:48px;border-radius:50%;border:1px solid var(--line);background:var(--paper);display:grid;place-items:center;cursor:pointer}
+.cart-btn svg{width:22px;height:22px}
+.cart-btn b{position:absolute;top:-4px;right:-4px;min-width:22px;height:22px;padding:0 6px;border-radius:999px;background:var(--rose);color:#fff;font-size:.75rem;font-weight:500;display:grid;place-items:center}
+.cart-btn b:empty{display:none}
+
+/* Hero */
+.hero{padding:56px 0 70px}
+.hero-grid{display:grid;grid-template-columns:1fr 1fr;gap:50px;align-items:center}
+.hero h1{font-size:clamp(2.7rem,7vw,4.6rem);margin-bottom:18px}
+.hero p{color:var(--soft);font-size:1.1rem;max-width:470px;margin-bottom:30px}
+.hero-actions{display:flex;flex-wrap:wrap;gap:12px}
+.collage{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.collage img{width:100%;aspect-ratio:3/4;object-fit:cover;border-radius:16px}
+.collage img:nth-child(2){margin-top:40px}
+.collage img:nth-child(3){margin-top:-40px}
+
+/* Ventajas */
+.perks{background:var(--sage-l);padding:22px 0}
+.perks .wrap{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;text-align:center}
+.perks div{font-size:.92rem}
+.perks b{display:block;font-size:1.4rem;margin-bottom:2px}
+
+/* Catálogo */
+.filters{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin:28px 0 36px}
+.chip{border:1px solid var(--line);background:var(--paper);padding:8px 18px;border-radius:999px;cursor:pointer;font-size:.9rem;transition:all .15s}
+.chip[aria-pressed="true"]{background:var(--ink);color:#fff;border-color:var(--ink)}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:22px}
+.card{background:var(--paper);border-radius:18px;overflow:hidden;border:1px solid var(--line);display:flex;flex-direction:column}
+.card .ph{position:relative;overflow:hidden}
+.card img{width:100%;aspect-ratio:3/4;object-fit:cover;transition:transform .5s}
+.card:hover img{transform:scale(1.04)}
+.tag{position:absolute;top:12px;left:12px;background:var(--rose);color:#fff;font-size:.72rem;font-weight:500;letter-spacing:.06em;padding:4px 10px;border-radius:999px;text-transform:uppercase}
+.tag.new{background:var(--sage-d)}
+.card .body{padding:14px 16px 16px;display:flex;flex-direction:column;gap:8px;flex:1}
+.card h3{font-family:'Jost',sans-serif;font-weight:500;font-size:1rem;line-height:1.3}
+.card .cat{font-size:.75rem;letter-spacing:.12em;text-transform:uppercase;color:var(--soft)}
+.price{font-size:1.1rem;font-weight:500}
+.price s{color:var(--soft);font-weight:400;font-size:.9rem;margin-left:6px}
+.price.sale{color:var(--rose)}
+.row{display:flex;gap:8px;margin-top:auto}
+.row select{flex:1;min-width:0;font:inherit;font-size:.9rem;border:1px solid var(--line);border-radius:10px;padding:9px 8px;background:var(--cream)}
+.add{border:0;background:var(--sage-d);color:#fff;border-radius:10px;padding:9px 14px;cursor:pointer;font-weight:500;font-size:.9rem;white-space:nowrap}
+.add:hover{background:#4E6A4B}
+.add.ok{background:var(--camel)}
+
+/* Cómo comprar */
+.how{background:var(--paper)}
+.steps{display:grid;grid-template-columns:repeat(4,1fr);gap:22px;margin-top:44px}
+.step{text-align:center;padding:24px 16px;border-radius:18px;background:var(--cream);border:1px solid var(--line)}
+.step b{display:grid;place-items:center;width:58px;height:58px;border-radius:50%;background:var(--sage-l);font-size:1.6rem;margin:0 auto 14px}
+.step h3{font-size:1.4rem;margin-bottom:6px}
+.step p{color:var(--soft);font-size:.92rem}
+
+/* Tiendas */
+.stores{display:grid;grid-template-columns:1fr 1fr;gap:22px;margin-top:40px}
+.store{background:var(--paper);border:1px solid var(--line);border-radius:18px;padding:28px}
+.store h3{font-size:1.7rem;margin-bottom:6px}
+.store p{color:var(--soft);margin-bottom:16px}
+
+footer{border-top:1px solid var(--line);padding:36px 0 100px;text-align:center;color:var(--soft);font-size:.88rem}
+
+/* Carrito */
+.overlay{position:fixed;inset:0;background:rgba(30,28,25,.45);z-index:70;opacity:0;pointer-events:none;transition:opacity .25s}
+.overlay.open{opacity:1;pointer-events:auto}
+.drawer{position:fixed;top:0;right:0;bottom:0;width:min(440px,100%);background:var(--cream);z-index:80;transform:translateX(100%);transition:transform .3s ease;display:flex;flex-direction:column}
+.drawer.open{transform:none}
+.dh{display:flex;justify-content:space-between;align-items:center;padding:18px 20px;border-bottom:1px solid var(--line)}
+.dh h3{font-size:1.7rem}
+.x{width:40px;height:40px;border-radius:50%;border:1px solid var(--line);background:var(--paper);cursor:pointer;font-size:1.2rem}
+.items{flex:1;overflow:auto;padding:14px 20px}
+.empty{text-align:center;color:var(--soft);padding:40px 0}
+.it{display:grid;grid-template-columns:64px 1fr auto;gap:12px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line)}
+.it img{width:64px;height:80px;object-fit:cover;border-radius:10px}
+.it h4{font-weight:500;font-size:.92rem;line-height:1.3}
+.it small{color:var(--soft)}
+.qty{display:flex;align-items:center;gap:6px;margin-top:4px}
+.qty button{width:26px;height:26px;border-radius:50%;border:1px solid var(--line);background:var(--paper);cursor:pointer}
+.it .p{font-weight:500}
+.df{padding:16px 20px 20px;border-top:1px solid var(--line);background:var(--paper)}
+.total{display:flex;justify-content:space-between;font-size:1.15rem;font-weight:500;margin-bottom:12px}
+.df label{display:block;font-size:.78rem;letter-spacing:.08em;text-transform:uppercase;color:var(--soft);margin:8px 0 4px}
+.df input,.df select{width:100%;font:inherit;font-size:.95rem;border:1px solid var(--line);border-radius:10px;padding:10px 12px;background:var(--cream)}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.df .btn{width:100%;margin-top:14px}
+.hide{display:none}
+
+/* Confirmación */
+.modal{position:fixed;inset:0;z-index:90;display:grid;place-items:center;padding:20px;background:rgba(30,28,25,.5);opacity:0;pointer-events:none;transition:opacity .25s}
+.modal.open{opacity:1;pointer-events:auto}
+.mbox{background:var(--paper);border-radius:22px;padding:32px 28px;max-width:420px;width:100%;text-align:center}
+.mbox .big{font-size:3rem}
+.mbox h3{font-size:2rem;margin:8px 0}
+.mbox p{color:var(--soft);margin-bottom:12px}
+.bizum{background:var(--sage-l);border-radius:14px;padding:16px;margin:14px 0;text-align:left;font-size:.95rem}
+.bizum b{color:var(--sage-d)}
+
+.wa{position:fixed;right:18px;bottom:18px;z-index:60;width:58px;height:58px;border-radius:50%;background:var(--wa);display:grid;place-items:center;box-shadow:0 10px 26px rgba(37,211,102,.4)}
+.wa svg{width:32px;height:32px;color:#fff}
+
+@media (max-width:1000px){.grid{grid-template-columns:repeat(3,1fr)}}
+@media (max-width:860px){
+  .menu{display:none}
+  .hero-grid{grid-template-columns:1fr}
+  .collage{max-width:460px}
+  .perks .wrap,.steps{grid-template-columns:1fr 1fr}
+  .grid{grid-template-columns:1fr 1fr;gap:14px}
+  .stores{grid-template-columns:1fr}
+}
+@media (max-width:520px){
+  section{padding:64px 0}
+  .wrap{padding:0 16px}
+  .hero{padding:30px 0 56px}
+  .hero-actions .btn{flex:1 1 100%}
+  .card .body{padding:12px}
+  .row{flex-direction:column}
+  .brand b{font-size:1.25rem}
+}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="wa" viewBox="0 0 24 24"><path fill="currentColor" d="M19.05 4.91A9.82 9.82 0 0 0 12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38a9.9 9.9 0 0 0 4.74 1.21h.01c5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.91-7.01Zm-7.01 15.24h-.01a8.23 8.23 0 0 1-4.19-1.15l-.3-.18-3.12.82.83-3.04-.2-.31a8.2 8.2 0 0 1-1.26-4.38c0-4.54 3.7-8.23 8.25-8.23 2.2 0 4.27.86 5.82 2.42a8.18 8.18 0 0 1 2.41 5.83c0 4.54-3.7 8.22-8.23 8.22Zm4.52-6.16c-.25-.12-1.47-.72-1.69-.81-.23-.08-.39-.12-.56.13-.17.25-.64.81-.78.97-.14.17-.29.19-.54.06-.25-.12-1.05-.39-1.99-1.23-.74-.66-1.23-1.47-1.38-1.72-.14-.25-.02-.38.11-.51.11-.11.25-.29.37-.43.13-.15.17-.25.25-.42.08-.17.04-.31-.02-.43-.06-.12-.56-1.34-.76-1.84-.2-.48-.41-.42-.56-.43h-.48c-.17 0-.43.06-.66.31-.23.25-.86.85-.86 2.07 0 1.22.89 2.4 1.01 2.56.12.17 1.75 2.67 4.23 3.74.59.26 1.05.41 1.41.52.59.19 1.13.16 1.56.1.48-.07 1.47-.6 1.67-1.18.21-.58.21-1.07.14-1.18-.06-.1-.22-.16-.47-.28Z"/></symbol>
+  <symbol id="bag" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" d="M5 8h14l-1 12H6L5 8Z"/><path fill="none" stroke="currentColor" stroke-width="1.6" d="M9 8V6a3 3 0 0 1 6 0v2"/></symbol>
+</svg>
+
+<div class="demo">✨ Demo · productos y precios de ejemplo</div>
+
+<header>
+  <div class="wrap nav">
+    <a class="brand" href="#top"><img src="img/logo.png" alt="" width="217" height="217"><span><b>DeNenes Bebé</b><small>Kids store</small></span></a>
+    <ul class="menu">
+      <li><a href="#catalogo">Catálogo</a></li>
+      <li><a href="#comprar">Cómo comprar</a></li>
+      <li><a href="#tiendas">Tiendas</a></li>
+    </ul>
+    <button class="cart-btn" id="open-cart" aria-label="Ver carrito"><svg><use href="#bag"/></svg><b id="count"></b></button>
+  </div>
+</header>
+
+<main id="top">
+<section class="hero">
+  <div class="wrap hero-grid">
+    <div>
+      <span class="kicker">Nueva colección Invierno</span>
+      <h1>Moda infantil <em>con encanto</em></h1>
+      <p>Ropa clásica para bebés y niños, ceremonia y puericultura. Elige, pide por WhatsApp y recíbelo en casa en 24/48 h.</p>
+      <div class="hero-actions">
+        <a class="btn btn-sage" href="#catalogo">Ver colección</a>
+        <a class="btn btn-line" href="#comprar">Cómo comprar</a>
+      </div>
+    </div>
+    <div class="collage" aria-hidden="true">
+      <img src="img/p1.jpg" alt="" width="352" height="470">
+      <img src="img/p3.jpg" alt="" width="352" height="468">
+      <img src="img/p2.jpg" alt="" width="352" height="470">
+      <img src="img/p6.jpg" alt="" width="352" height="468">
+    </div>
+  </div>
+</section>
+
+<div class="perks">
+  <div class="wrap">
+    <div><b>📦</b>Envíos 24/48 h</div>
+    <div><b>💬</b>Pedidos por WhatsApp</div>
+    <div><b>💸</b>Pago con Bizum</div>
+    <div><b>🏬</b>Tiendas en Almería y Sevilla</div>
+  </div>
+</div>
+
+<section id="catalogo">
+  <div class="wrap">
+    <div class="center">
+      <span class="kicker">Catálogo</span>
+      <h2>Nuestra <em>colección</em></h2>
+    </div>
+    <div class="filters" role="group" aria-label="Filtrar por categoría" id="filters"></div>
+    <div class="grid" id="grid"></div>
+  </div>
+</section>
+
+<section id="comprar" class="how">
+  <div class="wrap">
+    <div class="center"><span class="kicker">Cómo comprar</span><h2>Así de <em>fácil</em></h2></div>
+    <div class="steps">
+      <div class="step"><b>🛍️</b><h3>Elige</h3><p>Añade tus prendas favoritas y su talla al carrito.</p></div>
+      <div class="step"><b>💬</b><h3>Pide</h3><p>Envía tu pedido por WhatsApp con un solo clic.</p></div>
+      <div class="step"><b>💸</b><h3>Paga</h3><p>Haz un Bizum con el número de tu pedido.</p></div>
+      <div class="step"><b>📦</b><h3>Recibe</h3><p>Te lo enviamos en 24/48 h o lo recoges en tienda.</p></div>
+    </div>
+  </div>
+</section>
+
+<section id="tiendas">
+  <div class="wrap">
+    <div class="center"><span class="kicker">Tiendas</span><h2>Ven a <em>vernos</em></h2></div>
+    <div class="stores">
+      <div class="store"><h3>Almería</h3><p>C/ Concepción Arenal, 8 · 04001 Almería</p><a class="btn btn-line" href="https://www.google.com/maps/search/?api=1&amp;query=Calle+Concepci%C3%B3n+Arenal+8+Almer%C3%ADa" target="_blank" rel="noopener">Cómo llegar</a></div>
+      <div class="store"><h3>Sevilla</h3><p>C.C. Carrefour Camas · Camas, Sevilla</p><a class="btn btn-line" href="https://www.google.com/maps/search/?api=1&amp;query=Centro+Comercial+Carrefour+Camas+Sevilla" target="_blank" rel="noopener">Cómo llegar</a></div>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer>
+  <p>DeNenes Bebé · Moda infantil y puericultura · Pedidos por WhatsApp 648 65 93 41</p>
+  <p><a href="https://www.instagram.com/denenesbebe/" target="_blank" rel="noopener">@denenesbebe</a></p>
+</footer>
+
+<a class="wa" href="https://wa.me/34648659341?text=Hola%20DeNenes!%20Tengo%20una%20consulta" target="_blank" rel="noopener" aria-label="Escríbenos por WhatsApp"><svg><use href="#wa"/></svg></a>
+
+<!-- Carrito -->
+<div class="overlay" id="overlay"></div>
+<aside class="drawer" id="drawer" aria-label="Carrito" aria-hidden="true">
+  <div class="dh"><h3>Tu carrito</h3><button class="x" id="close-cart" aria-label="Cerrar carrito">✕</button></div>
+  <div class="items" id="items"></div>
+  <form class="df hide" id="checkout" novalidate>
+    <div class="total"><span>Total</span><span id="total">0,00 €</span></div>
+    <div class="two">
+      <div><label for="cn">Nombre</label><input id="cn" required autocomplete="name"></div>
+      <div><label for="ct">Teléfono</label><input id="ct" type="tel" required autocomplete="tel"></div>
+    </div>
+    <label for="cm">Entrega</label>
+    <select id="cm"><option value="envio">Envío a domicilio (24/48 h)</option><option value="alm">Recoger en tienda · Almería</option><option value="sev">Recoger en tienda · Sevilla</option></select>
+    <div id="addr">
+      <label for="ca">Dirección</label><input id="ca" autocomplete="street-address">
+      <div class="two"><div><label for="cc">Localidad</label><input id="cc" autocomplete="address-level2"></div><div><label for="cp">C. postal</label><input id="cp" inputmode="numeric" autocomplete="postal-code"></div></div>
+    </div>
+    <button class="btn btn-wa" type="submit"><svg><use href="#wa"/></svg>Enviar pedido por WhatsApp</button>
+  </form>
+</aside>
+
+<div class="modal" id="modal" role="dialog" aria-modal="true" aria-labelledby="mt">
+  <div class="mbox">
+    <div class="big">🎉</div>
+    <h3 id="mt">¡Pedido <span id="onum"></span> enviado!</h3>
+    <p>Hemos abierto WhatsApp con tu pedido. Para completarlo:</p>
+    <div class="bizum">💸 Haz un <b>Bizum de <span id="oamt"></span></b> al <b>648 65 93 41</b><br>Concepto: <b id="oref"></b></div>
+    <p>En cuanto lo recibamos te confirmamos el envío. ¡Gracias! 💛</p>
+    <button class="btn btn-sage" id="mclose">Seguir comprando</button>
+  </div>
+</div>
+
+<script>
+(function(){
+  var WA='34648659341';
+  var P=[
+    {id:1,n:'Ranita cuadros con chaleco de punto',c:'Bebé',p:42.9,img:'p1',t:['3m','6m','9m','12m','18m']},
+    {id:2,n:'Conjunto bordado conejitos',c:'Niña',p:39.9,img:'p2',t:['12m','18m','2a','3a'],tag:'new'},
+    {id:3,n:'Ranita vichy azul con volantes',c:'Bebé',p:34.9,o:29.9,img:'p3',t:['3m','6m','9m','12m']},
+    {id:4,n:'Jersey "Spagnolo" bordado',c:'Niño',p:32.9,img:'p4',t:['2a','4a','6a','8a']},
+    {id:5,n:'Pelele de punto rosa',c:'Bebé',p:36.9,img:'p5',t:['0m','1m','3m','6m'],tag:'new'},
+    {id:6,n:'Pelele de punto azul',c:'Bebé',p:36.9,img:'p6',t:['0m','1m','3m','6m']},
+    {id:7,n:'Ranita cuadros malva con cuello',c:'Niña',p:38.9,img:'p7',t:['6m','12m','18m','2a']},
+    {id:8,n:'Vestido cuadros rojos Navidad',c:'Ceremonia',p:45.9,img:'p8',t:['2a','3a','4a','6a']},
+    {id:9,n:'Pelele cuadros gris cuello bebé',c:'Bebé',p:33.9,img:'p9',t:['1m','3m','6m','9m']},
+    {id:10,n:'Peto con tirantes y camisa',c:'Niño',p:44.9,img:'p10',t:['12m','18m','2a','3a']},
+    {id:11,n:'Vestido marino con cuello floral',c:'Niña',p:41.9,img:'p11',t:['12m','18m','2a','3a']},
+    {id:12,n:'Conjunto de punto verde con capota',c:'Bebé',p:49.9,img:'p12',t:['0m','1m','3m']},
+    {id:13,n:'Ranita con chaqueta de punto',c:'Niño',p:46.9,img:'p13',t:['12m','18m','2a']},
+    {id:14,n:'Pelele crema con pompones',c:'Bebé',p:35.9,img:'p14',t:['0m','3m','6m']},
+    {id:15,n:'Ranita roja con capota de puntilla',c:'Ceremonia',p:39.9,o:30,img:'p15',t:['3m','6m','9m','12m']},
+    {id:16,n:'Primera puesta cruzada',c:'Primera puesta',p:29.9,img:'p16',t:['0m','1m'],tag:'new'}
+  ];
+  var cart=[]; try{cart=JSON.parse(localStorage.getItem('dn_cart')||'[]')}catch(e){}
+  var eur=function(n){return n.toFixed(2).replace('.',',')+' €'};
+  var price=function(x){return x.o||x.p};
+
+  // Filtros
+  var cats=['Todo'].concat(P.map(function(x){return x.c}).filter(function(c,i,a){return a.indexOf(c)===i}));
+  var F=document.getElementById('filters'),G=document.getElementById('grid'),cur='Todo';
+  cats.forEach(function(c){var b=document.createElement('button');b.className='chip';b.textContent=c;b.setAttribute('aria-pressed',c===cur);b.onclick=function(){cur=c;[].forEach.call(F.children,function(x){x.setAttribute('aria-pressed',x===b)});render()};F.appendChild(b)});
+
+  function render(){
+    G.innerHTML='';
+    P.filter(function(x){return cur==='Todo'||x.c===cur}).forEach(function(x){
+      var d=document.createElement('article');d.className='card';
+      var tag=x.o?'<span class="tag">Oferta</span>':(x.tag?'<span class="tag new">Novedad</span>':'');
+      d.innerHTML='<div class="ph">'+tag+'<img src="img/'+x.img+'.jpg" alt="'+x.n+'" width="352" height="470" loading="lazy"></div>'+
+        '<div class="body"><span class="cat">'+x.c+'</span><h3>'+x.n+'</h3>'+
+        '<div class="price'+(x.o?' sale':'')+'">'+eur(price(x))+(x.o?'<s>'+eur(x.p)+'</s>':'')+'</div>'+
+        '<div class="row"><select aria-label="Talla de '+x.n+'">'+x.t.map(function(t){return '<option>'+t+'</option>'}).join('')+'</select>'+
+        '<button class="add" type="button">Añadir</button></div></div>';
+      var btn=d.querySelector('.add'),sel=d.querySelector('select');
+      btn.onclick=function(){add(x.id,sel.value);btn.textContent='✓ Añadido';btn.classList.add('ok');setTimeout(function(){btn.textContent='Añadir';btn.classList.remove('ok')},1300)};
+      G.appendChild(d);
+    });
+  }
+
+  function save(){try{localStorage.setItem('dn_cart',JSON.stringify(cart))}catch(e){} draw()}
+  function add(id,t){var l=cart.find(function(c){return c.id===id&&c.t===t});if(l)l.q++;else cart.push({id:id,t:t,q:1});save()}
+  var I=document.getElementById('items'),CO=document.getElementById('checkout');
+  function total(){return cart.reduce(function(s,c){return s+price(P.find(function(x){return x.id===c.id}))*c.q},0)}
+  function draw(){
+    var n=cart.reduce(function(s,c){return s+c.q},0);
+    document.getElementById('count').textContent=n||'';
+    if(!cart.length){I.innerHTML='<p class="empty">Tu carrito está vacío 🧸</p>';CO.classList.add('hide');return}
+    CO.classList.remove('hide');
+    I.innerHTML='';
+    cart.forEach(function(c,i){
+      var x=P.find(function(p){return p.id===c.id});
+      var r=document.createElement('div');r.className='it';
+      r.innerHTML='<img src="img/'+x.img+'.jpg" alt=""><div><h4>'+x.n+'</h4><small>Talla '+c.t+'</small><div class="qty"><button type="button" aria-label="Quitar uno">−</button><span>'+c.q+'</span><button type="button" aria-label="Añadir uno">+</button></div></div><span class="p">'+eur(price(x)*c.q)+'</span>';
+      var b=r.querySelectorAll('.qty button');
+      b[0].onclick=function(){c.q--;if(c.q<1)cart.splice(i,1);save()};
+      b[1].onclick=function(){c.q++;save()};
+      I.appendChild(r);
+    });
+    document.getElementById('total').textContent=eur(total());
+  }
+
+  var D=document.getElementById('drawer'),O=document.getElementById('overlay');
+  function openC(o){D.classList.toggle('open',o);O.classList.toggle('open',o);D.setAttribute('aria-hidden',!o)}
+  document.getElementById('open-cart').onclick=function(){openC(true)};
+  document.getElementById('close-cart').onclick=function(){openC(false)};
+  O.onclick=function(){openC(false)};
+  var cm=document.getElementById('cm');cm.onchange=function(){document.getElementById('addr').style.display=cm.value==='envio'?'':'none'};
+
+  CO.addEventListener('submit',function(e){
+    e.preventDefault();
+    var v=function(id){return document.getElementById(id).value.trim()};
+    var req=['cn','ct'].concat(cm.value==='envio'?['ca','cc','cp']:[]);
+    for(var i=0;i<req.length;i++){var el=document.getElementById(req[i]);if(!v(req[i])){el.focus();el.setCustomValidity('Rellena este campo');el.reportValidity();el.setCustomValidity('');return}}
+    var num='#'+String(Math.floor(1000+Math.random()*9000));
+    var lines=['¡Hola DeNenes! 👶 Nuevo pedido '+num,''];
+    cart.forEach(function(c){var x=P.find(function(p){return p.id===c.id});lines.push('• '+c.q+'x '+x.n+' (talla '+c.t+') – '+eur(price(x)*c.q))});
+    lines.push('','Total: '+eur(total()),'','Nombre: '+v('cn'),'Teléfono: '+v('ct'));
+    lines.push(cm.value==='envio'?'Envío a: '+v('ca')+', '+v('cp')+' '+v('cc'):'Recogida en tienda: '+(cm.value==='alm'?'Almería':'Sevilla'));
+    lines.push('','Hago el Bizum con el concepto '+num);
+    window.open('https://wa.me/'+WA+'?text='+encodeURIComponent(lines.join('\n')),'_blank','noopener');
+    document.getElementById('onum').textContent=num;
+    document.getElementById('oref').textContent='Pedido '+num;
+    document.getElementById('oamt').textContent=eur(total());
+    openC(false);document.getElementById('modal').classList.add('open');
+    cart=[];save();CO.reset();cm.onchange();
+  });
+  document.getElementById('mclose').onclick=function(){document.getElementById('modal').classList.remove('open')};
+
+  render();draw();
+})();
+</script>
+</body>
+</html>
