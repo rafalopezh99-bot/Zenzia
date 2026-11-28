@@ -37,6 +37,7 @@ const ICONS: Record<string, string> = {
   "/mi-web": "M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18M3 12h18M12 3c3 3 3 15 0 18M12 3c-3 3-3 15 0 18",
   "/galeria": "M4 5h16v14H4zM4 16l5-5 4 4 2-2 5 5",
   "/proveedores": "M3 7h11v10H3zM14 10h4l3 3v4h-7M7 20a2 2 0 1 0 0-4 2 2 0 0 0 0 4M18 20a2 2 0 1 0 0-4 2 2 0 0 0 0 4",
+  "/tienda": "M5 8h14l-1 12H6L5 8ZM9 8V6a3 3 0 0 1 6 0v2",
   "/cuentas": "M4 21V5h10v16M14 9h6v12M8 9h2M8 13h2",
   "/solicitudes": "M4 5h16v14H4zM4 6l8 7 8-7",
   "/perfil": "M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8M4 21c0-4 4-6 8-6s8 2 8 6",

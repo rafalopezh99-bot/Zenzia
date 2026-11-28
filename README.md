@@ -73,3 +73,12 @@ Dar de alta una web nueva:
 Requisito: variable de entorno `NETLIFY_AUTH_TOKEN` (token personal de Netlify) en el sitio de Zenzia.
 
 `public/zz/site.js` queda solo para las webs que aún lo cargan (3DLAB); ya no registra visitas.
+
+## Módulo Tienda (catálogo + pedidos por WhatsApp/Bizum)
+
+- **Base de datos:** `supabase/migrations/2026-11-28-tienda.sql` (tablas `shop_*`, bucket `shop`, funciones `public_shop_catalog` y `public_shop_create_order`).
+- **Panel:** `/tienda` (productos, tallas, stock y ajustes) y `/tienda/pedidos` (pendiente → pagado → enviado). Al marcar **pagado** se descuenta el stock; si se cancela un pedido pagado, se devuelve.
+- **API pública** (sin sesión, con CORS): `GET /api/tienda/<company_id>/catalogo` y `POST /api/tienda/<company_id>/pedido`. Los precios y el stock se comprueban en la base de datos.
+- **Web:** plantilla de ejemplo en `web-sites/denenes-demo/`. Con `SHOP_ID` vacío usa productos de ejemplo; con el `company_id` lee el catálogo en directo y guarda cada pedido antes de abrir WhatsApp.
+
+Dar de alta una tienda: aplicar la migración (una vez), activar el módulo `tienda` en `company_modules` para la empresa, rellenar **Ajustes de la tienda** en `/tienda` y poner su `company_id` en `SHOP_ID` de la plantilla.
